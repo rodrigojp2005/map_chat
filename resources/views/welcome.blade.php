@@ -1,9 +1,9 @@
 @extends('layouts.app')
 @section('title')
     @auth
-        Gincaneiros - Crie sua gincana!
+    MapChat - Crie sua sala!
     @else
-        Gincaneiros - Desafio do bem!
+    MapChat - Conversas no mapa!
     @endauth
 @endsection
 

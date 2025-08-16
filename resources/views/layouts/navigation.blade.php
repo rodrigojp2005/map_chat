@@ -9,7 +9,7 @@
         </div>
 
         <!-- Ações à direita (mobile + desktop) -->
-        <div class="flex items-center gap-2 md:gap-4 ml-4">
+    <div class="flex items-center gap-2 md:gap-4 ml-4">
             @auth
                 <!-- Sino de notificações (sempre visível) -->
                 <div class="relative">
@@ -28,6 +28,29 @@
                         <div class="p-2 text-center">
                             <button id="notif-reload" class="text-xs text-gray-500 hover:text-gray-700">Atualizar</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Navegação Desktop (md+) -->
+                <a href="{{ route('home') }}" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md {{ request()->routeIs('home') ? 'text-gray-900 bg-gray-100 font-medium' : '' }}">Mapa</a>
+
+                <!-- Chats submenu (Desktop) -->
+                <div class="relative hidden md:block">
+                    <button id="chats-menu-btn" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Chats</button>
+                    <div id="chats-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-lg text-sm z-50">
+                        <a href="{{ route('gincana.create') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">Criar Sala</a>
+                        <a href="{{ route('gincana.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">Minhas Salas</a>
+                        <a href="{{ route('gincana.jogadas') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.jogadas') ? 'text-gray-900 bg-gray-100' : '' }}">Salas que Participei</a>
+                        <a href="{{ route('gincana.disponiveis') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">Salas Disponíveis</a>
+                    </div>
+                </div>
+
+                <!-- Rankings submenu (Desktop) -->
+                <div class="relative hidden md:block">
+                    <button id="rankings-menu-btn" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">🏆 Rankings</button>
+                    <div id="rankings-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-lg text-sm z-50">
+                        <a href="{{ route('ranking.geral') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('ranking.geral') ? 'text-gray-900 bg-gray-100' : '' }}">🌟 Ranking Geral</a>
+                        <a href="{{ route('ranking.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('ranking.index') ? 'text-gray-900 bg-gray-100' : '' }}">📊 Por Gincana</a>
                     </div>
                 </div>
 
@@ -50,7 +73,7 @@
                         </ul>
                     </div>
                 </div>
-                <!-- Links informativos (recolhidos) -->
+                <!-- Links informativos (Desktop) -->
                 <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Como Funciona</a>
                 <a href="#" onclick="event.preventDefault(); mostrarSobreJogo()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Sobre</a>
             @else
@@ -216,6 +239,10 @@
         const reloadBtn = document.getElementById('notif-reload');
         const userBtn = document.getElementById('user-menu-btn');
         const userDropdown = document.getElementById('user-menu-dropdown');
+    const chatsBtn = document.getElementById('chats-menu-btn');
+    const chatsDropdown = document.getElementById('chats-menu-dropdown');
+    const rankingsBtn = document.getElementById('rankings-menu-btn');
+    const rankingsDropdown = document.getElementById('rankings-menu-dropdown');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileMenuPanel = document.getElementById('mobile-menu-panel');
@@ -290,6 +317,20 @@
                 toggle(userDropdown);
             } else if(userDropdown && !userDropdown.contains(e.target) && !userBtn.contains(e.target)) {
                 hide(userDropdown);
+            }
+            // Chats menu (desktop)
+            if(chatsBtn && chatsBtn.contains(e.target)) {
+                toggle(chatsDropdown);
+                hide(rankingsDropdown);
+            } else if(chatsDropdown && !chatsDropdown.contains(e.target) && !(chatsBtn && chatsBtn.contains(e.target))) {
+                hide(chatsDropdown);
+            }
+            // Rankings menu (desktop)
+            if(rankingsBtn && rankingsBtn.contains(e.target)) {
+                toggle(rankingsDropdown);
+                hide(chatsDropdown);
+            } else if(rankingsDropdown && !rankingsDropdown.contains(e.target) && !(rankingsBtn && rankingsBtn.contains(e.target))) {
+                hide(rankingsDropdown);
             }
         });
 
