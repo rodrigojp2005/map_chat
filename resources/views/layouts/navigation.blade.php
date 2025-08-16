@@ -45,14 +45,7 @@
                     </div>
                 </div>
 
-                <!-- Rankings submenu (Desktop) -->
-                <div class="relative hidden md:block">
-                    <button id="rankings-menu-btn" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">🏆 Rankings</button>
-                    <div id="rankings-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-lg text-sm z-50">
-                        <a href="{{ route('ranking.geral') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('ranking.geral') ? 'text-gray-900 bg-gray-100' : '' }}">🌟 Ranking Geral</a>
-                        <a href="{{ route('ranking.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('ranking.index') ? 'text-gray-900 bg-gray-100' : '' }}">📊 Por Gincana</a>
-                    </div>
-                </div>
+                <!-- Rankings removidos -->
 
                 <!-- Avatar Emoji / Menu usuário -->
                 <div class="relative">
@@ -129,16 +122,7 @@
                         </a>
                     </div>
 
-                    <!-- Rankings section -->
-                    <div class="space-y-2">
-                        <p class="text-sm font-medium text-gray-500 px-3">🏆 Rankings</p>
-                        <a href="{{ route('ranking.geral') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('ranking.geral') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            🌟 Ranking Geral
-                        </a>
-                        <a href="{{ route('ranking.index') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('ranking.index') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            📊 Por Gincana
-                        </a>
-                    </div>
+                    <!-- Rankings removidos do mobile -->
 
                     <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-md transition-all duration-200">
                         Como Funciona
@@ -241,8 +225,6 @@
         const userDropdown = document.getElementById('user-menu-dropdown');
     const chatsBtn = document.getElementById('chats-menu-btn');
     const chatsDropdown = document.getElementById('chats-menu-dropdown');
-    const rankingsBtn = document.getElementById('rankings-menu-btn');
-    const rankingsDropdown = document.getElementById('rankings-menu-dropdown');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileMenuPanel = document.getElementById('mobile-menu-panel');
@@ -325,13 +307,7 @@
             } else if(chatsDropdown && !chatsDropdown.contains(e.target) && !(chatsBtn && chatsBtn.contains(e.target))) {
                 hide(chatsDropdown);
             }
-            // Rankings menu (desktop)
-            if(rankingsBtn && rankingsBtn.contains(e.target)) {
-                toggle(rankingsDropdown);
-                hide(chatsDropdown);
-            } else if(rankingsDropdown && !rankingsDropdown.contains(e.target) && !(rankingsBtn && rankingsBtn.contains(e.target))) {
-                hide(rankingsDropdown);
-            }
+            // Rankings removidos
         });
 
                 if(window.LaravelIsAuthenticated){

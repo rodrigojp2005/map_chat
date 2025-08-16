@@ -3,7 +3,6 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GincanaController;
 use App\Http\Controllers\GameController;
-use App\Http\Controllers\RankingController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ComentarioController;
 use Illuminate\Support\Facades\Route;
@@ -38,10 +37,7 @@ Route::middleware('auth')->group(function () {
     // Rotas do jogo
     Route::post('/game/save-score', [GameController::class, 'saveScore'])->name('game.save-score');
     
-    // Rotas de Ranking
-    Route::get('/rankings', [RankingController::class, 'index'])->name('ranking.index');
-    Route::get('/ranking/{gincana}', [RankingController::class, 'show'])->name('ranking.show');
-    Route::get('/ranking-geral', [RankingController::class, 'geral'])->name('ranking.geral');
+    // Rankings removidos
     
     // Rotas para comentários
     Route::post('/comentarios', [ComentarioController::class, 'store'])->name('comentarios.store');
