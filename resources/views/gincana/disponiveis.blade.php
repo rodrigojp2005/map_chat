@@ -10,10 +10,10 @@
         <!-- Header -->
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-900 mb-4">
-                🌟 Gincanas Disponíveis
+                🌟 Salas Disponíveis
             </h1>
             <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                Descubra novas gincanas criadas pela comunidade e comece a jogar agora mesmo!
+                Descubra salas criadas pela comunidade e entre na conversa!
             </p>
         </div>
 
@@ -21,7 +21,7 @@
             <!-- Statistics Card -->
             <div class="bg-white rounded-xl shadow-lg p-6 text-center mb-8">
                 <div class="text-3xl font-bold text-green-600">{{ $gincanasDisponiveis->count() }}</div>
-                <div class="text-gray-600 mt-2">{{ $gincanasDisponiveis->count() == 1 ? 'Gincana Disponível' : 'Gincanas Disponíveis' }}</div>
+                <div class="text-gray-600 mt-2">{{ $gincanasDisponiveis->count() == 1 ? 'Sala Disponível' : 'Salas Disponíveis' }}</div>
             </div>
 
             <!-- Gincanas List -->
@@ -81,9 +81,9 @@
                             <!-- Actions -->
                             <div class="flex gap-2">
                                 @if(Auth::id() !== $gincana->user_id)
-                                    <a href="{{ route('gincana.jogar', $gincana) }}" 
-                                       class="flex-1 bg-green-600 text-white text-center px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium">
-                                        🎮 Jogar Agora
+                                                <a href="{{ route('gincana.jogar', $gincana) }}" 
+                                                    class="flex-1 bg-green-600 text-white text-center px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium">
+                                                     💬 Entrar no Chat
                                     </a>
                                 @endif
                                     <button type="button" onclick="compartilharGincanaDisponivel('{{ $gincana->nome }}', '{{ route('gincana.show', $gincana) }}')" class="flex-1 bg-blue-600 text-white text-center px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2">
@@ -101,12 +101,12 @@
                 <div class="space-y-4">
                     <a href="{{ route('gincana.jogadas') }}" 
                     class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-                        🎮 Ver Minhas Jogadas
+                        🗺️ Ver Mapa
                     </a>
                     <div class="text-gray-500">ou</div>
                     <a href="{{ route('gincana.create') }}" 
                     class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors duration-200 font-medium">
-                        ➕ Criar Nova Gincana
+                        ➕ Criar Nova Sala
                     </a>
                 </div>
             </div>

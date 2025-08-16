@@ -8,7 +8,7 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">
-                        🏆 Ranking - {{ $gincana->nome }}
+                        �️ Sala - {{ $gincana->nome }}
                     </h1>
                     <p class="text-gray-600 mt-2">
                         {{ $gincana->contexto }}
@@ -21,7 +21,7 @@
                 <div class="text-right">
                     <a href="{{ route('gincana.show', $gincana->id) }}" 
                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        Ver Gincana
+                        Ver Sala
                     </a>
                 </div>
             </div>
@@ -201,11 +201,11 @@
                     Nenhuma participação concluída ainda
                 </h3>
                 <p class="text-gray-600 mb-6">
-                    Seja o primeiro a completar esta gincana e aparecer no ranking!
+                    Nenhuma atividade registrada nesta sala ainda.
                 </p>
                 <a href="{{ route('gincana.show', $gincana->id) }}" 
                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors">
-                    Participar da Gincana
+                    Abrir Sala
                 </a>
             </div>
         @endif
@@ -214,7 +214,7 @@
         <div class="mt-8 flex justify-between">
             <a href="{{ route('gincana.index') }}" 
                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors">
-                ← Voltar às Gincanas
+                ← Voltar às Salas
             </a>
             <a href="{{ route('ranking.geral') }}" 
                class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg transition-colors">

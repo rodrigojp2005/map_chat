@@ -3,8 +3,8 @@
         <!-- Logo / Brand à esquerda -->
         <div class="flex items-center min-w-0">
             <a href="{{ route('home') }}" class="flex items-center gap-2 font-bold text-lg md:text-xl text-gray-800 hover:text-blue-600 whitespace-nowrap">
-                <img src="/images/gincaneiros_logo.png" alt="Gincaneiros" class="h-7 w-7 md:h-8 md:w-8 object-contain" loading="lazy" />
-                <span class="tracking-tight">Gincaneiros</span>
+                <img src="/images/gincaneiros_logo.png" alt="MapChat" class="h-7 w-7 md:h-8 md:w-8 object-contain" loading="lazy" />
+                <span class="tracking-tight">MapChat</span>
             </a>
         </div>
 
@@ -51,11 +51,11 @@
                     </div>
                 </div>
                 <!-- Links informativos (recolhidos) -->
-                <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Como Jogar</a>
+                <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Como Funciona</a>
                 <a href="#" onclick="event.preventDefault(); mostrarSobreJogo()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Sobre</a>
             @else
                 <div class="hidden md:flex items-center gap-2">
-                    <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="px-3 py-1 text-sm text-gray-600">Como Jogar</a>
+                    <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="px-3 py-1 text-sm text-gray-600">Como Funciona</a>
                     <a href="#" onclick="event.preventDefault(); mostrarSobreJogo()" class="px-3 py-1 text-sm text-gray-600">Sobre</a>
                     <a href="{{ route('login') }}" class="px-3 py-1 text-sm font-medium text-blue-600 hover:underline">Entrar</a>
                     @if (Route::has('register'))
@@ -86,23 +86,23 @@
                 @auth
                 <div class="p-4 space-y-4">
                     <a href="{{ route('home') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('home') ? 'text-gray-900 bg-gray-100 font-medium' : '' }}">
-                        Jogar
+                        Mapa
                     </a>
                     
-                    <!-- Gincanas section -->
+                    <!-- Chats section -->
                     <div class="space-y-2">
-                        <p class="text-sm font-medium text-gray-500 px-3">Gincanas</p>
+                        <p class="text-sm font-medium text-gray-500 px-3">Chats</p>
                         <a href="{{ route('gincana.create') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Criar Gincana
+                            Criar Sala
                         </a>
                         <a href="{{ route('gincana.index') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Gincanas que Criei
+                            Minhas Salas
                         </a>
                         <a href="{{ route('gincana.jogadas') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.jogadas') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Gincanas que Joguei
+                            Salas que Participei
                         </a>
                         <a href="{{ route('gincana.disponiveis') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Gincanas Disponíveis
+                            Salas Disponíveis
                         </a>
                     </div>
 
@@ -118,7 +118,7 @@
                     </div>
 
                     <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-md transition-all duration-200">
-                        Como Jogar
+                        Como Funciona
                     </a>
                     <a href="#" onclick="event.preventDefault(); mostrarSobreJogo()" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-md transition-all duration-200">
                         Sobre
@@ -161,18 +161,15 @@
     // Funções SweetAlert - funcionam para todos os usuários
     function mostrarComoJogar() {
         Swal.fire({
-            title: 'Como Jogar',
+            title: 'Como Funciona',
             html: `
                 <div class="text-left">
-                    <h4 class="font-bold mb-2">🎯 Objetivo do Jogo:</h4>
-                    <p class="mb-3">Adivinhe onde está apenas pela imagem do Street View.</p>
-
-                    <h4 class="font-bold mb-2">🎮 Como Jogar</h4>
+                    <h4 class="font-bold mb-2">💬 Conversas no Mapa</h4>
                     <ul class="list-disc list-inside mb-3 space-y-1">
-                        <li>Analise a imagem e busque por pistas</li>
-                        <li>Clique em Start e marque o local no mapa</li>
-                        <li>Confirme o Palpite, você tem 5 tentativas</li>
-                        <li>Caso erre, leia a dica da distância e direção!</li>
+                        <li>Abra o mapa e o Street View</li>
+                        <li>Clique em avatares no Street View para abrir o chat</li>
+                        <li>Converse com pessoas associadas àquela localização</li>
+                        <li>Você pode criar salas e convidar amigos</li>
                     </ul>
                 </div>
             `,
@@ -185,17 +182,17 @@
 
     function mostrarSobreJogo() {
         Swal.fire({
-            title: 'Sobre o Gincaneiros',
+            title: 'Sobre o MapChat',
             html: `
                 <div class="text-left">
-                    <h4 class="font-bold mb-2">🌍 O que é o Gincaneiros?</h4>
-                    <p class="mb-3">É uma brincadeira de desafios para testar a memória afetiva dos seus amigos e parentes ou ainda mostrar para eles lugares que você já visitou ou quer visitar.</p>             
-                    <h4 class="font-bold mb-2">🎯 Crie sua Gincana</h4>
+                    <h4 class="font-bold mb-2">🌍 O que é o MapChat?</h4>
+                    <p class="mb-3">É um app de chats geolocalizados: converse no mapa e dentro do Street View com avatares clicáveis.</p>
+                    <h4 class="font-bold mb-2">🗺️ Recursos</h4>
                     <ul class="list-disc list-inside mb-3 space-y-1">
-                        <li><strong>Infância:</strong> Desafie alguém se lembrar de determinado local</li>
-                        <li><strong>Viagens:</strong> Desafie alguém adivinhar o local que você quer conhecer</li>
+                        <li>Mapa + Street View</li>
+                        <li>Avatares clicáveis que abrem o chat</li>
+                        <li>Salas públicas ou privadas</li>
                     </ul>
-                    <h4 class="font-bold mb-2">🔍 Procure gicanas de amigos ou aleatórias.</h4>
                     <h4 class="font-bold mb-2"><br>📞 Contato (zap): 53 981056952</h4>
                 </div>
             `,

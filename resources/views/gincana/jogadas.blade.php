@@ -11,10 +11,10 @@
     @if($gincanasJogadas->count() > 0)
         <div class="text-center mb-8">
             <h1 class="text-4xl font-bold text-gray-900 mb-4">
-                🎮 Gincanas Jogadas!
+                💬 Salas que Participei
             </h1>
             <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                Aqui estão todas as gincanas que você participou. Clique em uma gincana para ver o ranking!
+                Aqui estão todas as salas que você participou. Clique para ver detalhes!
             </p>
         </div>
             <!-- Gincanas List -->
@@ -78,7 +78,7 @@
                                     @endif
                                 @elseif($participacao)
                                     <div class="flex justify-between">
-                                        <span class="text-sm text-gray-600">Locais visitados:</span>
+                                        <span class="text-sm text-gray-600">Mensagens/Locais:</span>
                                         <span class="text-sm font-medium text-orange-600">
                                             {{ $participacao->locais_visitados ?? 0 }} / {{ $gincana->duracao }}
                                         </span>
@@ -114,7 +114,7 @@
            <div class="text-center mb-8">
                 <h1 class="text-4xl font-bold text-gray-900 mb-4">
                     🎮
-                    <br> Nenhuma Gincana Jogada Ainda!
+                    <br> Nenhuma Sala Participada Ainda!
                 </h1>
             </div>  
             <div class="text-center py-4">
@@ -122,12 +122,12 @@
                     <div class="space-y-4">
                         <a href="{{ route('home') }}" 
                            class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-                            🎯 Jogar Agora
+                            🗺️ Abrir Mapa
                         </a>
                         <div class="text-gray-500">ou</div>
                         <a href="{{ route('ranking.index') }}" 
                            class="inline-block bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium">
-                            🏆 Ver Rankings
+                            📊 Ver Atividades
                         </a>
                     </div>
                 </div>

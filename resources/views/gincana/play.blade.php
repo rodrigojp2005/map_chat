@@ -2,9 +2,9 @@
 
 @section('title')
     @auth
-        Gincaneiros - Crie sua gincana!
+        MapChat - Conversas no mapa
     @else
-        Gincaneiros - Desafio do bem!
+        MapChat - Geochat
     @endauth
 @endsection
 

@@ -8,16 +8,16 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-4xl font-bold flex items-center">
-                        🌟 Ranking Geral dos Gincaneiros!
+                        🌟 Atividade Geral nas Salas
                     </h1>
                     <p class="text-purple-100 mt-2 text-lg">
-                        Os melhores jogadores de todas as gincanas
+                        Estatísticas gerais de participação nas salas
                     </p>
                 </div>
                 <div class="text-right">
                     <a href="{{ route('ranking.index') }}" 
                        class="bg-white hover:bg-gray-100 text-purple-600 px-6 py-3 rounded-lg transition-colors font-semibold">
-                        Ver Rankings por Gincana
+                        Ver Atividades por Sala
                     </a>
                 </div>
             </div>
@@ -261,11 +261,11 @@
                     Ranking geral ainda não disponível
                 </h3>
                 <p class="text-gray-600 mb-6">
-                    Complete algumas gincanas para começar a ver o ranking geral aparecer aqui!
+                    Participe das salas para começar a ver estatísticas aqui!
                 </p>
                 <a href="{{ route('gincana.index') }}" 
                    class="bg-purple-500 hover:bg-purple-600 text-white px-6 py-3 rounded-lg transition-colors">
-                    Participar de Gincanas
+                    Ver Salas
                 </a>
             </div>
         @endif
@@ -274,7 +274,7 @@
         <div class="mt-8 text-center">
             <a href="{{ route('gincana.index') }}" 
                class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-colors">
-                ← Voltar às Gincanas
+                ← Voltar às Salas
             </a>
         </div>
     </div>

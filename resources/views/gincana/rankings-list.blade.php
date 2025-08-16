@@ -8,10 +8,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">
-                        🏆 Rankings das Gincanas
+                        🏆 Atividades por Sala
                     </h1>
                     <p class="text-gray-600 mt-2">
-                        Veja os rankings de todas as gincanas concluídas
+                        Veja as atividades recentes em cada sala
                     </p>
                 </div>
                 <div class="text-right">
@@ -21,7 +21,7 @@
                     </a>
                     <a href="{{ route('gincana.index') }}" 
                        class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
-                        Ver Gincanas
+                        Ver Salas
                     </a>
                 </div>
             </div>
@@ -118,13 +118,13 @@
                 <div class="bg-white rounded-lg shadow-md p-6 text-center">
                     <div class="text-3xl mb-2">🏆</div>
                     <div class="text-2xl font-bold text-gray-900">{{ $gincanas->count() }}</div>
-                    <div class="text-sm text-gray-600">Gincanas com Rankings</div>
+                    <div class="text-sm text-gray-600">Salas com Atividades</div>
                 </div>
                 
                 <div class="bg-white rounded-lg shadow-md p-6 text-center">
                     <div class="text-3xl mb-2">👥</div>
                     <div class="text-2xl font-bold text-gray-900">{{ $gincanas->sum('participacoes_count') }}</div>
-                    <div class="text-sm text-gray-600">Total de Participações</div>
+                    <div class="text-sm text-gray-600">Total de Interações</div>
                 </div>
                 
                 <div class="bg-white rounded-lg shadow-md p-6 text-center">
@@ -132,7 +132,7 @@
                     <div class="text-2xl font-bold text-gray-900">
                         {{ number_format($gincanas->avg('participacoes_count'), 1) }}
                     </div>
-                    <div class="text-sm text-gray-600">Média de Participantes</div>
+                    <div class="text-sm text-gray-600">Média de Interações</div>
                 </div>
                 
                 <div class="bg-white rounded-lg shadow-md p-6 text-center">
@@ -140,7 +140,7 @@
                     <div class="text-2xl font-bold text-gray-900">
                         {{ $gincanas->where('privacidade', 'publica')->count() }}
                     </div>
-                    <div class="text-sm text-gray-600">Gincanas Públicas</div>
+                    <div class="text-sm text-gray-600">Salas Públicas</div>
                 </div>
             </div>
 
@@ -149,14 +149,14 @@
             <div class="bg-white rounded-lg shadow-md p-12 text-center">
                 <div class="text-6xl mb-4">🏆</div>
                 <h3 class="text-xl font-semibold text-gray-900 mb-2">
-                    Nenhuma gincana com ranking ainda
+                    Nenhuma sala com atividade ainda
                 </h3>
                 <p class="text-gray-600 mb-6">
-                    Complete uma gincana para começar a ver os rankings aparecerem aqui!
+                    Interaja nas salas para ver estatísticas aparecerem aqui!
                 </p>
                 <a href="{{ route('gincana.index') }}" 
                    class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors">
-                    Ver Gincanas Disponíveis
+                    Ver Salas Disponíveis
                 </a>
             </div>
         @endif

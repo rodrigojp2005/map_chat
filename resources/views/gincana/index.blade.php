@@ -2,7 +2,7 @@
 @section('content')
 <div class="container" style="max-width: 800px; margin: 10px auto 0 auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-        <h2 style="margin: 0; font-weight: 600; color: #198754; font-size: 2rem;">Gincanas que Criei</h2>
+    <h2 style="margin: 0; font-weight: 600; color: #198754; font-size: 2rem;">Minhas Salas</h2>
     </div>
     
     @if($gincanas->isEmpty())
@@ -10,10 +10,10 @@
             <div class="max-w-md mx-auto">
                 <div class="text-6xl mb-6">🎯</div>
                 <h3 class="text-2xl font-bold text-gray-900 mb-4">
-                    Nenhuma gincana criada ainda
+                    Nenhuma sala criada ainda
                 </h3>
                 <p class="text-gray-600 mb-8">
-                    Que tal criar sua primeira gincana personalizada?
+                    Que tal criar sua primeira sala?
                 </p>
             </div>
         </div>
@@ -67,7 +67,7 @@
     @endif
     
     <div style="width: 100%; display: flex; justify-content: center; margin-top: 32px;">
-        <a href="{{ route('gincana.create') }}" class="btn btn-primary" style="font-weight: 500; background: #198754; border: none; min-width: 220px; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none;">🎮 Criar Nova Gincana</a>
+    <a href="{{ route('gincana.create') }}" class="btn btn-primary" style="font-weight: 500; background: #198754; border: none; min-width: 220px; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none;">💬 Criar Nova Sala</a>
     </div>
 
     <script>
