@@ -9,7 +9,7 @@
 @endsection
 
 @section('scripts')
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c&libraries=geometry&callback=initGame"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c&libraries=geometry"></script>
 @endsection
 
 @section('content')
@@ -88,9 +88,9 @@
 </div>
 
 <script>
-    // Passar os locais do backend para o JavaScript
-    window.gameLocations = @json($locations ?? []);
-    // Passar informação de autenticação para o JavaScript
+    // Dados do chat e autenticação, sem dependência do game.js
     window.isAuthenticated = @json(auth()->check());
+    // Se necessário, injetar dados de locais diretamente na página específica do chat.
+    window.mapchatLocations = @json($locations ?? []);
 </script>
 @endsection

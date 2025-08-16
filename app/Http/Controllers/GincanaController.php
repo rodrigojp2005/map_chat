@@ -105,44 +105,17 @@ class GincanaController extends Controller
     public function show(Gincana $gincana)
     {
         $user = auth()->user();
-        $jaJogou = false;
-        
         if ($user) {
             // Ao entrar na página da gincana, zera contador agregado dessa gincana
             \App\Models\GincanaCommentNotification::where('user_id', $user->id)
                 ->where('gincana_id', $gincana->id)
                 ->update(['unread_count' => 0]);
-            $jaJogou = Participacao::where('user_id', $user->id) // Usando o 'use' adicionado
-                ->where('gincana_id', $gincana->id)
-                ->exists();
         }
-        
-        if ($jaJogou) {
-            return view('gincana.ja_jogada', compact('gincana'));
-        }
-        
+        // Exibe sempre a view padrão
         return view('gincana.show', compact('gincana'));
     }
 
-    // Lista as gincanas que o usuário jogou (participou)
-    public function jogadas()
-    {
-        $userId = Auth::id();
-        
-        // Método mais direto: buscar participações e então carregar as gincanas
-        $participacoes = Participacao::where('user_id', $userId) // Usando o 'use' adicionado
-            ->with(['gincana.user'])
-            ->get();
-        
-        // Agrupar por gincana (caso o usuário tenha jogado a mesma gincana várias vezes)
-        $gincanasJogadas = $participacoes->groupBy('gincana_id')->map(function($group) {
-            $gincana = $group->first()->gincana;
-            $gincana->participacoes = $group; // Adicionar as participações
-            return $gincana;
-        })->values();
-
-        return view('gincana.jogadas', compact('gincanasJogadas'));
-    }
+    // Jogadas removido
 
     // Lista gincanas disponíveis para jogar
     public function disponiveis()
@@ -162,18 +135,11 @@ class GincanaController extends Controller
     public function jogar(Gincana $gincana)
     {
         $user = auth()->user();
-        $jaJogou = false;
         if ($user) {
             // Ao entrar em jogar, também zera contador
             \App\Models\GincanaCommentNotification::where('user_id', $user->id)
                 ->where('gincana_id', $gincana->id)
                 ->update(['unread_count' => 0]);
-            $jaJogou = Participacao::where('user_id', $user->id) // Usando o 'use' adicionado
-                ->where('gincana_id', $gincana->id)
-                ->exists();
-        }
-        if ($jaJogou) {
-            return view('gincana.ja_jogada', compact('gincana'));
         }
 
         // Criar array de locais da gincana

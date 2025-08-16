@@ -99,10 +99,7 @@
         @else
             <div class="text-center mt-12">
                 <div class="space-y-4">
-                    <a href="{{ route('gincana.jogadas') }}" 
-                    class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium">
-                        🗺️ Ver Mapa
-                    </a>
+                        <!-- Link Minhas Jogadas removido -->
                     <div class="text-gray-500">ou</div>
                     <a href="{{ route('gincana.create') }}" 
                     class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors duration-200 font-medium">

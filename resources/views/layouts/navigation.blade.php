@@ -40,7 +40,7 @@
                     <div id="chats-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-lg text-sm z-50">
                         <a href="{{ route('gincana.create') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">Criar Sala</a>
                         <a href="{{ route('gincana.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">Minhas Salas</a>
-                        <a href="{{ route('gincana.jogadas') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.jogadas') ? 'text-gray-900 bg-gray-100' : '' }}">Salas que Participei</a>
+                        <!-- Jogadas removido -->
                         <a href="{{ route('gincana.disponiveis') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">Salas Disponíveis</a>
                     </div>
                 </div>
@@ -114,9 +114,7 @@
                         <a href="{{ route('gincana.index') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">
                             Minhas Salas
                         </a>
-                        <a href="{{ route('gincana.jogadas') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.jogadas') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Salas que Participei
-                        </a>
+                        <!-- Jogadas removido do mobile -->
                         <a href="{{ route('gincana.disponiveis') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">
                             Salas Disponíveis
                         </a>
@@ -303,7 +301,6 @@
             // Chats menu (desktop)
             if(chatsBtn && chatsBtn.contains(e.target)) {
                 toggle(chatsDropdown);
-                hide(rankingsDropdown);
             } else if(chatsDropdown && !chatsDropdown.contains(e.target) && !(chatsBtn && chatsBtn.contains(e.target))) {
                 hide(chatsDropdown);
             }

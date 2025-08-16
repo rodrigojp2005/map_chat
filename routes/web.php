@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GincanaController;
-use App\Http\Controllers\GameController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ComentarioController;
 use Illuminate\Support\Facades\Route;
@@ -26,7 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/gincana/create', [GincanaController::class, 'create'])->name('gincana.create');
     Route::post('/gincana', [GincanaController::class, 'store'])->name('gincana.store');
     Route::get('/gincana', [GincanaController::class, 'index'])->name('gincana.index');
-    Route::get('/gincana/jogadas', [GincanaController::class, 'jogadas'])->name('gincana.jogadas');
+    // Jogadas removido
     Route::get('/gincana/disponiveis', [GincanaController::class, 'disponiveis'])->name('gincana.disponiveis');
     Route::get('/gincana/{gincana}', [GincanaController::class, 'show'])->name('gincana.show');
     Route::get('/gincana/{gincana}/jogar', [GincanaController::class, 'jogar'])->name('gincana.jogar');
@@ -34,8 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/gincana/{gincana}', [GincanaController::class, 'update'])->name('gincana.update');
     Route::delete('/gincana/{gincana}', [GincanaController::class, 'destroy'])->name('gincana.destroy');
     
-    // Rotas do jogo
-    Route::post('/game/save-score', [GameController::class, 'saveScore'])->name('game.save-score');
+    // Rotas do jogo removidas
     
     // Rankings removidos
     

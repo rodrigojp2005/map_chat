@@ -111,7 +111,7 @@ app/
 ├── Http/Controllers/
 │   ├── GincanaController.php    # Gerenciamento de gincanas
 │   ├── GameController.php       # Lógica do jogo
-│   ├── RankingController.php    # Sistema de rankings
+│   ├── (removido) RankingController.php    # Sistema de rankings (removido)
 │   └── Auth/SocialiteController.php # OAuth Google
 ├── Models/
 │   ├── User.php                 # Modelo de usuários
@@ -126,7 +126,7 @@ resources/
 ├── css/
 │   └── game.css               # Estilos do jogo
 └── js/
-    └── game.js                # Lógica JavaScript do jogo
+    └── (removido) game.js                # Lógica JavaScript do jogo (removido)
 ```
 
 ## 🗄️ Banco de Dados
