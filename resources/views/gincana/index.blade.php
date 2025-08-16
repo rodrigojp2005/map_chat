@@ -44,13 +44,13 @@
                             <td style="padding: 10px 8px;">{{ $gincana->created_at->format('d/m/Y') }}</td>
                             <td style="padding: 10px 8px; text-align:center;">
                                 <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                                    <button type="button" title="Compartilhar" onclick="compartilharGincana('{{ $gincana->nome }}', '{{ route('gincana.show', $gincana) }}')" style="background: none; border: none; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; cursor: pointer;">
+                                    <button type="button" title="Compartilhar" onclick="compartilharGincana('{{ $gincana->nome }}', '{{ route('mapchat.show', $gincana) }}')" style="background: none; border: none; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; cursor: pointer;">
                                         <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2R5aDI5bnVkNHAyMG5zM2tnNHVlOGY5NjA1ZW04ZzZrNzNpZGx4biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/XfmFPcUZTddaFZhLgt/giphy.gif" alt="Compartilhar" style="width: 33px; height: 33px; display: inline-block; margin-right: 2px;">
                                     </button>
-                                    <a href="{{ route('gincana.edit', $gincana) }}" title="Editar" style="background: none; border: none; color: #ffc107; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; text-decoration: none;">
+                                    <a href="{{ route('mapchat.edit', $gincana) }}" title="Editar" style="background: none; border: none; color: #ffc107; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; text-decoration: none;">
                                         ✏️
                                     </a>
-                                    <form action="{{ route('gincana.destroy', $gincana) }}" method="POST" style="display:inline; margin:0;">
+                                    <form action="{{ route('mapchat.destroy', $gincana) }}" method="POST" style="display:inline; margin:0;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" title="Excluir" style="background: none; border: none; color: #dc3545; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; cursor: pointer;" onclick="return confirm('Tem certeza que deseja excluir esta gincana?')">
@@ -67,7 +67,7 @@
     @endif
     
     <div style="width: 100%; display: flex; justify-content: center; margin-top: 32px;">
-    <a href="{{ route('gincana.create') }}" class="btn btn-primary" style="font-weight: 500; background: #198754; border: none; min-width: 220px; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none;">💬 Criar Nova Sala</a>
+    <a href="{{ route('mapchat.create') }}" class="btn btn-primary" style="font-weight: 500; background: #198754; border: none; min-width: 220px; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none;">💬 Criar Nova Sala</a>
     </div>
 
     <script>

@@ -81,12 +81,12 @@
                             <!-- Actions -->
                             <div class="flex gap-2">
                                 @if(Auth::id() !== $gincana->user_id)
-                                                <a href="{{ route('gincana.jogar', $gincana) }}" 
+                                                <a href="{{ route('mapchat.jogar', $gincana) }}" 
                                                     class="flex-1 bg-green-600 text-white text-center px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium">
                                                      💬 Entrar no Chat
                                     </a>
                                 @endif
-                                    <button type="button" onclick="compartilharGincanaDisponivel('{{ $gincana->nome }}', '{{ route('gincana.show', $gincana) }}')" class="flex-1 bg-blue-600 text-white text-center px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2">
+                                    <button type="button" onclick="compartilharGincanaDisponivel('{{ $gincana->nome }}', '{{ route('mapchat.show', $gincana) }}')" class="flex-1 bg-blue-600 text-white text-center px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2">
                                         <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2R5aDI5bnVkNHAyMG5zM2tnNHVlOGY5NjA1ZW04ZzZrNzNpZGx4biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/XfmFPcUZTddaFZhLgt/giphy.gif" alt="Compartilhar" style="width: 20px; height: 20px;">
                                         Compartilhar com amigo
                                     </button>
@@ -101,7 +101,7 @@
                 <div class="space-y-4">
                         <!-- Link Minhas Jogadas removido -->
                     <div class="text-gray-500">ou</div>
-                    <a href="{{ route('gincana.create') }}" 
+                    <a href="{{ route('mapchat.create') }}" 
                     class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700 transition-colors duration-200 font-medium">
                         ➕ Criar Nova Sala
                     </a>

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\GincanaController;
+use App\Http\Controllers\MapchatController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ComentarioController;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,19 @@ Route::middleware('auth')->group(function () {
     Route::delete('/gincana/{gincana}', [GincanaController::class, 'destroy'])->name('gincana.destroy');
     
     // Rotas do jogo removidas
+
+    // Rotas paralelas MapChat (alias das rotas gincana.*) para migração gradual
+    Route::prefix('mapchat')->name('mapchat.')->group(function () {
+        Route::get('/', [MapchatController::class, 'index'])->name('index');
+        Route::get('/create', [MapchatController::class, 'create'])->name('create');
+        Route::post('/', [MapchatController::class, 'store'])->name('store');
+        Route::get('/disponiveis', [MapchatController::class, 'disponiveis'])->name('disponiveis');
+        Route::get('/{mapchat}', [MapchatController::class, 'show'])->name('show');
+    Route::get('/{mapchat}/jogar', [MapchatController::class, 'jogar'])->name('jogar');
+        Route::get('/{mapchat}/edit', [MapchatController::class, 'edit'])->name('edit');
+        Route::put('/{mapchat}', [MapchatController::class, 'update'])->name('update');
+        Route::delete('/{mapchat}', [MapchatController::class, 'destroy'])->name('destroy');
+    });
     
     // Rankings removidos
     

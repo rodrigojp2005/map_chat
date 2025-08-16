@@ -38,10 +38,10 @@
                 <div class="relative hidden md:block">
                     <button id="chats-menu-btn" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Chats</button>
                     <div id="chats-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-lg text-sm z-50">
-                        <a href="{{ route('gincana.create') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">Criar Sala</a>
-                        <a href="{{ route('gincana.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">Minhas Salas</a>
+                        <a href="{{ route('mapchat.create') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.create') || request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">Criar Sala</a>
+                        <a href="{{ route('mapchat.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.index') || request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">Minhas Salas</a>
                         <!-- Jogadas removido -->
-                        <a href="{{ route('gincana.disponiveis') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">Salas Disponíveis</a>
+                        <a href="{{ route('mapchat.disponiveis') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.disponiveis') || request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">Salas Disponíveis</a>
                     </div>
                 </div>
 
@@ -108,14 +108,14 @@
                     <!-- Chats section -->
                     <div class="space-y-2">
                         <p class="text-sm font-medium text-gray-500 px-3">Chats</p>
-                        <a href="{{ route('gincana.create') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">
+                        <a href="{{ route('mapchat.create') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('mapchat.create') || request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">
                             Criar Sala
                         </a>
-                        <a href="{{ route('gincana.index') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">
+                        <a href="{{ route('mapchat.index') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('mapchat.index') || request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">
                             Minhas Salas
                         </a>
                         <!-- Jogadas removido do mobile -->
-                        <a href="{{ route('gincana.disponiveis') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">
+                        <a href="{{ route('mapchat.disponiveis') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('mapchat.disponiveis') || request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">
                             Salas Disponíveis
                         </a>
                     </div>
@@ -267,7 +267,7 @@
                                                                 try {
                                                                     await fetch('/notifications/read', {method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content}, body: JSON.stringify({gincana_id:n.gincana_id})});
                                                                 } catch(e){}
-                                                                window.location.href = '/gincana/' + n.gincana_id;
+                                                                window.location.href = '/mapchat/' + n.gincana_id;
                                                                 return;
                                                         }
                                                 });
