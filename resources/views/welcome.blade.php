@@ -1,91 +1,98 @@
+
 @extends('layouts.app')
-@section('title')
-    @auth
-    MapChat - Crie sua sala!
-    @else
-    MapChat - Conversas no mapa!
-    @endauth
-@endsection
+
+@section('title', 'MapChat - Conversas no mapa!')
 
 @section('content')
-<div class="game-container">
-    <!-- Informações do jogo -->
-    <div class="game-info">
-       @auth
-            <div><strong>Pontuação:</strong> <span id="score">1000</span></div>
-            <div><strong>Tentativas:</strong> <span id="attempts">5</span></div>
-            <div><strong>Rodada:</strong> <span id="round">1</span></div> 
-            <div><strong>Jogador:</strong> {{ auth()->user()->name }}</div>
-        @else
-            <div><strong>Tentativas:</strong> <span id="attempts">5</span></div>
-            <div><strong>Modo:</strong> Visitante</div>
-        @endauth
-    </div>
-
-    <!-- Container do Street View -->
-    <div id="streetview" class="street-view-container"></div>
-
-    <!-- Controles do jogo -->
-    <div class="game-controls">
-        <div style="display: flex; justify-content: center; align-items: center; width: 100%; padding: 10px 0;">
-            <button id="showMapBtn" class="btn" style="padding: 0; border: none; background: none; width: 100%; max-width: 220px;">
-            <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjFnOGtlcnl5dmpveGJydTNxb2twNGxudXB3Nm8wMjNlMnI2bDBrZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/PrfN2Hqu24ln2eAaOS/giphy.gif" alt="JOGAR" style="width: 100%; height: auto; max-width: 180px; max-height: 120px; display: block; margin: 0 auto;">
-            </button>
-        </div>
-        <style>
-            @media (max-width: 600px) {
-            #showMapBtn img {
-                max-width: 100%;
-                max-height: 80px;
-            }
-            .game-controls > div {
-                padding: 0 5px;
-            }
-            }
-        </style>
-    </div>
-
-    <!-- Slider do mapa -->
-    <div id="mapSlider" class="map-slider">
-        <!-- Header com título e botão fechar -->
-        <div class="map-slider-header">
-            <h3 class="map-slider-title">📍 Marque no mapa seu Palpite</h3>
-            <button id="closeMapBtn" class="close-btn">
-                <span>✕</span>
-                <span>Fechar</span>
-            </button>
-        </div>
-        
-        <!-- Instruções -->
-        <div id="mapInstructions" class="map-instructions">
-            <span class="map-instructions-icon">👆</span>
-            <span>Clique no mapa onde você acha que está!</span>
-        </div>
-        
-        <!-- Container do mapa -->
-        <div id="map" class="map-container"></div>
-        
-        <!-- Footer com controles -->
-        <div class="slider-controls">
-            <button id="confirmGuessBtn" class="btn btn-success" disabled>
-                🎯 Confirmar Palpite
-            </button>
-        </div>
-    </div>
-
-    <!-- Popup de feedback -->
-    <div id="overlay" class="overlay"></div>
-    <div id="popup" class="popup">
-        <h3 id="popupTitle">Resultado</h3>
-        <p id="popupMessage"></p>
-        <button id="continueBtn" class="btn">Continuar</button>
-    </div>
+<div class="relative w-full" style="height: calc(100vh - 120px);">
+    <div id="map" class="absolute left-0 top-0" style="width: 100%; height: 100%; z-index: 1;"></div>
+    <div id="streetview" class="absolute left-0 top-0" style="width: 100%; height: 100%; display: none; z-index: 2;"></div>
+    <button id="btn-voltar-mapa" class="px-4 py-2 rounded-md shadow bg-blue-600 text-white hover:bg-blue-700 focus:outline-none absolute top-5 left-5" style="z-index: 10; display: none;">⬅️ Voltar ao mapa</button>
 </div>
 
 <script>
-    // Passar os locais do backend para o JavaScript
-    // game.js removido; nenhuma variável gameLocations necessária aqui.
-    // Passar informação de autenticação para o JavaScript
-    window.isAuthenticated = @json(auth()->check());
+window.isAuthenticated = @json(auth()->check());
+const MC_LOCATIONS = @json($locations ?? []);
+
+let map, markers = [], panorama;
+
+function showStreetView(loc) {
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('streetview').style.display = 'block';
+    document.getElementById('btn-voltar-mapa').style.display = 'block';
+    const pos = { lat: Number(loc.lat), lng: Number(loc.lng) };
+    panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
+        position: pos,
+        pov: { heading: 165, pitch: 0 },
+        zoom: 1,
+        disableDefaultUI: true,
+        showRoadLabels: false
+    });
+    // Avatar no Street View
+    const avatar = new google.maps.Marker({
+        position: pos,
+        map: panorama,
+        icon: {
+            url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif',
+            scaledSize: new google.maps.Size(60, 80),
+            anchor: new google.maps.Point(30, 80)
+        },
+        title: loc.name || 'Local'
+    });
+    avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
+}
+
+function initMapChatHome() {
+    if (!window.google || !window.google.maps) return;
+    // Se houver pelo menos um local, já abre o Street View do primeiro
+    if (Array.isArray(MC_LOCATIONS) && MC_LOCATIONS.length > 0 && !MC_LOCATIONS[0].no_gincana) {
+        showStreetView(MC_LOCATIONS[0]);
+    } else {
+        // Se não houver locais, mostra o mapa vazio
+        document.getElementById('map').style.display = 'block';
+        document.getElementById('streetview').style.display = 'none';
+        document.getElementById('btn-voltar-mapa').style.display = 'none';
+    }
+    // Inicializa o mapa (para quando clicar em "voltar")
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: -14.2350, lng: -51.9253 },
+        zoom: 4,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: false
+    });
+    markers = [];
+    if (Array.isArray(MC_LOCATIONS)) {
+        MC_LOCATIONS.forEach(loc => {
+            if (loc.no_gincana) return;
+            const marker = new google.maps.Marker({
+                position: { lat: Number(loc.lat), lng: Number(loc.lng) },
+                map,
+                title: loc.name || 'Local',
+                icon: {
+                    url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif',
+                    scaledSize: new google.maps.Size(50, 65),
+                    anchor: new google.maps.Point(25, 65)
+                }
+            });
+            marker.addListener('click', () => showStreetView(loc));
+            markers.push(marker);
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('btn-voltar-mapa').addEventListener('click', function () {
+        document.getElementById('map').style.display = 'block';
+        document.getElementById('streetview').style.display = 'none';
+        document.getElementById('btn-voltar-mapa').style.display = 'none';
+        if (panorama) panorama.setVisible(false);
+    });
+});
 </script>
+
+@section('scripts')
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c') }}&callback=initMapChatHome"></script>
+@endsection
+
 @endsection

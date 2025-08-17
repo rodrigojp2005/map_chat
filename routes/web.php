@@ -23,17 +23,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // Rotas legacy "gincana.*" agora apontam para MapchatController (compatibilidade)
-    // Route::get('/gincana', [MapchatController::class, 'index'])->name('gincana.index');
-    // Route::get('/gincana/create', [MapchatController::class, 'create'])->name('gincana.create');
-    // Route::post('/gincana', [MapchatController::class, 'store'])->name('gincana.store');
-    // Route::get('/gincana/disponiveis', [MapchatController::class, 'disponiveis'])->name('gincana.disponiveis');
-    // Route::get('/gincana/{mapchat}', [MapchatController::class, 'show'])->name('gincana.show');
-    // Route::get('/gincana/{mapchat}/jogar', [MapchatController::class, 'jogar'])->name('gincana.jogar');
-    // Route::get('/gincana/{mapchat}/edit', [MapchatController::class, 'edit'])->name('gincana.edit');
-    // Route::put('/gincana/{mapchat}', [MapchatController::class, 'update'])->name('gincana.update');
-    // Route::delete('/gincana/{mapchat}', [MapchatController::class, 'destroy'])->name('gincana.destroy');
-    
     // Rotas do jogo removidas
 
     // Rotas paralelas MapChat (alias das rotas gincana.*) para migração gradual
@@ -43,7 +32,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/', [MapchatController::class, 'store'])->name('store');
         Route::get('/disponiveis', [MapchatController::class, 'disponiveis'])->name('disponiveis');
         Route::get('/{mapchat}', [MapchatController::class, 'show'])->name('show');
-    Route::get('/{mapchat}/jogar', [MapchatController::class, 'jogar'])->name('jogar');
+        Route::get('/{mapchat}/jogar', [MapchatController::class, 'jogar'])->name('jogar');
         Route::get('/{mapchat}/edit', [MapchatController::class, 'edit'])->name('edit');
         Route::put('/{mapchat}', [MapchatController::class, 'update'])->name('update');
         Route::delete('/{mapchat}', [MapchatController::class, 'destroy'])->name('destroy');

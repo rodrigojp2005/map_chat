@@ -49,35 +49,6 @@
             }
         </style>
     </div>
-
-    <!-- Slider do mapa -->
-    <div id="mapSlider" class="map-slider">
-        <!-- Header com título e botão fechar -->
-        <div class="map-slider-header">
-            <h3 class="map-slider-title">📍 Marque no mapa seu Palpite</h3>
-            <button id="closeMapBtn" class="close-btn">
-                <span>✕</span>
-                <span>Fechar</span>
-            </button>
-        </div>
-        
-        <!-- Instruções -->
-        <div id="mapInstructions" class="map-instructions">
-            <span class="map-instructions-icon">👆</span>
-            <span>Clique no mapa onde você acha que está!</span>
-        </div>
-        
-        <!-- Container do mapa -->
-        <div id="map" class="map-container"></div>
-        
-        <!-- Footer com controles -->
-        <div class="slider-controls">
-            <button id="confirmGuessBtn" class="btn btn-success" disabled>
-                🎯 Confirmar Palpite
-            </button>
-        </div>
-    </div>
-
     <!-- Popup de feedback -->
     <div id="overlay" class="overlay"></div>
     <div id="popup" class="popup">
