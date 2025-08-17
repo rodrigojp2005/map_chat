@@ -32,21 +32,6 @@
                 </div>
 
                 <!-- Navegação Desktop (md+) -->
-                <a href="{{ route('home') }}" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md {{ request()->routeIs('home') ? 'text-gray-900 bg-gray-100 font-medium' : '' }}">Mapa</a>
-
-                <!-- Chats submenu (Desktop) -->
-                <div class="relative hidden md:block">
-                    <button id="chats-menu-btn" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Chats</button>
-                    <div id="chats-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-lg text-sm z-50">
-                        <a href="{{ route('mapchat.create') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.create') || request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">Criar Sala</a>
-                        <a href="{{ route('mapchat.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.index') || request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">Minhas Salas</a>
-                        <!-- Jogadas removido -->
-                        <a href="{{ route('mapchat.disponiveis') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.disponiveis') || request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">Salas Disponíveis</a>
-                    </div>
-                </div>
-
-                <!-- Rankings removidos -->
-
                 <!-- Avatar Emoji / Menu usuário -->
                 <div class="relative">
                     <button id="user-menu-btn" class="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-xl" aria-haspopup="true" aria-expanded="false">🙂</button>
@@ -66,6 +51,22 @@
                         </ul>
                     </div>
                 </div>
+                <a href="{{ route('home') }}" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md {{ request()->routeIs('home') ? 'text-gray-900 bg-gray-100 font-medium' : '' }}">Mapa</a>
+
+                <!-- Chats submenu (Desktop) -->
+                <div class="relative hidden md:block">
+                    <button id="chats-menu-btn" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Chats</button>
+                    <div id="chats-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-lg text-sm z-50">
+                        <a href="{{ route('mapchat.create') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.create') || request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">Criar Sala</a>
+                        <a href="{{ route('mapchat.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.index') || request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">Minhas Salas</a>
+                        <!-- Jogadas removido -->
+                        <a href="{{ route('mapchat.disponiveis') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.disponiveis') || request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">Salas Disponíveis</a>
+                    </div>
+                </div>
+
+                <!-- Rankings removidos -->
+
+              
                 <!-- Links informativos (Desktop) -->
                 <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Como Funciona</a>
                 <a href="#" onclick="event.preventDefault(); mostrarSobreJogo()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Sobre</a>

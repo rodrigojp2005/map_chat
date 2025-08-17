@@ -3,6 +3,7 @@
 let drawerEl, mapEl, gmap, markers = [];
 let lastBounds = null;
 let gmapsLoading = false;
+let clusterer = null;
 
 function ensureGoogleMaps() {
   return new Promise((resolve, reject) => {
@@ -23,6 +24,21 @@ function ensureGoogleMaps() {
   });
 }
 
+function ensureMarkerClusterer() {
+  return new Promise((resolve, reject) => {
+    if (window.markerClusterer && window.markerClusterer.MarkerClusterer) {
+      return resolve(window.markerClusterer);
+    }
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve(window.markerClusterer);
+    script.onerror = () => reject(new Error('Falha ao carregar MarkerClusterer'));
+    document.body.appendChild(script);
+  });
+}
+
 async function openDrawerWithMap() {
   drawerEl = drawerEl || document.getElementById('active-chats-drawer');
   mapEl = mapEl || document.getElementById('active-chats-map');
@@ -31,6 +47,7 @@ async function openDrawerWithMap() {
   drawerEl.classList.remove('translate-x-full');
   try {
     const GM = await ensureGoogleMaps();
+  await ensureMarkerClusterer();
     if (!gmap) {
       // Center roughly in Brazil
       gmap = new GM.Map(mapEl, {
@@ -71,7 +88,9 @@ function formatWhen(s) {
 async function loadAndRenderMarkers() {
   if (!gmap) return;
   // Clear previous markers
-  markers.forEach(m => m.setMap(null));
+  if (clusterer) {
+    try { clusterer.clearMarkers(); } catch {}
+  }
   markers = [];
   const res = await fetch('/mapchat-ativos.json');
   if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -84,7 +103,7 @@ async function loadAndRenderMarkers() {
   const info = new GM.InfoWindow();
   data.forEach(item => {
     if (typeof item.lat !== 'number' || typeof item.lng !== 'number') return;
-    const marker = new GM.Marker({ position: { lat: item.lat, lng: item.lng }, map: gmap, title: item.nome || 'Chat' });
+    const marker = new GM.Marker({ position: { lat: item.lat, lng: item.lng }, title: item.nome || 'Chat' });
     markers.push(marker);
     bounds.extend(marker.getPosition());
     const content = `
@@ -111,6 +130,18 @@ async function loadAndRenderMarkers() {
       }, 0);
     });
   });
+
+  // Apply clustering (adds markers to the map via clusterer)
+  if (window.markerClusterer && window.markerClusterer.MarkerClusterer) {
+    if (!clusterer) {
+      clusterer = new window.markerClusterer.MarkerClusterer({ map: gmap, markers });
+    } else {
+      try { clusterer.addMarkers(markers); } catch {}
+    }
+  } else {
+    // Fallback: add markers directly if clusterer failed to load
+    markers.forEach(m => m.setMap(gmap));
+  }
   if (!bounds.isEmpty()) {
     gmap.fitBounds(bounds, { top: 20, bottom: 20, left: 20, right: 20 });
     lastBounds = bounds;
