@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\GincanaController;
+// use App\Http\Controllers\GincanaController; // legacy removed
 use App\Http\Controllers\MapchatController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ComentarioController;
@@ -14,25 +14,23 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Rota principal - AGORA SEM O MIDDLEWARE 'guest' PARA FUNCIONAR PARA TODOS
-Route::get('/', [GincanaController::class, 'welcome'])->name('home');
+Route::get('/', [MapchatController::class, 'welcome'])->name('home');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     
-    // ... O RESTO DAS SUAS ROTAS CONTINUA EXATAMENTE IGUAL ...
-    // Rotas das Gincanas
-    Route::get('/gincana/create', [GincanaController::class, 'create'])->name('gincana.create');
-    Route::post('/gincana', [GincanaController::class, 'store'])->name('gincana.store');
-    Route::get('/gincana', [GincanaController::class, 'index'])->name('gincana.index');
-    // Jogadas removido
-    Route::get('/gincana/disponiveis', [GincanaController::class, 'disponiveis'])->name('gincana.disponiveis');
-    Route::get('/gincana/{gincana}', [GincanaController::class, 'show'])->name('gincana.show');
-    Route::get('/gincana/{gincana}/jogar', [GincanaController::class, 'jogar'])->name('gincana.jogar');
-    Route::get('/gincana/{gincana}/edit', [GincanaController::class, 'edit'])->name('gincana.edit');
-    Route::put('/gincana/{gincana}', [GincanaController::class, 'update'])->name('gincana.update');
-    Route::delete('/gincana/{gincana}', [GincanaController::class, 'destroy'])->name('gincana.destroy');
+    // Rotas legacy "gincana.*" agora apontam para MapchatController (compatibilidade)
+    // Route::get('/gincana', [MapchatController::class, 'index'])->name('gincana.index');
+    // Route::get('/gincana/create', [MapchatController::class, 'create'])->name('gincana.create');
+    // Route::post('/gincana', [MapchatController::class, 'store'])->name('gincana.store');
+    // Route::get('/gincana/disponiveis', [MapchatController::class, 'disponiveis'])->name('gincana.disponiveis');
+    // Route::get('/gincana/{mapchat}', [MapchatController::class, 'show'])->name('gincana.show');
+    // Route::get('/gincana/{mapchat}/jogar', [MapchatController::class, 'jogar'])->name('gincana.jogar');
+    // Route::get('/gincana/{mapchat}/edit', [MapchatController::class, 'edit'])->name('gincana.edit');
+    // Route::put('/gincana/{mapchat}', [MapchatController::class, 'update'])->name('gincana.update');
+    // Route::delete('/gincana/{mapchat}', [MapchatController::class, 'destroy'])->name('gincana.destroy');
     
     // Rotas do jogo removidas
 
@@ -53,7 +51,7 @@ Route::middleware('auth')->group(function () {
     
     // Rotas para comentários
     Route::post('/comentarios', [ComentarioController::class, 'store'])->name('comentarios.store');
-    Route::get('/comentarios/{gincana_id}', [ComentarioController::class, 'index'])->name('comentarios.index');
+    Route::get('/comentarios/{mapchat_id}', [ComentarioController::class, 'index'])->name('comentarios.index');
 
     // Push subscription
     Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');

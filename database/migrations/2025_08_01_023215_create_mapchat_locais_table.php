@@ -4,27 +4,20 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
-        Schema::create('gincana_locais', function (Blueprint $table) {
+        Schema::create('mapchat_locais', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gincana_id')->constrained()->onDelete('cascade');
+            $table->foreignId('mapchat_id')->constrained('mapchats')->onDelete('cascade');
             $table->decimal('latitude', 10, 8);
             $table->decimal('longitude', 11, 8);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('gincana_locais');
+        Schema::dropIfExists('mapchat_locais');
     }
 };

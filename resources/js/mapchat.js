@@ -38,17 +38,17 @@ window.MapChat = (function () {
       showConfirmButton: false,
       didOpen: () => {
         if (window.isAuthenticated) {
-          loadComments(location.gincana_id || location.id);
+          loadComments(location.mapchat_id || location.id);
           const btn = document.getElementById('comment-btn');
-          if (btn) btn.addEventListener('click', () => addComment(location.gincana_id || location.id));
+          if (btn) btn.addEventListener('click', () => addComment(location.mapchat_id || location.id));
         }
       }
     });
   }
 
-  async function loadComments(gincanaId) {
+  async function loadComments(mapchatId) {
     try {
-      const res = await fetch(`/comentarios/${gincanaId}`);
+      const res = await fetch(`/comentarios/${mapchatId}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       const comentarios = JSON.parse(text);
@@ -73,7 +73,7 @@ window.MapChat = (function () {
     }
   }
 
-  async function addComment(gincanaId) {
+  async function addComment(mapchatId) {
     const textarea = document.getElementById('new-comment');
     const conteudo = (textarea?.value || '').trim();
     if (!conteudo) {
@@ -85,14 +85,14 @@ window.MapChat = (function () {
       const res = await fetch('/comentarios', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf?.getAttribute('content') || '', 'Accept': 'application/json' },
-        body: JSON.stringify({ gincana_id: gincanaId, conteudo })
+  body: JSON.stringify({ mapchat_id: mapchatId, conteudo })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       const data = JSON.parse(text);
       if (!data.success) throw new Error(data.message || 'Erro ao comentar');
       if (textarea) textarea.value = '';
-      await loadComments(gincanaId);
+  await loadComments(mapchatId);
       Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Comentário adicionado!', showConfirmButton: false, timer: 2000 });
     } catch (e) {
       Swal.fire({ icon: 'error', title: 'Erro', text: `Não foi possível adicionar seu comentário: ${e.message}`, confirmButtonColor: '#dc3545' });

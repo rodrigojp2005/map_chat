@@ -9,16 +9,16 @@ class GincanaLocal extends Model
 {
     use HasFactory;
     
-    protected $table = 'gincana_locais';
+    protected $table = 'mapchat_locais';
     
     protected $fillable = [
-        'gincana_id', 
+        'mapchat_id', 
         'latitude', 
         'longitude'
     ];
 
-    public function gincana()
+    public function mapchat()
     {
-        return $this->belongsTo(Gincana::class);
+        return $this->belongsTo(Mapchat::class);
     }
 }

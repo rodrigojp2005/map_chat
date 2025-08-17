@@ -10,7 +10,7 @@ class Comentario extends Model
     use HasFactory;
 
     protected $fillable = [
-        'gincana_id',
+    'mapchat_id',
         'user_id',
         'conteudo'
     ];
@@ -20,8 +20,8 @@ class Comentario extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function gincana()
+    public function mapchat()
     {
-        return $this->belongsTo(Gincana::class);
+        return $this->belongsTo(Mapchat::class);
     }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('participacoes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('gincana_id')->constrained()->onDelete('cascade');
+            $table->foreignId('mapchat_id')->constrained('mapchats')->onDelete('cascade');
             $table->integer('pontuacao')->default(0);
             $table->enum('status', ['em_andamento', 'concluida', 'abandonada'])->default('em_andamento');
             $table->timestamp('inicio_participacao')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamps();
             
             // Evitar participações duplicadas
-            $table->unique(['user_id', 'gincana_id']);
+            $table->unique(['user_id', 'mapchat_id']);
         });
     }
 

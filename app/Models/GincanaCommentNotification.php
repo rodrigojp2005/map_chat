@@ -9,9 +9,12 @@ class GincanaCommentNotification extends Model
 {
     use HasFactory;
 
+    // Explicit table to match the migration name
+    protected $table = 'mapchat_comment_notifications';
+
     protected $fillable = [
         'user_id',
-        'gincana_id',
+    'mapchat_id',
         'unread_count',
         'last_comentario_id',
         'last_preview',
@@ -23,8 +26,8 @@ class GincanaCommentNotification extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function gincana()
+    public function mapchat()
     {
-        return $this->belongsTo(Gincana::class);
+        return $this->belongsTo(Mapchat::class);
     }
 }

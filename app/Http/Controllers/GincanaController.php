@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Gincana;
+use App\Models\Mapchat;
 use App\Models\Participacao; // Adicionado para clareza
 use Illuminate\Support\Facades\Auth;
 
 class GincanaController extends Controller
 {
+    // Legacy controller no longer used; kept for reference during transition.
     /**
      * Exibe a página inicial com as gincanas públicas.
      * Corresponde à lógica anterior da função global getGameLocations().
@@ -20,13 +22,13 @@ class GincanaController extends Controller
         $locations = [];
         
         // Buscar apenas os locais principais das gincanas públicas
-        $gincanas = Gincana::where('privacidade', 'publica')->get();
-        foreach ($gincanas as $gincana) {
+    $gincanas = Mapchat::where('privacidade', 'publica')->get();
+    foreach ($gincanas as $gincana) {
             $locations[] = [
                 'lat' => (float) $gincana->latitude,
                 'lng' => (float) $gincana->longitude,
                 'name' => $gincana->nome,
-                'gincana_id' => $gincana->id,
+        'mapchat_id' => $gincana->id,
                 'contexto' => $gincana->contexto
             ];
         }

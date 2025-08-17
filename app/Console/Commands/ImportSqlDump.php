@@ -94,7 +94,7 @@ class ImportSqlDump extends Command
                 'personal_access_tokens',
                 'password_reset_tokens',
                 'comentarios',
-                'gincana_comment_notifications',
+                'mapchat_comment_notifications',
                 'gincana_locais',
                 'participacoes',
                 'gincanas',

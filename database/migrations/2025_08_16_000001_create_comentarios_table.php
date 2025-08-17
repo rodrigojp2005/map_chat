@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('comentarios', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('gincana_id')->constrained('gincanas')->cascadeOnDelete();
+            $table->foreignId('mapchat_id')->constrained('mapchats')->cascadeOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->text('conteudo');
             $table->timestamps();

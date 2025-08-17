@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="apple-touch-icon" href="/images/gincaneiros_logo.png">
+  <link rel="apple-touch-icon" href="/images/mapchat_logo.png">
   <link rel="manifest" href="/manifest.webmanifest?v=2025-08-13-1" crossorigin="use-credentials">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">

@@ -53,15 +53,15 @@ class User extends Authenticatable
         return $this->hasMany(Participacao::class);
     }
 
-    public function gincanasParticipando()
+    public function mapchatsParticipando()
     {
-        return $this->belongsToMany(Gincana::class, 'participacoes')
+        return $this->belongsToMany(Mapchat::class, 'participacoes', 'user_id', 'mapchat_id')
                     ->withPivot('pontuacao', 'status', 'tempo_total_segundos', 'locais_visitados')
                     ->withTimestamps();
     }
 
-    public function gincanasCriadas()
+    public function mapchatsCriados()
     {
-        return $this->hasMany(Gincana::class);
+        return $this->hasMany(Mapchat::class, 'user_id');
     }
 }
