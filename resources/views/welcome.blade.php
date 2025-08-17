@@ -26,7 +26,8 @@ function showStreetView(loc) {
         pov: { heading: 165, pitch: 0 },
         zoom: 1,
         disableDefaultUI: true,
-        showRoadLabels: false
+        showRoadLabels: false,
+        motionTracking: false // desabilita giroscópio/mobile motion
     });
     // Avatar no Street View
     const avatar = new google.maps.Marker({
@@ -59,7 +60,8 @@ function initMapChatHome() {
         zoom: 4,
         streetViewControl: false,
         mapTypeControl: false,
-        fullscreenControl: false
+        fullscreenControl: false,
+        gestureHandling: 'greedy' // permite mover o mapa com um dedo no mobile
     });
     markers = [];
     if (Array.isArray(MC_LOCATIONS)) {
