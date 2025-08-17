@@ -118,4 +118,28 @@ class MapchatController extends Controller
         ]];
     return view('mapchat.play', ['gincana' => $mapchat, 'locations' => $locations]);
     }
+
+    /**
+     * Lista de MapChats ativos (públicos) em JSON para o mapa lateral.
+     */
+    public function ativosJson()
+    {
+        $items = Mapchat::with('user')
+            ->where('privacidade', 'publica')
+            ->get()
+            ->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'nome' => $m->nome,
+                    'lat' => (float) $m->latitude,
+                    'lng' => (float) $m->longitude,
+                    'contexto' => $m->contexto,
+                    'duracao' => (int) $m->duracao,
+                    'criador' => $m->user ? $m->user->name : null,
+                    'created_at' => $m->created_at ? $m->created_at->toIso8601String() : null,
+                ];
+            });
+
+        return response()->json(['success' => true, 'data' => $items]);
+    }
 }

@@ -22,6 +22,11 @@
 
     <script>window.LaravelIsAuthenticated = {{ Auth::check() ? 'true' : 'false' }};</script>
   <script>window.APP_VAPID_KEY = '{{ env('VAPID_PUBLIC_KEY') }}';</script>
+    <script>
+      // Torna a chave do Google Maps disponível no front.
+      // Prioriza a config/services.php -> GOOGLE_MAPS_API_KEY; caso ausente, usa a mesma chave do StreetView (fallback).
+      window.GMAPS_API_KEY = 'AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c';
+    </script>
 
 </head>
 <body class="bg-gray-100 font-sans antialiased">

@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 // Rota principal - AGORA SEM O MIDDLEWARE 'guest' PARA FUNCIONAR PARA TODOS
 Route::get('/', [MapchatController::class, 'welcome'])->name('home');
+// Endpoint público para listar chats ativos em JSON (usado pelo mapa lateral)
+Route::get('/mapchat-ativos.json', [MapchatController::class, 'ativosJson'])->name('mapchat.ativos.json');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

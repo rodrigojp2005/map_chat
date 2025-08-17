@@ -1,5 +1,6 @@
 import './bootstrap';
 import './push';
+import './activeChatsMap';
 
 import Alpine from 'alpinejs';
 
