@@ -1,14 +1,13 @@
-# 🌍 Gincaneiros - Jogo de Geolocalização
+# 🌍 MapChat - Chats no Mapa e Street View
 
-Gincaneiros é um jogo de geolocalização inspirado no GeoGuessr, desenvolvido com Laravel 10. Os jogadores devem adivinhar sua localização no mundo usando apenas imagens do Google Street View.
+MapChat é uma aplicação de conversas geolocalizadas que usa Google Maps e Street View. Mantém o mapa e avatares clicáveis para abrir chats no próprio Street View.
 
 ## 🎯 Funcionalidades
 
-- **🎮 Jogo Principal**: Interface interativa com Google Street View e mapa
+- **🗺️ Mapa + Street View**: Interface com Google Street View e mapa
 - **👤 Sistema de Usuários**: Autenticação completa com Laravel Breeze
 - **🔑 Login Social**: Integração com Google OAuth
-- **🏆 Gincanas Personalizadas**: Criação de desafios customizados
-- **📊 Sistema de Rankings**: Acompanhe pontuações e progressos
+- (Em transição) Recursos de gincana e ranking serão removidos nesta branch
 - **📱 Interface Responsiva**: Funciona perfeitamente em mobile e desktop
 - **🎨 Design Moderno**: Interface limpa e intuitiva
 
@@ -35,8 +34,8 @@ Gincaneiros é um jogo de geolocalização inspirado no GeoGuessr, desenvolvido 
 
 1. **Clone o repositório**
 ```bash
-git clone https://github.com/rodrigojp2005/ginca10.git
-cd ginca10
+git clone https://github.com/rodrigojp2005/map_chat.git
+cd map_chat
 ```
 
 2. **Instale as dependências PHP**
@@ -61,7 +60,7 @@ Edite o arquivo `.env` com suas configurações:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=ginca10
+DB_DATABASE=map_chat
 DB_USERNAME=seu_usuario
 DB_PASSWORD=sua_senha
 ```
@@ -112,7 +111,7 @@ app/
 ├── Http/Controllers/
 │   ├── GincanaController.php    # Gerenciamento de gincanas
 │   ├── GameController.php       # Lógica do jogo
-│   ├── RankingController.php    # Sistema de rankings
+│   ├── (removido) RankingController.php    # Sistema de rankings (removido)
 │   └── Auth/SocialiteController.php # OAuth Google
 ├── Models/
 │   ├── User.php                 # Modelo de usuários
@@ -127,7 +126,7 @@ resources/
 ├── css/
 │   └── game.css               # Estilos do jogo
 └── js/
-    └── game.js                # Lógica JavaScript do jogo
+    └── (removido) game.js                # Lógica JavaScript do jogo (removido)
 ```
 
 ## 🗄️ Banco de Dados

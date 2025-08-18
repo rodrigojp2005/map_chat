@@ -35,7 +35,8 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
-  const targetUrl = '/gincana/' + (event.notification.data?.gincana_id || '');
+  const id = event.notification.data?.mapchat_id || event.notification.data?.gincana_id || '';
+  const targetUrl = '/mapchat/' + id;
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
       for (let client of windowClients) {

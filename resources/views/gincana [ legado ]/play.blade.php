@@ -2,14 +2,14 @@
 
 @section('title')
     @auth
-        Gincaneiros - Crie sua gincana!
+        MapChat - Conversas no mapa
     @else
-        Gincaneiros - Desafio do bem!
+        MapChat - Geochat
     @endauth
 @endsection
 
 @section('scripts')
-<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c&libraries=geometry&callback=initGame"></script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c&libraries=geometry"></script>
 @endsection
 
 @section('content')
@@ -49,35 +49,6 @@
             }
         </style>
     </div>
-
-    <!-- Slider do mapa -->
-    <div id="mapSlider" class="map-slider">
-        <!-- Header com título e botão fechar -->
-        <div class="map-slider-header">
-            <h3 class="map-slider-title">📍 Marque no mapa seu Palpite</h3>
-            <button id="closeMapBtn" class="close-btn">
-                <span>✕</span>
-                <span>Fechar</span>
-            </button>
-        </div>
-        
-        <!-- Instruções -->
-        <div id="mapInstructions" class="map-instructions">
-            <span class="map-instructions-icon">👆</span>
-            <span>Clique no mapa onde você acha que está!</span>
-        </div>
-        
-        <!-- Container do mapa -->
-        <div id="map" class="map-container"></div>
-        
-        <!-- Footer com controles -->
-        <div class="slider-controls">
-            <button id="confirmGuessBtn" class="btn btn-success" disabled>
-                🎯 Confirmar Palpite
-            </button>
-        </div>
-    </div>
-
     <!-- Popup de feedback -->
     <div id="overlay" class="overlay"></div>
     <div id="popup" class="popup">
@@ -88,9 +59,9 @@
 </div>
 
 <script>
-    // Passar os locais do backend para o JavaScript
-    window.gameLocations = @json($locations ?? []);
-    // Passar informação de autenticação para o JavaScript
+    // Dados do chat e autenticação, sem dependência do game.js
     window.isAuthenticated = @json(auth()->check());
+    // Se necessário, injetar dados de locais diretamente na página específica do chat.
+    window.mapchatLocations = @json($locations ?? []);
 </script>
 @endsection

@@ -28,15 +28,15 @@ class NewCommentNotification extends Notification implements ShouldQueue
 
     public function toWebPush(object $notifiable, object $notification = null): WebPushMessage
     {
-        $gincana = $this->comentario->gincana; // lazy load ok
+    $gincana = $this->comentario->mapchat; // lazy load ok
         $user = $this->comentario->user;
 
         return (new WebPushMessage)
-            ->title('Novo comentário em ' . ($gincana?->nome ?? 'uma gincana'))
+            ->title('Novo comentário em ' . ($gincana?->nome ?? 'um chat'))
             ->icon('/favicon.ico')
             ->body(($user?->name ?? 'Alguém') . ': ' . Str::limit($this->comentario->conteudo, 80))
             ->data([
-                'gincana_id' => $this->comentario->gincana_id,
+                'gincana_id' => $this->comentario->mapchat_id,
                 'comentario_id' => $this->comentario->id,
             ]);
     }

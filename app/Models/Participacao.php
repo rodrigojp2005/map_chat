@@ -13,7 +13,7 @@ class Participacao extends Model
 
     protected $fillable = [
         'user_id',
-        'gincana_id',
+    'mapchat_id',
         'pontuacao',
         'status',
         'inicio_participacao',
@@ -32,8 +32,8 @@ class Participacao extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function gincana()
+    public function mapchat()
     {
-        return $this->belongsTo(Gincana::class);
+        return $this->belongsTo(Mapchat::class);
     }
 }

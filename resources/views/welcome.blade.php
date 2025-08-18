@@ -1,91 +1,143 @@
 @extends('layouts.app')
-@section('title')
-    @auth
-        Gincaneiros - Crie sua gincana!
-    @else
-        Gincaneiros - Desafio do bem!
-    @endauth
-@endsection
+
+@section('title', 'MapChat - Conversas no mapa!')
 
 @section('content')
-<div class="game-container">
-    <!-- Informações do jogo -->
-    <div class="game-info">
-       @auth
-            <div><strong>Pontuação:</strong> <span id="score">1000</span></div>
-            <div><strong>Tentativas:</strong> <span id="attempts">5</span></div>
-            <div><strong>Rodada:</strong> <span id="round">1</span></div> 
-            <div><strong>Jogador:</strong> {{ auth()->user()->name }}</div>
-        @else
-            <div><strong>Tentativas:</strong> <span id="attempts">5</span></div>
-            <div><strong>Modo:</strong> Visitante</div>
-        @endauth
-    </div>
-
-    <!-- Container do Street View -->
-    <div id="streetview" class="street-view-container"></div>
-
-    <!-- Controles do jogo -->
-    <div class="game-controls">
-        <div style="display: flex; justify-content: center; align-items: center; width: 100%; padding: 10px 0;">
-            <button id="showMapBtn" class="btn" style="padding: 0; border: none; background: none; width: 100%; max-width: 220px;">
-            <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjFnOGtlcnl5dmpveGJydTNxb2twNGxudXB3Nm8wMjNlMnI2bDBrZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/PrfN2Hqu24ln2eAaOS/giphy.gif" alt="JOGAR" style="width: 100%; height: auto; max-width: 180px; max-height: 120px; display: block; margin: 0 auto;">
-            </button>
-        </div>
-        <style>
-            @media (max-width: 600px) {
-            #showMapBtn img {
-                max-width: 100%;
-                max-height: 80px;
-            }
-            .game-controls > div {
-                padding: 0 5px;
-            }
-            }
-        </style>
-    </div>
-
-    <!-- Slider do mapa -->
-    <div id="mapSlider" class="map-slider">
-        <!-- Header com título e botão fechar -->
-        <div class="map-slider-header">
-            <h3 class="map-slider-title">📍 Marque no mapa seu Palpite</h3>
-            <button id="closeMapBtn" class="close-btn">
-                <span>✕</span>
-                <span>Fechar</span>
-            </button>
-        </div>
-        
-        <!-- Instruções -->
-        <div id="mapInstructions" class="map-instructions">
-            <span class="map-instructions-icon">👆</span>
-            <span>Clique no mapa onde você acha que está!</span>
-        </div>
-        
-        <!-- Container do mapa -->
-        <div id="map" class="map-container"></div>
-        
-        <!-- Footer com controles -->
-        <div class="slider-controls">
-            <button id="confirmGuessBtn" class="btn btn-success" disabled>
-                🎯 Confirmar Palpite
-            </button>
-        </div>
-    </div>
-
-    <!-- Popup de feedback -->
-    <div id="overlay" class="overlay"></div>
-    <div id="popup" class="popup">
-        <h3 id="popupTitle">Resultado</h3>
-        <p id="popupMessage"></p>
-        <button id="continueBtn" class="btn">Continuar</button>
-    </div>
+<div class="relative w-full" style="height: calc(100vh - 120px);">
+    <div id="map" class="absolute left-0 top-0" style="width: 100%; height: 100%; z-index: 1;"></div>
+    <div id="streetview" class="absolute left-0 top-0" style="width: 100%; height: 100%; display: none; z-index: 2;"></div>
+    <button id="btn-voltar-mapa" class="px-4 py-2 focus:outline-none absolute top-5 left-5" style="z-index: 10; display: none;">
+        <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3JmOW9vODF4OGJqMHpxNWJ4M3h3MXhncXF6NnZ6eHF6dnlucmwweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/EOIQArrlGT8SeIvYma/giphy.gif" alt="Alternar para o mapa" style="width: 72px; height: 72px;">
+    </button>
+    <button id="btn-voltar-streetview" class="px-2 py-2 focus:outline-none absolute " style="z-index: 10; display: none; left: 90px;">
+        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc28zbjI2dTRoaG4wZHRnMWhsNGZqYTNzMzVuNmNpN2M3NXVhc2RqZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/S89ccIhj3e0xyMcLOp/giphy.gif" alt="Voltar para o Street View" style="width: 96px; height: 72px;">
+    </button>
 </div>
 
+<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
 <script>
-    // Passar os locais do backend para o JavaScript
-    window.gameLocations = @json($locations ?? []);
-    // Passar informação de autenticação para o JavaScript
-    window.isAuthenticated = @json(auth()->check());
+window.isAuthenticated = @json(auth()->check());
+const MC_LOCATIONS = @json($locations ?? []);
+
+let map, markers = [], panorama, markerCluster;
+let lastStreetViewLoc = null;
+
+function showStreetView(loc) {
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('streetview').style.display = 'block';
+    document.getElementById('btn-voltar-mapa').style.display = 'block';
+    const pos = { lat: Number(loc.lat), lng: Number(loc.lng) };
+    panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
+        position: pos,
+        pov: { heading: 0, pitch: 0 }, // heading será ajustado após carregar
+        zoom: 1,
+        disableDefaultUI: true,
+        showRoadLabels: false,
+        motionTracking: false // desabilita giroscópio/mobile motion
+    });
+    // Avatar no Street View
+    const avatarUrl = loc.avatar
+        ? (loc.avatar.startsWith('http') ? loc.avatar : 'https://media4.giphy.com/media/' + loc.avatar)
+        : 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif';
+    const avatar = new google.maps.Marker({
+        position: pos,
+        map: panorama,
+        icon: {
+            url: avatarUrl,
+            scaledSize: new google.maps.Size(60, 80),
+            anchor: new google.maps.Point(30, 80)
+        },
+        title: loc.name || 'Local'
+    });
+    avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
+
+    // Ajusta o POV para olhar para o avatar assim que o panorama carregar
+    panorama.addListener('position_changed', function () {
+        const panoPos = panorama.getPosition();
+        if (!panoPos) return;
+        // Calcula heading entre a posição da câmera e o avatar
+        const heading = google.maps.geometry.spherical.computeHeading(panoPos, pos);
+        panorama.setPov({ heading: heading, pitch: 0 });
+    });
+    lastStreetViewLoc = loc;
+    document.getElementById('btn-voltar-streetview').style.display = 'none';
+}
+
+function initMapChatHome() {
+    if (!window.google || !window.google.maps) return;
+    // Se houver pelo menos um local, já abre o Street View do primeiro
+    if (Array.isArray(MC_LOCATIONS) && MC_LOCATIONS.length > 0 && !MC_LOCATIONS[0].no_gincana) {
+        showStreetView(MC_LOCATIONS[0]);
+    } else {
+        // Se não houver locais, mostra o mapa vazio
+        document.getElementById('map').style.display = 'block';
+        document.getElementById('streetview').style.display = 'none';
+        document.getElementById('btn-voltar-mapa').style.display = 'none';
+    }
+    // Inicializa o mapa (para quando clicar em "voltar")
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: -14.2350, lng: -51.9253 },
+        zoom: 4,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        gestureHandling: 'greedy' // permite mover o mapa com um dedo no mobile
+    });
+    markers = [];
+    if (Array.isArray(MC_LOCATIONS)) {
+        MC_LOCATIONS.forEach(loc => {
+            if (loc.no_gincana) return;
+            const markerUrl = loc.avatar
+                ? (loc.avatar.startsWith('http') ? loc.avatar : 'https://media4.giphy.com/media/' + loc.avatar)
+                : 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif';
+            const marker = new google.maps.Marker({
+                position: { lat: Number(loc.lat), lng: Number(loc.lng) },
+                title: loc.name || 'Local',
+                icon: {
+                    url: markerUrl,
+                    scaledSize: new google.maps.Size(50, 65),
+                    anchor: new google.maps.Point(25, 65)
+                }
+            });
+            marker.addListener('click', () => {
+                // Abre o modal com link para Street View
+                window.MapChat && window.MapChat.showPostModal(loc, { modo: 'mapa' });
+            });
+            markers.push(marker);
+        });
+        // Agrupamento de marcadores (clusters)
+        if (window.markerClusterer && window.markerClusterer.MarkerClusterer) {
+            markerCluster = new markerClusterer.MarkerClusterer({
+                map,
+                markers
+            });
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const btnVoltarMapa = document.getElementById('btn-voltar-mapa');
+    const btnVoltarStreet = document.getElementById('btn-voltar-streetview');
+    btnVoltarMapa.addEventListener('click', function () {
+        document.getElementById('map').style.display = 'block';
+        document.getElementById('streetview').style.display = 'none';
+        btnVoltarMapa.style.display = 'none';
+        document.getElementById('btn-voltar-streetview').style.display = 'none';
+        if (lastStreetViewLoc) btnVoltarStreet.style.display = 'block';
+        if (panorama) panorama.setVisible(false);
+    });
+    btnVoltarStreet.addEventListener('click', function () {
+        if (lastStreetViewLoc) {
+            showStreetView(lastStreetViewLoc);
+            btnVoltarStreet.style.display = 'none';
+        }
+    });
+});
 </script>
+
+
+@section('scripts')
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c') }}&libraries=geometry&callback=initMapChatHome"></script>
+@endsection
+
 @endsection

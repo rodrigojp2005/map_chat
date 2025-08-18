@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gincana_locais', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('gincana_id')->constrained()->onDelete('cascade');
-            $table->decimal('latitude', 10, 8);
-            $table->decimal('longitude', 11, 8);
-            $table->timestamps();
+        Schema::table('mapchats', function (Blueprint $table) {
+            $table->string('duracao')->change();
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('gincana_locais');
+        Schema::table('mapchats', function (Blueprint $table) {
+            $table->integer('duracao')->change();
+        });
     }
 };

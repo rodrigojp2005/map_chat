@@ -3,7 +3,7 @@
 @section('content')
 <div id="form_container" style="max-width: 600px; margin: 24px auto 0 auto; padding: 28px 24px 22px 24px; background: #eafaf1; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
     <h2 style="margin-bottom: 22px; text-align: center; font-weight: 700; color: #198754; font-size: 2rem; letter-spacing: 0.5px;">Editar Gincana</h2>
-    <form id="form-editar-gincana" method="POST" action="{{ route('gincana.update', $gincana->id) }}">
+    <form id="form-editar-gincana" method="POST" action="{{ route('mapchat.update', $gincana->id) }}">
         @csrf
         @method('PUT')
         <!-- Nome da Gincana -->
@@ -64,7 +64,7 @@
             <button type="submit" style="padding: 10px 28px; background-color: #198754; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 1.08em;">
                 Salvar Alterações
             </button>
-            <a href="{{ route('gincana.index') }}" style="padding: 10px 28px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: 600; font-size: 1.08em;">
+            <a href="{{ route('mapchat.index') }}" style="padding: 10px 28px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; display: inline-block; font-weight: 600; font-size: 1.08em;">
                 Cancelar
             </a>
         </div>
@@ -74,8 +74,8 @@
             <div style="background:#fff; border-radius:10px; padding:28px 22px; max-width:340px; width:90vw; box-shadow:0 2px 12px rgba(0,0,0,0.12); text-align:center;">
                 <h3 style="font-size:1.3em; font-weight:700; color:#198754; margin-bottom:18px;">Compartilhe com amigos!</h3>
                 <div style="display:flex; flex-direction:column; gap:14px;">
-                    <a href="https://wa.me/?text={{ urlencode(route('gincana.show', $gincana->id)) }}" target="_blank" style="background:#25D366; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">WhatsApp</a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('gincana.show', $gincana->id)) }}" target="_blank" style="background:#4267B2; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">Facebook</a>
+                    <a href="https://wa.me/?text={{ urlencode(route('mapchat.show', $gincana->id)) }}" target="_blank" style="background:#25D366; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">WhatsApp</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('mapchat.show', $gincana->id)) }}" target="_blank" style="background:#4267B2; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">Facebook</a>
                     <button onclick="copiarLinkGincana()" style="background:#6c757d; color:#fff; padding:10px; border-radius:6px; font-weight:600; border:none;">Copiar Link</button>
                 </div>
                 <button onclick="fecharModalCompartilhar()" style="margin-top:18px; background:#dc3545; color:#fff; padding:8px 18px; border-radius:6px; border:none; font-weight:600;">Fechar</button>
@@ -90,7 +90,7 @@
                 document.getElementById('modal-compartilhar').style.display = 'none';
             }
             function copiarLinkGincana() {
-                const link = "{{ route('gincana.show', $gincana->id) }}";
+                const link = "{{ route('mapchat.show', $gincana->id) }}";
                 navigator.clipboard.writeText(link);
                 alert('Link copiado!');
             }

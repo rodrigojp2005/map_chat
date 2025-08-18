@@ -10,16 +10,16 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        // Lista agregada por gincana
-        $items = \App\Models\GincanaCommentNotification::with('gincana:id,nome')
+    // Lista agregada por sala (mapchat). Mantemos as chaves "gincana_*" por compatibilidade no front-end.
+    $items = \App\Models\GincanaCommentNotification::with('mapchat:id,nome')
             ->where('user_id', $user->id)
             ->where('unread_count', '>', 0)
             ->orderByDesc('updated_at')
             ->get()
             ->map(function($n){
                 return [
-                    'gincana_id' => $n->gincana_id,
-                    'gincana_nome' => $n->gincana?->nome,
+            'gincana_id' => $n->mapchat_id,
+            'gincana_nome' => $n->mapchat?->nome,
                     'unread_count' => (int)$n->unread_count,
                     'last_preview' => $n->last_preview,
                     'last_author_name' => $n->last_author_name,
@@ -42,7 +42,7 @@ class NotificationController extends Controller
         $user = Auth::user();
         if ($request->filled('gincana_id')) {
             \App\Models\GincanaCommentNotification::where('user_id', $user->id)
-                ->where('gincana_id', $request->integer('gincana_id'))
+                ->where('mapchat_id', $request->integer('gincana_id'))
                 ->update(['unread_count' => 0]);
         } else {
             \App\Models\GincanaCommentNotification::where('user_id', $user->id)

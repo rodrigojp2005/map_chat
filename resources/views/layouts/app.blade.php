@@ -4,24 +4,29 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', config('app.name', 'Gincaneiros - Jogo de Localização'))</title>
+  <title>@yield('title', config('app.name', 'MapChat'))</title>
     <meta name="theme-color" content="#2563eb" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
-  <link rel="apple-touch-icon" href="/images/gincaneiros_logo.png">
+  <link rel="apple-touch-icon" href="/images/mapchat_logo.png">
   <link rel="manifest" href="/manifest.webmanifest?v=2025-08-13-1" crossorigin="use-credentials">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600&display=swap" rel="stylesheet" />
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    @vite(['resources/css/app.css', 'resources/css/game.css', 'resources/js/app.js', 'resources/js/game.js'])
+  @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/mapchat.js'])
     @stack('styles')
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c&libraries=geometry&callback=initGame"></script>
+  <!-- Maps API removida do layout global; carregar somente em páginas que precisarem. -->
 
     <script>window.LaravelIsAuthenticated = {{ Auth::check() ? 'true' : 'false' }};</script>
   <script>window.APP_VAPID_KEY = '{{ env('VAPID_PUBLIC_KEY') }}';</script>
+    <script>
+      // Torna a chave do Google Maps disponível no front.
+      // Prioriza a config/services.php -> GOOGLE_MAPS_API_KEY; caso ausente, usa a mesma chave do StreetView (fallback).
+      window.GMAPS_API_KEY = 'AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c';
+    </script>
 
 </head>
 <body class="bg-gray-100 font-sans antialiased">
@@ -61,7 +66,7 @@
   }
 </style>
 
-<button id="install-btn">📲 Instalar Gincaneiros</button>
+<button id="install-btn">📲 Instalar MapChat</button>
 
 <script>
   let deferredPrompt;

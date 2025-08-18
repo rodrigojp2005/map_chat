@@ -1,7 +1,7 @@
 @extends('layouts.app')
 @section('content')
 <div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-blue-700 mb-6">Detalhes da Gincana</h1>
+    <h1 class="text-3xl font-bold text-blue-700 mb-6">Detalhes da Sala</h1>
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
         <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ $gincana->nome }}</h2>
         <p class="text-gray-600 mb-2">{{ $gincana->contexto }}</p>
@@ -35,8 +35,8 @@
         <div style="background:#fff; border-radius:10px; padding:28px 22px; max-width:340px; width:90vw; box-shadow:0 2px 12px rgba(0,0,0,0.12); text-align:center;">
             <h3 style="font-size:1.3em; font-weight:700; color:#198754; margin-bottom:18px;">Compartilhe com amigos!</h3>
             <div style="display:flex; flex-direction:column; gap:14px;">
-                <a href="https://wa.me/?text={{ urlencode(route('gincana.show', $gincana->id)) }}" target="_blank" style="background:#25D366; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">WhatsApp</a>
-                <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('gincana.show', $gincana->id)) }}" target="_blank" style="background:#4267B2; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">Facebook</a>
+                <a href="https://wa.me/?text={{ urlencode(route('mapchat.show', $gincana->id)) }}" target="_blank" style="background:#25D366; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">WhatsApp</a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('mapchat.show', $gincana->id)) }}" target="_blank" style="background:#4267B2; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">Facebook</a>
                 <button onclick="copiarLinkGincana()" style="background:#6c757d; color:#fff; padding:10px; border-radius:6px; font-weight:600; border:none;">Copiar Link</button>
             </div>
             <button onclick="fecharModalCompartilhar()" style="margin-top:18px; background:#dc3545; color:#fff; padding:8px 18px; border-radius:6px; border:none; font-weight:600;">Fechar</button>
@@ -51,7 +51,7 @@
             document.getElementById('modal-compartilhar').style.display = 'none';
         }
         function copiarLinkGincana() {
-            const link = "{{ route('gincana.show', $gincana->id) }}";
+            const link = "{{ route('mapchat.show', $gincana->id) }}";
             navigator.clipboard.writeText(link);
             alert('Link copiado!');
         }

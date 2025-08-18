@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Gincana;
+use App\Models\Mapchat;
 use App\Models\Participacao; // Adicionado para clareza
 use Illuminate\Support\Facades\Auth;
 
 class GincanaController extends Controller
 {
+    // Legacy controller no longer used; kept for reference during transition.
     /**
      * Exibe a página inicial com as gincanas públicas.
      * Corresponde à lógica anterior da função global getGameLocations().
@@ -20,13 +22,13 @@ class GincanaController extends Controller
         $locations = [];
         
         // Buscar apenas os locais principais das gincanas públicas
-        $gincanas = Gincana::where('privacidade', 'publica')->get();
-        foreach ($gincanas as $gincana) {
+    $gincanas = Mapchat::where('privacidade', 'publica')->get();
+    foreach ($gincanas as $gincana) {
             $locations[] = [
                 'lat' => (float) $gincana->latitude,
                 'lng' => (float) $gincana->longitude,
                 'name' => $gincana->nome,
-                'gincana_id' => $gincana->id,
+        'mapchat_id' => $gincana->id,
                 'contexto' => $gincana->contexto
             ];
         }
@@ -105,44 +107,17 @@ class GincanaController extends Controller
     public function show(Gincana $gincana)
     {
         $user = auth()->user();
-        $jaJogou = false;
-        
         if ($user) {
             // Ao entrar na página da gincana, zera contador agregado dessa gincana
             \App\Models\GincanaCommentNotification::where('user_id', $user->id)
                 ->where('gincana_id', $gincana->id)
                 ->update(['unread_count' => 0]);
-            $jaJogou = Participacao::where('user_id', $user->id) // Usando o 'use' adicionado
-                ->where('gincana_id', $gincana->id)
-                ->exists();
         }
-        
-        if ($jaJogou) {
-            return view('gincana.ja_jogada', compact('gincana'));
-        }
-        
+        // Exibe sempre a view padrão
         return view('gincana.show', compact('gincana'));
     }
 
-    // Lista as gincanas que o usuário jogou (participou)
-    public function jogadas()
-    {
-        $userId = Auth::id();
-        
-        // Método mais direto: buscar participações e então carregar as gincanas
-        $participacoes = Participacao::where('user_id', $userId) // Usando o 'use' adicionado
-            ->with(['gincana.user'])
-            ->get();
-        
-        // Agrupar por gincana (caso o usuário tenha jogado a mesma gincana várias vezes)
-        $gincanasJogadas = $participacoes->groupBy('gincana_id')->map(function($group) {
-            $gincana = $group->first()->gincana;
-            $gincana->participacoes = $group; // Adicionar as participações
-            return $gincana;
-        })->values();
-
-        return view('gincana.jogadas', compact('gincanasJogadas'));
-    }
+    // Jogadas removido
 
     // Lista gincanas disponíveis para jogar
     public function disponiveis()
@@ -162,18 +137,11 @@ class GincanaController extends Controller
     public function jogar(Gincana $gincana)
     {
         $user = auth()->user();
-        $jaJogou = false;
         if ($user) {
             // Ao entrar em jogar, também zera contador
             \App\Models\GincanaCommentNotification::where('user_id', $user->id)
                 ->where('gincana_id', $gincana->id)
                 ->update(['unread_count' => 0]);
-            $jaJogou = Participacao::where('user_id', $user->id) // Usando o 'use' adicionado
-                ->where('gincana_id', $gincana->id)
-                ->exists();
-        }
-        if ($jaJogou) {
-            return view('gincana.ja_jogada', compact('gincana'));
         }
 
         // Criar array de locais da gincana

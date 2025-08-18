@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Comentario;
-use App\Models\Gincana;
+use App\Models\Mapchat;
 use App\Notifications\NewCommentNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,15 +11,15 @@ use Illuminate\Support\Facades\Log;
 
 class ComentarioController extends Controller
 {
-    public function index($gincana_id)
+    public function index($mapchat_id)
     {
         try {
             // Primeiro verificar se é um número válido
-            if (!is_numeric($gincana_id)) {
+            if (!is_numeric($mapchat_id)) {
                 return response()->json(['error' => 'ID inválido'], 400);
             }
             
-            $comentarios = Comentario::where('gincana_id', $gincana_id)
+            $comentarios = Comentario::where('mapchat_id', $mapchat_id)
                 ->with('user:id,name')  // Carregar apenas id e name do usuário
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -37,7 +37,7 @@ class ComentarioController extends Controller
         try {
             // Validação básica
             $validated = $request->validate([
-                'gincana_id' => 'required|integer',
+                'mapchat_id' => 'required|integer',
                 'conteudo' => 'required|string|max:500'
             ]);
 
@@ -45,7 +45,7 @@ class ComentarioController extends Controller
             $userId = Auth::check() ? Auth::id() : 1;
 
             $comentario = Comentario::create([
-                'gincana_id' => $validated['gincana_id'],
+                'mapchat_id' => $validated['mapchat_id'],
                 'user_id' => $userId,
                 'conteudo' => $validated['conteudo']
             ]);
@@ -54,11 +54,11 @@ class ComentarioController extends Controller
 
             // Notificar criador e quem já comentou; atualizar contador agregado por gincana
             try {
-                $gincana = Gincana::find($comentario->gincana_id);
-                if ($gincana) {
-                    $criadorId = $gincana->user_id;
-                    // quem comentou antes nesta gincana (exclui o comentário atual e o autor atual)
-                    $comentouAntesIds = Comentario::where('gincana_id', $gincana->id)
+                $mapchat = Mapchat::find($comentario->mapchat_id);
+                if ($mapchat) {
+                    $criadorId = $mapchat->user_id;
+                    // quem comentou antes neste mapchat (exclui o comentário atual e o autor atual)
+                    $comentouAntesIds = Comentario::where('mapchat_id', $mapchat->id)
                         ->where('id', '!=', $comentario->id)
                         ->pluck('user_id')
                         ->unique()
@@ -71,7 +71,7 @@ class ComentarioController extends Controller
                     }
                     $targets = $targets->merge($comentouAntesIds)->unique();
 
-                    if ($targets->isNotEmpty()) {
+            if ($targets->isNotEmpty()) {
                         $notificaveis = \App\Models\User::whereIn('id', $targets)->get();
                         // Enviar push leve e atualizar contador agregado
                         foreach ($notificaveis as $u) {
@@ -79,9 +79,9 @@ class ComentarioController extends Controller
                             $u->notify(new NewCommentNotification($comentario));
 
                             // Atualização do contador agregado
-                            \App\Models\GincanaCommentNotification::query()
+                \App\Models\GincanaCommentNotification::query()
                                 ->updateOrCreate(
-                                    ['user_id' => $u->id, 'gincana_id' => $gincana->id],
+                    ['user_id' => $u->id, 'mapchat_id' => $mapchat->id],
                                     [
                                         'last_comentario_id' => $comentario->id,
                                         'last_author_name' => $comentario->user?->name,
@@ -89,9 +89,9 @@ class ComentarioController extends Controller
                                     ]
                                 );
                             // incrementar sem condições de corrida relevantes (operação simples)
-                            \DB::table('gincana_comment_notifications')
+                \DB::table('mapchat_comment_notifications')
                                 ->where('user_id', $u->id)
-                                ->where('gincana_id', $gincana->id)
+                ->where('mapchat_id', $mapchat->id)
                                 ->increment('unread_count');
                         }
                     }

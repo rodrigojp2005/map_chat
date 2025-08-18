@@ -19,7 +19,7 @@ class RouteServiceProvider extends ServiceProvider
      */
   //  public const HOME = '/';
 
-    public const HOME = '/gincana/disponiveis';
+    public const HOME = '/mapchat/disponiveis';
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.

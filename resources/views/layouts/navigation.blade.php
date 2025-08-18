@@ -3,13 +3,13 @@
         <!-- Logo / Brand à esquerda -->
         <div class="flex items-center min-w-0">
             <a href="{{ route('home') }}" class="flex items-center gap-2 font-bold text-lg md:text-xl text-gray-800 hover:text-blue-600 whitespace-nowrap">
-                <img src="/images/gincaneiros_logo.png" alt="Gincaneiros" class="h-7 w-7 md:h-8 md:w-8 object-contain" loading="lazy" />
-                <span class="tracking-tight">Gincaneiros</span>
+                <img src="/images/gincaneiros_logo.png" alt="MapChat" class="h-7 w-7 md:h-8 md:w-8 object-contain" loading="lazy" />
+                <span class="tracking-tight">MapChat</span>
             </a>
         </div>
 
         <!-- Ações à direita (mobile + desktop) -->
-        <div class="flex items-center gap-2 md:gap-4 ml-4">
+    <div class="flex items-center gap-2 md:gap-4 ml-4">
             @auth
                 <!-- Sino de notificações (sempre visível) -->
                 <div class="relative">
@@ -31,6 +31,7 @@
                     </div>
                 </div>
 
+                <!-- Navegação Desktop (md+) -->
                 <!-- Avatar Emoji / Menu usuário -->
                 <div class="relative">
                     <button id="user-menu-btn" class="p-2 rounded-full hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 text-xl" aria-haspopup="true" aria-expanded="false">🙂</button>
@@ -50,12 +51,28 @@
                         </ul>
                     </div>
                 </div>
-                <!-- Links informativos (recolhidos) -->
-                <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Como Jogar</a>
+                <a href="{{ route('home') }}" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md {{ request()->routeIs('home') ? 'text-gray-900 bg-gray-100 font-medium' : '' }}">Mapa</a>
+
+                <!-- Chats submenu (Desktop) -->
+                <div class="relative hidden md:block">
+                    <button id="chats-menu-btn" class="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Chats</button>
+                    <div id="chats-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white border border-gray-200 shadow-lg rounded-lg text-sm z-50">
+                        <a href="{{ route('mapchat.create') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.create') || request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">Criar Sala</a>
+                        <a href="{{ route('mapchat.index') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.index') || request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">Minhas Salas</a>
+                        <!-- Jogadas removido -->
+                        <a href="{{ route('mapchat.disponiveis') }}" class="block px-4 py-2 hover:bg-gray-50 {{ request()->routeIs('mapchat.disponiveis') || request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">Salas Disponíveis</a>
+                    </div>
+                </div>
+
+                <!-- Rankings removidos -->
+
+              
+                <!-- Links informativos (Desktop) -->
+                <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Como Funciona</a>
                 <a href="#" onclick="event.preventDefault(); mostrarSobreJogo()" class="hidden md:inline-block px-3 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md">Sobre</a>
             @else
                 <div class="hidden md:flex items-center gap-2">
-                    <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="px-3 py-1 text-sm text-gray-600">Como Jogar</a>
+                    <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="px-3 py-1 text-sm text-gray-600">Como Funciona</a>
                     <a href="#" onclick="event.preventDefault(); mostrarSobreJogo()" class="px-3 py-1 text-sm text-gray-600">Sobre</a>
                     <a href="{{ route('login') }}" class="px-3 py-1 text-sm font-medium text-blue-600 hover:underline">Entrar</a>
                     @if (Route::has('register'))
@@ -86,39 +103,28 @@
                 @auth
                 <div class="p-4 space-y-4">
                     <a href="{{ route('home') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('home') ? 'text-gray-900 bg-gray-100 font-medium' : '' }}">
-                        Jogar
+                        Mapa
                     </a>
                     
-                    <!-- Gincanas section -->
+                    <!-- Chats section -->
                     <div class="space-y-2">
-                        <p class="text-sm font-medium text-gray-500 px-3">Gincanas</p>
-                        <a href="{{ route('gincana.create') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Criar Gincana
+                        <p class="text-sm font-medium text-gray-500 px-3">Chats</p>
+                        <a href="{{ route('mapchat.create') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('mapchat.create') || request()->routeIs('gincana.create') ? 'text-gray-900 bg-gray-100' : '' }}">
+                            Criar Sala
                         </a>
-                        <a href="{{ route('gincana.index') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Gincanas que Criei
+                        <a href="{{ route('mapchat.index') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('mapchat.index') || request()->routeIs('gincana.index') ? 'text-gray-900 bg-gray-100' : '' }}">
+                            Minhas Salas
                         </a>
-                        <a href="{{ route('gincana.jogadas') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.jogadas') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Gincanas que Joguei
-                        </a>
-                        <a href="{{ route('gincana.disponiveis') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            Gincanas Disponíveis
+                        <!-- Jogadas removido do mobile -->
+                        <a href="{{ route('mapchat.disponiveis') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('mapchat.disponiveis') || request()->routeIs('gincana.disponiveis') ? 'text-gray-900 bg-gray-100' : '' }}">
+                            Salas Disponíveis
                         </a>
                     </div>
 
-                    <!-- Rankings section -->
-                    <div class="space-y-2">
-                        <p class="text-sm font-medium text-gray-500 px-3">🏆 Rankings</p>
-                        <a href="{{ route('ranking.geral') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('ranking.geral') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            🌟 Ranking Geral
-                        </a>
-                        <a href="{{ route('ranking.index') }}" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-6 py-2 rounded-md transition-all duration-200 {{ request()->routeIs('ranking.index') ? 'text-gray-900 bg-gray-100' : '' }}">
-                            📊 Por Gincana
-                        </a>
-                    </div>
+                    <!-- Rankings removidos do mobile -->
 
                     <a href="#" onclick="event.preventDefault(); mostrarComoJogar()" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-md transition-all duration-200">
-                        Como Jogar
+                        Como Funciona
                     </a>
                     <a href="#" onclick="event.preventDefault(); mostrarSobreJogo()" class="block text-gray-600 hover:text-gray-800 hover:bg-gray-100 px-3 py-2 rounded-md transition-all duration-200">
                         Sobre
@@ -161,18 +167,15 @@
     // Funções SweetAlert - funcionam para todos os usuários
     function mostrarComoJogar() {
         Swal.fire({
-            title: 'Como Jogar',
+            title: 'Como Funciona',
             html: `
                 <div class="text-left">
-                    <h4 class="font-bold mb-2">🎯 Objetivo do Jogo:</h4>
-                    <p class="mb-3">Adivinhe onde está apenas pela imagem do Street View.</p>
-
-                    <h4 class="font-bold mb-2">🎮 Como Jogar</h4>
+                    <h4 class="font-bold mb-2">💬 Conversas no Mapa</h4>
                     <ul class="list-disc list-inside mb-3 space-y-1">
-                        <li>Analise a imagem e busque por pistas</li>
-                        <li>Clique em Start e marque o local no mapa</li>
-                        <li>Confirme o Palpite, você tem 5 tentativas</li>
-                        <li>Caso erre, leia a dica da distância e direção!</li>
+                        <li>Abra o mapa e o Street View</li>
+                        <li>Clique em avatares no Street View para abrir o chat</li>
+                        <li>Converse com pessoas associadas àquela localização</li>
+                        <li>Você pode criar salas e convidar amigos</li>
                     </ul>
                 </div>
             `,
@@ -185,17 +188,17 @@
 
     function mostrarSobreJogo() {
         Swal.fire({
-            title: 'Sobre o Gincaneiros',
+            title: 'Sobre o MapChat',
             html: `
                 <div class="text-left">
-                    <h4 class="font-bold mb-2">🌍 O que é o Gincaneiros?</h4>
-                    <p class="mb-3">É uma brincadeira de desafios para testar a memória afetiva dos seus amigos e parentes ou ainda mostrar para eles lugares que você já visitou ou quer visitar.</p>             
-                    <h4 class="font-bold mb-2">🎯 Crie sua Gincana</h4>
+                    <h4 class="font-bold mb-2">🌍 O que é o MapChat?</h4>
+                    <p class="mb-3">É um app de chats geolocalizados: converse no mapa e dentro do Street View com avatares clicáveis.</p>
+                    <h4 class="font-bold mb-2">🗺️ Recursos</h4>
                     <ul class="list-disc list-inside mb-3 space-y-1">
-                        <li><strong>Infância:</strong> Desafie alguém se lembrar de determinado local</li>
-                        <li><strong>Viagens:</strong> Desafie alguém adivinhar o local que você quer conhecer</li>
+                        <li>Mapa + Street View</li>
+                        <li>Avatares clicáveis que abrem o chat</li>
+                        <li>Salas públicas ou privadas</li>
                     </ul>
-                    <h4 class="font-bold mb-2">🔍 Procure gicanas de amigos ou aleatórias.</h4>
                     <h4 class="font-bold mb-2"><br>📞 Contato (zap): 53 981056952</h4>
                 </div>
             `,
@@ -219,6 +222,8 @@
         const reloadBtn = document.getElementById('notif-reload');
         const userBtn = document.getElementById('user-menu-btn');
         const userDropdown = document.getElementById('user-menu-dropdown');
+    const chatsBtn = document.getElementById('chats-menu-btn');
+    const chatsDropdown = document.getElementById('chats-menu-dropdown');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         const mobileMenuPanel = document.getElementById('mobile-menu-panel');
@@ -263,7 +268,7 @@
                                                                 try {
                                                                     await fetch('/notifications/read', {method:'POST', headers:{'Content-Type':'application/json','X-CSRF-TOKEN':document.querySelector('meta[name=csrf-token]').content}, body: JSON.stringify({gincana_id:n.gincana_id})});
                                                                 } catch(e){}
-                                                                window.location.href = '/gincana/' + n.gincana_id;
+                                                                window.location.href = '/mapchat/' + n.gincana_id;
                                                                 return;
                                                         }
                                                 });
@@ -294,6 +299,13 @@
             } else if(userDropdown && !userDropdown.contains(e.target) && !userBtn.contains(e.target)) {
                 hide(userDropdown);
             }
+            // Chats menu (desktop)
+            if(chatsBtn && chatsBtn.contains(e.target)) {
+                toggle(chatsDropdown);
+            } else if(chatsDropdown && !chatsDropdown.contains(e.target) && !(chatsBtn && chatsBtn.contains(e.target))) {
+                hide(chatsDropdown);
+            }
+            // Rankings removidos
         });
 
                 if(window.LaravelIsAuthenticated){
