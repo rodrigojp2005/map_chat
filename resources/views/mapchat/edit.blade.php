@@ -10,16 +10,50 @@
             <label for="nome" style="display: block; font-weight: bold; margin-bottom: 6px;">Nome</label>
             <input type="text" id="nome" name="nome" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" value="{{ old('nome', $gincana->nome) }}">
         </div>
-        <!-- Duração -->
+        <!-- Avatar -->
         <div style="margin-bottom: 16px;">
-            <label for="duracao" style="display: block; font-weight: bold; margin-bottom: 6px;">Duração (em horas)</label>
-            <select id="duracao" name="duracao" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
-                <option value="">Selecione a duração</option>
-                <option value="24" {{ $gincana->duracao == 24 ? 'selected' : '' }}>24 horas</option>
-                <option value="48" {{ $gincana->duracao == 48 ? 'selected' : '' }}>48 horas</option>
-                <option value="72" {{ $gincana->duracao == 72 ? 'selected' : '' }}>72 horas</option>
-            </select>
+            <label for="avatar" style="display: block; font-weight: bold; margin-bottom: 6px;">Escolha um Avatar </label>
+            <div style="display: flex; gap: 16px;">
+            @php
+            $avatars = [
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbG9vZW50YmIxbDQxZWN3cWM4NmRrZjVxNnBpN2ViMnEzbG10d2ZyaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/ufnnVkxyqyuA6dAwDO/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzNybzNveGdrZDU5b3dkd3Bwdms1MXhsZjgxMnc5MzA0bnk3YjF6aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/4JGWlKTzFmCsAlICHG/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXR0NHlueHI1cmJqaGhoOTg0aGl4azVzZnlheGc1cTZkeTJxNHloNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/PkOZUxYXOQlnzBH1Hl/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZWs4d2JtdnZpdHNvaGJqZHl2dHNkMWc1bmxzMXZsbzdqOGVseXFzZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/FgCiihG8wyI3wR5H2Y/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHNtZDFvMjVqeG96ZmZkdWIxeTM1bTV0NDI5N3VhdjJsNmo0NjAwayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/xUPGcpnieVnGZQ5IAw/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWEwdTJpenFjdDg2YWZiYm4yMHo5azZpeGQ1Y2ptZ2ozaGIwOHdpdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Dl1vSg7nXEJ9sw1H1o/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcTRsNnBmdXl6ZHJibXM3N3dweXlqbjk5ZGQ4aXJ6bjMzMjR3eGg5dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/RJPvSu5cKfg9cZplHn/giphy.gif'
+            ];
+            $user = Auth::user();
+            if (!empty($gincana->avatar) && Str::startsWith($gincana->avatar, 'http')) {
+                array_unshift($avatars, $gincana->avatar);
+            }
+            @endphp
+            @foreach($avatars as $index => $avatar)
+            <label style="cursor: pointer;">
+                <input type="radio" name="avatar" value="{{ $avatar }}" {{ (old('avatar', $gincana->avatar) == $avatar || ($index === 0 && empty($gincana->avatar))) ? 'checked' : '' }} style="display: none;">
+                <img src="{{ $avatar }}" alt="Avatar {{ $index + 1 }}" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ccc; transition: border-color 0.2s;">
+            </label>
+            @endforeach
+            </div>
         </div>
+        <script>
+            // Destaca o avatar selecionado
+            document.addEventListener('DOMContentLoaded', function() {
+            const avatarRadios = document.querySelectorAll('input[name="avatar"]');
+            avatarRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                document.querySelectorAll('input[name="avatar"]').forEach(r => {
+                    r.nextElementSibling.style.borderColor = r.checked ? '#198754' : '#ccc';
+                });
+                });
+                // Inicializa o destaque
+                if (radio.checked) {
+                radio.nextElementSibling.style.borderColor = '#198754';
+                }
+            });
+            });
+        </script>
         <!-- Mapa e Street View -->
         <div style="display: flex; gap: 16px; margin-bottom: 16px;">
             <div style="flex: 1;">
@@ -50,11 +84,15 @@
             <div style="display: flex; gap: 16px;">
                 <div>
                     <input type="radio" id="publica" name="privacidade" value="publica" {{ $gincana->privacidade == 'publica' ? 'checked' : '' }}>
-                    <label for="publica">Pública (todos podem participar)</label>
+                    <label for="publica">Pública </label>
                 </div>
                 <div>
                     <input type="radio" id="privada" name="privacidade" value="privada" {{ $gincana->privacidade == 'privada' ? 'checked' : '' }}>
-                    <label for="privada">Privada (apenas quem tem o link)</label>
+                    <label for="privada">Privada (amigos)</label>
+                </div>
+                <div>
+                    <input type="radio" id="comercial" name="privacidade" value="comercial" {{ $gincana->privacidade == 'comercial' ? 'checked' : '' }}>
+                    <label for="comercial">Comercial (72 horas)</label>
                 </div>
             </div>
         </div>

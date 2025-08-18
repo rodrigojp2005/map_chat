@@ -33,11 +33,14 @@ function showStreetView(loc) {
         motionTracking: false // desabilita giroscópio/mobile motion
     });
     // Avatar no Street View
+    const avatarUrl = loc.avatar
+        ? (loc.avatar.startsWith('http') ? loc.avatar : 'https://media4.giphy.com/media/' + loc.avatar)
+        : 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif';
     const avatar = new google.maps.Marker({
         position: pos,
         map: panorama,
         icon: {
-            url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif',
+            url: avatarUrl,
             scaledSize: new google.maps.Size(60, 80),
             anchor: new google.maps.Point(30, 80)
         },
@@ -79,11 +82,14 @@ function initMapChatHome() {
     if (Array.isArray(MC_LOCATIONS)) {
         MC_LOCATIONS.forEach(loc => {
             if (loc.no_gincana) return;
+            const markerUrl = loc.avatar
+                ? (loc.avatar.startsWith('http') ? loc.avatar : 'https://media4.giphy.com/media/' + loc.avatar)
+                : 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif';
             const marker = new google.maps.Marker({
                 position: { lat: Number(loc.lat), lng: Number(loc.lng) },
                 title: loc.name || 'Local',
                 icon: {
-                    url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif',
+                    url: markerUrl,
                     scaledSize: new google.maps.Size(50, 65),
                     anchor: new google.maps.Point(25, 65)
                 }

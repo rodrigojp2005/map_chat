@@ -19,7 +19,8 @@ class MapchatController extends Controller
                 'lng' => (float) $gincana->longitude,
                 'name' => $gincana->nome,
                 'mapchat_id' => $gincana->id,
-                'contexto' => $gincana->contexto
+                'contexto' => $gincana->contexto,
+                'avatar' => $gincana->avatar,
             ];
         }
         if (empty($locations)) {
@@ -42,11 +43,12 @@ class MapchatController extends Controller
     {
         $validated = $request->validate([
             'nome' => 'required|string|max:255',
-            'duracao' => 'required|integer',
+            'avatar' => 'nullable|string|max:255',
+            'duracao' => 'nullable|string|max:255',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'contexto' => 'required|string|max:255',
-            'privacidade' => 'required|in:publica,privada',
+            'privacidade' => 'required|in:publica,privada,comercial',
         ]);
         $validated['user_id'] = Auth::id();
         Mapchat::create($validated);
@@ -77,7 +79,7 @@ class MapchatController extends Controller
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'contexto' => 'required|string|max:255',
-            'privacidade' => 'required|in:publica,privada',
+            'privacidade' => 'required|in:publica,privada,comercial',
         ]);
         $mapchat->update($validated);
         return redirect()->route('mapchat.index')->with('success', 'Sala atualizada com sucesso!');

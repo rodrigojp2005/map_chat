@@ -14,6 +14,7 @@ class Mapchat extends Model
     protected $fillable = [
         'user_id',
         'nome',
+        'avatar',
         'duracao',
         'latitude',
         'longitude',

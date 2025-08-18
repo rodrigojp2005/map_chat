@@ -1,26 +1,75 @@
 @extends('layouts.app')
 @section('content')
 <div id="form_container" style="max-width: 600px; margin: 24px auto 0 auto; padding: 28px 24px 22px 24px; background: #eafaf1; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
-    <h2 style="margin-bottom: 22px; text-align: center; font-weight: 700; color: #198754; font-size: 2rem; letter-spacing: 0.5px;">Criar Sala</h2>
+    <h2 style="margin-bottom: 22px; text-align: center; font-weight: 700; color: #198754; font-size: 2rem; letter-spacing: 0.5px;">Criar Post</h2>
     <form id="form-criar-gincana" method="POST" action="{{ route('mapchat.store') }}">
         @csrf
 
         <!-- Nome da Sala -->
         <div style="margin-bottom: 16px;">
-            <label for="nome" style="display: block; font-weight: bold; margin-bottom: 6px;">Nome</label>
-            <input type="text" id="nome" name="nome" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" placeholder="Ex: Papo no Centro Histórico">
+            <label for="nome" style="display: block; font-weight: bold; margin-bottom: 6px;">
+            Nome para sua Sala de Conversas
+            </label>
+            <input 
+            type="text" 
+            id="nome" 
+            name="nome" 
+            required 
+            style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" 
+            placeholder="Ex: Sala criada por {{ explode(' ', Auth::user()->name)[0] }}"
+            value="Sala criada por {{ explode(' ', Auth::user()->name)[0] }}"
+            >
         </div>
 
-        <!-- Duração -->
+        <!-- Avatar -->
         <div style="margin-bottom: 16px;">
-            <label for="duracao" style="display: block; font-weight: bold; margin-bottom: 6px;">Duração (em horas)</label>
-            <select id="duracao" name="duracao" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;">
-                <option value="">Selecione a duração</option>
-                <option value="24">24 horas</option>
-                <option value="48">48 horas</option>
-                <option value="72">72 horas</option>
-            </select>
+            <label for="avatar" style="display: block; font-weight: bold; margin-bottom: 6px;">Escolha um Avatar </label>
+            <div style="display: flex; gap: 16px;">
+            @php
+            $avatars = [
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbG9vZW50YmIxbDQxZWN3cWM4NmRrZjVxNnBpN2ViMnEzbG10d2ZyaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/ufnnVkxyqyuA6dAwDO/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzNybzNveGdrZDU5b3dkd3Bwdms1MXhsZjgxMnc5MzA0bnk3YjF6aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/4JGWlKTzFmCsAlICHG/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExMXR0NHlueHI1cmJqaGhoOTg0aGl4azVzZnlheGc1cTZkeTJxNHloNyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/PkOZUxYXOQlnzBH1Hl/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExZWs4d2JtdnZpdHNvaGJqZHl2dHNkMWc1bmxzMXZsbzdqOGVseXFzZyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/FgCiihG8wyI3wR5H2Y/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeHNtZDFvMjVqeG96ZmZkdWIxeTM1bTV0NDI5N3VhdjJsNmo0NjAwayZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/xUPGcpnieVnGZQ5IAw/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWEwdTJpenFjdDg2YWZiYm4yMHo5azZpeGQ1Y2ptZ2ozaGIwOHdpdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Dl1vSg7nXEJ9sw1H1o/giphy.gif',
+                'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcTRsNnBmdXl6ZHJibXM3N3dweXlqbjk5ZGQ4aXJ6bjMzMjR3eGg5dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/RJPvSu5cKfg9cZplHn/giphy.gif'
+            ];
+
+            $user = Auth::user();
+            if (!empty($user->avatar) && Str::startsWith($user->avatar, 'http')) {
+                array_unshift($avatars, $user->avatar);
+            }
+            @endphp
+            @foreach($avatars as $index => $avatar)
+            <label style="cursor: pointer;">
+                <input type="radio" name="avatar" value="{{ $avatar }}" {{ $index === 0 ? 'checked' : '' }} style="display: none;">
+                @if(Str::startsWith($avatar, 'http'))
+                <img src="{{ $avatar }}" alt="Avatar {{ $index + 1 }}" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ccc; transition: border-color 0.2s;">
+                @else
+                <img src="{{ asset($avatar) }}" alt="Avatar {{ $index + 1 }}" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ccc; transition: border-color 0.2s;">
+                @endif
+            </label>
+            @endforeach
+            </div>
         </div>
+        <script>
+            // Destaca o avatar selecionado
+            document.addEventListener('DOMContentLoaded', function() {
+            const avatarRadios = document.querySelectorAll('input[name="avatar"]');
+            avatarRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                document.querySelectorAll('input[name="avatar"]').forEach(r => {
+                    r.nextElementSibling.style.borderColor = r.checked ? '#198754' : '#ccc';
+                });
+                });
+                // Inicializa o destaque
+                if (radio.checked) {
+                radio.nextElementSibling.style.borderColor = '#198754';
+                }
+            });
+            });
+        </script>
 
         <!-- Mapa e Street View -->
         <div style="display: flex; gap: 16px; margin-bottom: 16px;">
@@ -45,22 +94,26 @@
 
         <!-- Contexto -->
         <div style="margin-bottom: 16px;">
-            <label for="contexto" style="display: block; font-weight: bold; margin-bottom: 6px;">Contexto/Dica</label>
-            <textarea id="contexto" name="contexto" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-height: 80px;" placeholder="Dê uma dica sobre o local ou conte uma história..."></textarea>
+            <label for="contexto" style="display: block; font-weight: bold; margin-bottom: 6px;">O que há nesse local?</label>
+            <textarea id="contexto" name="contexto" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-height: 80px;" placeholder="Conte sua história com este local ou sugira algo interessante..."></textarea>
         </div>
 
         <!-- Privacidade -->
         <div style="margin-bottom: 16px;">
-            <label style="display: block; font-weight: bold; margin-bottom: 6px;">Privacidade</label>
-            <div style="display: flex; gap: 16px;">
-                <div>
-                    <input type="radio" id="publica" name="privacidade" value="publica" checked>
-                    <label for="publica">Pública (todos podem participar)</label>
-                </div>
-                <div>
-                    <input type="radio" id="privada" name="privacidade" value="privada">
-                    <label for="privada">Privada (apenas quem tem o link)</label>
-                </div>
+            <label style="display: block; font-weight: bold; margin-bottom: 6px; text-align: center; width: 100%;">Privacidade</label>
+            <div style="display: flex; gap: 32px; justify-content: center; align-items: center;">
+            <div style="display: flex; align-items: center;">
+                <input type="radio" id="publica" name="privacidade" value="publica" checked>
+                <label for="publica" style="margin-left: 6px;">Pública</label>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <input type="radio" id="privada" name="privacidade" value="privada">
+                <label for="privada" style="margin-left: 6px;">Privada (amigos)</label>
+            </div>
+            <div style="display: flex; align-items: center;">
+                <input type="radio" id="comercial" name="privacidade" value="comercial">
+                <label for="comercial" style="margin-left: 6px;">Comercial (72 horas)</label>
+            </div>
             </div>
         </div>
 
