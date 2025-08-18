@@ -12,11 +12,12 @@
     </button>
 </div>
 
+<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
 <script>
 window.isAuthenticated = @json(auth()->check());
 const MC_LOCATIONS = @json($locations ?? []);
 
-let map, markers = [], panorama;
+let map, markers = [], panorama, markerCluster;
 
 function showStreetView(loc) {
     document.getElementById('map').style.display = 'none';
@@ -25,7 +26,7 @@ function showStreetView(loc) {
     const pos = { lat: Number(loc.lat), lng: Number(loc.lng) };
     panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
         position: pos,
-        pov: { heading: 165, pitch: 0 },
+        pov: { heading: 0, pitch: 0 }, // heading será ajustado após carregar
         zoom: 1,
         disableDefaultUI: true,
         showRoadLabels: false,
@@ -43,6 +44,15 @@ function showStreetView(loc) {
         title: loc.name || 'Local'
     });
     avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
+
+    // Ajusta o POV para olhar para o avatar assim que o panorama carregar
+    panorama.addListener('position_changed', function () {
+        const panoPos = panorama.getPosition();
+        if (!panoPos) return;
+        // Calcula heading entre a posição da câmera e o avatar
+        const heading = google.maps.geometry.spherical.computeHeading(panoPos, pos);
+        panorama.setPov({ heading: heading, pitch: 0 });
+    });
 }
 
 function initMapChatHome() {
@@ -71,7 +81,6 @@ function initMapChatHome() {
             if (loc.no_gincana) return;
             const marker = new google.maps.Marker({
                 position: { lat: Number(loc.lat), lng: Number(loc.lng) },
-                map,
                 title: loc.name || 'Local',
                 icon: {
                     url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif',
@@ -79,9 +88,19 @@ function initMapChatHome() {
                     anchor: new google.maps.Point(25, 65)
                 }
             });
-            marker.addListener('click', () => showStreetView(loc));
+            marker.addListener('click', () => {
+                // Abre o modal com link para Street View
+                window.MapChat && window.MapChat.showPostModal(loc, { modo: 'mapa' });
+            });
             markers.push(marker);
         });
+        // Agrupamento de marcadores (clusters)
+        if (window.markerClusterer && window.markerClusterer.MarkerClusterer) {
+            markerCluster = new markerClusterer.MarkerClusterer({
+                map,
+                markers
+            });
+        }
     }
 }
 
@@ -95,8 +114,9 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+
 @section('scripts')
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c') }}&callback=initMapChatHome"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c') }}&libraries=geometry&callback=initMapChatHome"></script>
 @endsection
 
 @endsection
