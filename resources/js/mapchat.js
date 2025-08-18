@@ -9,7 +9,7 @@ window.MapChat = (function () {
     let html = '';
     html += `<div class="post-content" style="text-align: left;">
       <div class="post-inicial" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <h4 style="margin: 0 0 10px 0; color: #495057;">📍 Dica do Local:</h4>
+        <h4 style="margin: 0 0 10px 0; color: #495057;">O que está acontecendo aqui?</h4>
         <p style="margin: 0; color: #6c757d; font-style: italic;">"${location.contexto || 'Descubra onde estou!'}"</p>
       </div>`;
     if (modo === 'mapa') {
