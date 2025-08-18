@@ -1,4 +1,3 @@
-
 @extends('layouts.app')
 
 @section('title', 'MapChat - Conversas no mapa!')
@@ -8,7 +7,10 @@
     <div id="map" class="absolute left-0 top-0" style="width: 100%; height: 100%; z-index: 1;"></div>
     <div id="streetview" class="absolute left-0 top-0" style="width: 100%; height: 100%; display: none; z-index: 2;"></div>
     <button id="btn-voltar-mapa" class="px-4 py-2 focus:outline-none absolute top-5 left-5" style="z-index: 10; display: none;">
-        <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWdkejl1cmF1azd1eGppcmdydmY3eXp6NDlmZmxwbW8xZmtnNHgzcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3fxOM1vBQJmCqqx5dV/giphy.gif" alt="Alternar para o mapa" style="width: 72px; height: 72px;">
+        <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3JmOW9vODF4OGJqMHpxNWJ4M3h3MXhncXF6NnZ6eHF6dnlucmwweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/EOIQArrlGT8SeIvYma/giphy.gif" alt="Alternar para o mapa" style="width: 72px; height: 72px;">
+    </button>
+    <button id="btn-voltar-streetview" class="px-2 py-2 focus:outline-none absolute " style="z-index: 10; display: none; left: 90px;">
+        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc28zbjI2dTRoaG4wZHRnMWhsNGZqYTNzMzVuNmNpN2M3NXVhc2RqZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/S89ccIhj3e0xyMcLOp/giphy.gif" alt="Voltar para o Street View" style="width: 96px; height: 72px;">
     </button>
 </div>
 
@@ -18,6 +20,7 @@ window.isAuthenticated = @json(auth()->check());
 const MC_LOCATIONS = @json($locations ?? []);
 
 let map, markers = [], panorama, markerCluster;
+let lastStreetViewLoc = null;
 
 function showStreetView(loc) {
     document.getElementById('map').style.display = 'none';
@@ -56,6 +59,8 @@ function showStreetView(loc) {
         const heading = google.maps.geometry.spherical.computeHeading(panoPos, pos);
         panorama.setPov({ heading: heading, pitch: 0 });
     });
+    lastStreetViewLoc = loc;
+    document.getElementById('btn-voltar-streetview').style.display = 'none';
 }
 
 function initMapChatHome() {
@@ -111,11 +116,21 @@ function initMapChatHome() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('btn-voltar-mapa').addEventListener('click', function () {
+    const btnVoltarMapa = document.getElementById('btn-voltar-mapa');
+    const btnVoltarStreet = document.getElementById('btn-voltar-streetview');
+    btnVoltarMapa.addEventListener('click', function () {
         document.getElementById('map').style.display = 'block';
         document.getElementById('streetview').style.display = 'none';
-        document.getElementById('btn-voltar-mapa').style.display = 'none';
+        btnVoltarMapa.style.display = 'none';
+        document.getElementById('btn-voltar-streetview').style.display = 'none';
+        if (lastStreetViewLoc) btnVoltarStreet.style.display = 'block';
         if (panorama) panorama.setVisible(false);
+    });
+    btnVoltarStreet.addEventListener('click', function () {
+        if (lastStreetViewLoc) {
+            showStreetView(lastStreetViewLoc);
+            btnVoltarStreet.style.display = 'none';
+        }
     });
 });
 </script>
