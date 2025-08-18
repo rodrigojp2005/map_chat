@@ -7,7 +7,9 @@
 <div class="relative w-full" style="height: calc(100vh - 120px);">
     <div id="map" class="absolute left-0 top-0" style="width: 100%; height: 100%; z-index: 1;"></div>
     <div id="streetview" class="absolute left-0 top-0" style="width: 100%; height: 100%; display: none; z-index: 2;"></div>
-    <button id="btn-voltar-mapa" class="px-4 py-2 rounded-md shadow bg-blue-600 text-white hover:bg-blue-700 focus:outline-none absolute top-5 left-5" style="z-index: 10; display: none;">⬅️ Voltar ao mapa</button>
+    <button id="btn-voltar-mapa" class="px-4 py-2 focus:outline-none absolute top-5 left-5" style="z-index: 10; display: none;">
+        <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWdkejl1cmF1azd1eGppcmdydmY3eXp6NDlmZmxwbW8xZmtnNHgzcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3fxOM1vBQJmCqqx5dV/giphy.gif" alt="Alternar para o mapa" style="width: 72px; height: 72px;">
+    </button>
 </div>
 
 <script>
