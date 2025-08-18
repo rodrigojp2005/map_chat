@@ -1,20 +1,14 @@
-# Laravel & PHP
+# === DEPENDÊNCIAS (não versionar) ===
 /vendor/
 /node_modules/
-/.idea/
-/.vscode/
-.phpunit.result.cache
-.php_cs.cache
-.php-cs-fixer.cache
-.phpstorm.meta.php
 composer.phar
 
-# Environment
+# === AMBIENTE (cada servidor tem o seu .env) ===
 .env
 .env.*
 !.env.example
 
-# Laravel storage and cache
+# === CACHE & STORAGE (arquivos temporários, regenerados pelo Laravel) ===
 /storage/*.key
 /storage/app/public
 /storage/framework/cache/**
@@ -22,25 +16,36 @@ composer.phar
 /storage/framework/views/**
 /storage/framework/testing/**
 /storage/logs/**
-/bootstrap/cache/**
-/public/storage
+/bootstrap/cache/*
 
-# Logs & debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
+# Manter a pasta, mas ignorar os arquivos
+!/storage/app/public/.gitignore
+!/bootstrap/cache/.gitignore
 
-# Frontend build
+# === FRONTEND (gerados no build local, não enviar) ===
 /public/build/
 /public/hot
 /public/mix-manifest.json
 
-# OS files
+# === LOGS & DEBUG ===
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# === IDE / SISTEMA OPERACIONAL ===
+/.idea/
+/.vscode/
 .DS_Store
 Thumbs.db
 
-# Coverage & reports
+# === TESTES & COVERAGE ===
 coverage/
-*.cover
-*.log
+.phpunit.result.cache
+.phpunit.cache
+clover.xml
+junit.xml
+
+# === DOCKER / SAIL (se usar) ===
+.docker
+docker-compose.override.yml

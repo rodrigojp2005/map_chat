@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'MapChat - Conversas no mapa!')
+@section('title', 'MapChat - Converse no mapa!')
 
 @section('content')
 <div class="relative w-full" style="height: calc(100vh - 120px);">
