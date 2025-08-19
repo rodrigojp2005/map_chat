@@ -232,8 +232,20 @@ window.showStreetView = function(loc) {
                 motionTracking: false
             });
 
+            // Calcula heading da câmera para posicionar o avatar à frente
+            const cameraLatLng = data.location.latLng;
+            const heading = panorama.getPov().heading || 0;
+            const distance = 0.01; // Aproximadamente 10 metros (em graus, ajuste se necessário)
+
+            // Usa a API do Google para calcular o novo ponto à frente
+            const avatarLatLng = google.maps.geometry.spherical.computeOffset(
+                cameraLatLng,
+                10, // 10 metros
+                heading
+            );
+
             const avatar = new google.maps.Marker({
-                position: pos,
+                position: avatarLatLng,
                 map: panorama,
                 icon: {
                     url: getAvatarUrl(loc.avatar),
@@ -244,7 +256,6 @@ window.showStreetView = function(loc) {
             });
             avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
 
-            const heading = google.maps.geometry.spherical.computeHeading(data.location.latLng, pos);
             panorama.setPov({ heading: heading, pitch: 0 });
 
             lastStreetViewLoc = loc;
