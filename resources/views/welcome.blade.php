@@ -473,6 +473,18 @@ function initMapChatHome() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Começa com a barra lateral oculta e a lupa visível
+    document.getElementById('chat-carousel').classList.add('hide');
+    let btnShow = document.getElementById('btn-show-sidebar');
+    if (!btnShow) {
+        btnShow = document.createElement('button');
+        btnShow.id = 'btn-show-sidebar';
+        btnShow.title = 'Mostrar barra lateral';
+        btnShow.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+        document.body.appendChild(btnShow);
+    }
+    btnShow.style.display = 'flex';
+
     // Botão para esconder barra lateral
     document.getElementById('btn-hide-sidebar').addEventListener('click', function() {
         document.getElementById('chat-carousel').classList.add('hide');
