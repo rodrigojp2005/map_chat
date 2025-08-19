@@ -31,11 +31,12 @@
         });
 
         // Avatar no Street View
+        const avatarUrl = MC_LOCATION.avatar ? '/images/' + MC_LOCATION.avatar : '/images/default.gif';
         const avatar = new google.maps.Marker({
             position: pos,
             map: pano,
             icon: {
-                url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif',
+                url: avatarUrl,
                 scaledSize: new google.maps.Size(60, 80),
                 anchor: new google.maps.Point(30, 80)
             },
