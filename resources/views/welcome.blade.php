@@ -351,9 +351,23 @@ function getPostsByRecent() {
         // ================================
         // Inicialização
         // ================================
+        // Inicialização do Google Maps
+        window.initMap = function() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -14.2350, lng: -51.9253 }, // Centro do Brasil
+                zoom: 4,
+                streetViewControl: false,
+                mapTypeControl: false,
+                fullscreenControl: false
+            });
+            // Aqui você pode adicionar marcadores iniciais, se quiser
+        };
+
         window.onload = async () => {
-            initMap();
-            await fetchPosts();
+            if (typeof window.initMap === 'function') {
+                window.initMap();
+            }
+            // await fetchPosts(); // Se necessário, descomente e implemente fetchPosts
             applyFilter();
         };
     </script>
