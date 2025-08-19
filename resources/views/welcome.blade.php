@@ -22,53 +22,45 @@
 
     <!-- Barra lateral com filtros integrados -->
     <div id="chat-carousel" style="position: absolute; top: 0; right: 0; bottom: 0; z-index: 20; background: rgba(255,255,255,0.95); box-shadow: -2px 0 12px rgba(0,0,0,0.08); padding: 0; display: flex; flex-direction: column; overflow-y: auto; align-items: center; min-width: 100px; max-width: 120px;">
-        <!-- Botão para esconder barra -->
-        <button id="btn-hide-sidebar" title="Esconder barra" style="position: absolute; top: 8px; left: 8px; background: none; border: none; color: #198754; font-size: 1.3em; cursor: pointer; z-index: 30; padding: 2px;">
-            &#10005;
-        </button>
-        
-        <!-- Filtros -->
-        <div style="position: sticky; top: 0; background: rgba(255,255,255,0.98); padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.08); width: 100%; display: flex; align-items: center; justify-content: space-between;">
+        <!-- Header com FILTROS e X -->
+        <div style="position: sticky; top: 0; background: rgba(255,255,255,0.98); padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.08); width: 100%; display: flex; align-items: center; justify-content: space-between; z-index: 21;">
             <div style="font-size: 0.85em; font-weight: 600; color: #198754;">FILTROS</div>
-            <button id="btn-hide-sidebar" title="Esconder barra" style="background: none; border: none; color: #198754; font-size: 1.3em; cursor: pointer; z-index: 30; padding: 2px; margin-left: 8px;">
-                &#10005;
-            </button>
+            <button id="btn-hide-sidebar" title="Esconder barra" style="background: none; border: none; color: #198754; font-size: 1.3em; cursor: pointer; z-index: 30; padding: 2px; margin-left: 8px;">&#10005;</button>
         </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-            <button class="filter-btn active" data-filter="proximity" title="Próximos">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                <span>Próx</span>
-            </button>
-            <button class="filter-btn" data-filter="recent" title="Recentes">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12,6 12,12 16,14"></polyline>
-                </svg>
-                <span>Recentes</span>
-            </button>
+        <!-- Filtros e seletor -->
+        <div style="width: 100%; padding: 8px 0 0 0;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
+                <button class="filter-btn active" data-filter="proximity" title="Próximos">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>Próx</span>
+                </button>
+                <button class="filter-btn" data-filter="recent" title="Recentes">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12,6 12,12 16,14"></polyline>
+                    </svg>
+                    <span>Recentes</span>
+                </button>
+            </div>
+            <div id="filter-status" style="text-align: center; font-size: 0.7em; color: #6c757d; margin-bottom: 8px;">
+                <span id="status-text">Carregando...</span>
+            </div>
+            <!-- Seletor de quantidade de posts -->
+            <div style="width: 100%; text-align: center; margin-bottom: 10px;">
+                <label for="post-limit" style="font-size: 0.85em; color: #198754; font-weight: 600;">Qtd. posts:</label>
+                <select id="post-limit" style="margin-left: 6px; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95em;">
+                    <option value="20">20</option>
+                    <option value="40">40</option>
+                    <option value="60">60</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
         </div>
-        
-        <div id="filter-status" style="text-align: center; font-size: 0.7em; color: #6c757d; margin-top: 8px;">
-            <span id="status-text">Carregando...</span>
-        </div>
-    </div>
-
-    <!-- Container dos avatares -->
-    <div id="avatars-container" style="flex: 1; width: 100%; padding: 18px 6px; display: flex; flex-direction: column; gap: 18px; align-items: center;">
-        <!-- Seletor de quantidade de posts -->
-        <div style="width: 100%; text-align: center; margin-bottom: 10px;">
-            <label for="post-limit" style="font-size: 0.85em; color: #198754; font-weight: 600;">Qtd. posts:</label>
-            <select id="post-limit" style="margin-left: 6px; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95em;">
-                <option value="20">20</option>
-                <option value="40">40</option>
-                <option value="60">60</option>
-                <option value="100">100</option>
-            </select>
-        </div>
+        <!-- Container dos avatares -->
+        <div id="avatars-container" style="flex: 1; width: 100%; padding: 0 6px 18px 6px; display: flex; flex-direction: column; gap: 18px; align-items: center; overflow-y: auto;">
         @foreach(($locations ?? []) as $loc)
             @if(empty($loc['no_gincana']))
             @php
