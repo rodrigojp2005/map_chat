@@ -28,62 +28,65 @@
         </button>
         
         <!-- Filtros -->
-        <div style="position: sticky; top: 0; background: rgba(255,255,255,0.98); padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.08); width: 100%;">
-            <div style="text-align: center; font-size: 0.85em; font-weight: 600; color: #198754; margin-bottom: 12px;">FILTROS</div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                <button class="filter-btn active" data-filter="proximity" title="Próximos">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                        <circle cx="12" cy="10" r="3"></circle>
-                    </svg>
-                    <span>Próx</span>
-                </button>
-                <button class="filter-btn" data-filter="recent" title="Recentes">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12,6 12,12 16,14"></polyline>
-                    </svg>
-                    <span>Recentes</span>
-                </button>
-            </div>
-            
-            <div id="filter-status" style="text-align: center; font-size: 0.7em; color: #6c757d; margin-top: 8px;">
-                <span id="status-text">Carregando...</span>
-            </div>
+        <div style="position: sticky; top: 0; background: rgba(255,255,255,0.98); padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.08); width: 100%; display: flex; align-items: center; justify-content: space-between;">
+            <div style="font-size: 0.85em; font-weight: 600; color: #198754;">FILTROS</div>
+            <button id="btn-hide-sidebar" title="Esconder barra" style="background: none; border: none; color: #198754; font-size: 1.3em; cursor: pointer; z-index: 30; padding: 2px; margin-left: 8px;">
+                &#10005;
+            </button>
         </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+            <button class="filter-btn active" data-filter="proximity" title="Próximos">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Próx</span>
+            </button>
+            <button class="filter-btn" data-filter="recent" title="Recentes">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12,6 12,12 16,14"></polyline>
+                </svg>
+                <span>Recentes</span>
+            </button>
+        </div>
+        
+        <div id="filter-status" style="text-align: center; font-size: 0.7em; color: #6c757d; margin-top: 8px;">
+            <span id="status-text">Carregando...</span>
+        </div>
+    </div>
 
-        <!-- Container dos avatares -->
-        <div id="avatars-container" style="flex: 1; width: 100%; padding: 18px 6px; display: flex; flex-direction: column; gap: 18px; align-items: center;">
-            <!-- Seletor de quantidade de posts -->
-            <div style="width: 100%; text-align: center; margin-bottom: 10px;">
-                <label for="post-limit" style="font-size: 0.85em; color: #198754; font-weight: 600;">Qtd. posts:</label>
-                <select id="post-limit" style="margin-left: 6px; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95em;">
-                    <option value="20">20</option>
-                    <option value="40">40</option>
-                    <option value="60">60</option>
-                    <option value="100">100</option>
-                </select>
-            </div>
-            @foreach(($locations ?? []) as $loc)
-                @if(empty($loc['no_gincana']))
-                @php
-                    // Sanitiza o avatar: pega só o nome do arquivo, sem path, e garante fallback
-                    $avatar = $loc['avatar'] ?? '';
-                    $avatar = trim($avatar);
-                    $avatar = $avatar ? basename($avatar) : 'default.gif';
-                    if (!$avatar || $avatar === '.' || $avatar === '..') $avatar = 'default.gif';
-                @endphp
-                <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;">
-                    <img src="{{ asset('images/' . $avatar) }}"
-                        alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;"
-                        onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
-                    <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['name'] ?? $loc['nome'] ?? 'Sala' }}</div>
-                    <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['cidade'] ?? '' }}</div>
-                </div>
-                @endif
-            @endforeach
+    <!-- Container dos avatares -->
+    <div id="avatars-container" style="flex: 1; width: 100%; padding: 18px 6px; display: flex; flex-direction: column; gap: 18px; align-items: center;">
+        <!-- Seletor de quantidade de posts -->
+        <div style="width: 100%; text-align: center; margin-bottom: 10px;">
+            <label for="post-limit" style="font-size: 0.85em; color: #198754; font-weight: 600;">Qtd. posts:</label>
+            <select id="post-limit" style="margin-left: 6px; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95em;">
+                <option value="20">20</option>
+                <option value="40">40</option>
+                <option value="60">60</option>
+                <option value="100">100</option>
+            </select>
         </div>
+        @foreach(($locations ?? []) as $loc)
+            @if(empty($loc['no_gincana']))
+            @php
+                // Sanitiza o avatar: pega só o nome do arquivo, sem path, e garante fallback
+                $avatar = $loc['avatar'] ?? '';
+                $avatar = trim($avatar);
+                $avatar = $avatar ? basename($avatar) : 'default.gif';
+                if (!$avatar || $avatar === '.' || $avatar === '..') $avatar = 'default.gif';
+            @endphp
+            <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;">
+                <img src="{{ asset('images/' . $avatar) }}"
+                    alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;"
+                    onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
+                <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['name'] ?? $loc['nome'] ?? 'Sala' }}</div>
+                <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['cidade'] ?? '' }}</div>
+            </div>
+            @endif
+        @endforeach
     </div>
 </div>
 
@@ -232,8 +235,20 @@ window.showStreetView = function(loc) {
                 motionTracking: false
             });
 
+            // Calcula heading da câmera para posicionar o avatar à frente
+            const cameraLatLng = data.location.latLng;
+            const heading = panorama.getPov().heading || 0;
+            const distance = 0.01; // Aproximadamente 10 metros (em graus, ajuste se necessário)
+
+            // Usa a API do Google para calcular o novo ponto à frente
+            const avatarLatLng = google.maps.geometry.spherical.computeOffset(
+                cameraLatLng,
+                10, // 10 metros
+                heading
+            );
+
             const avatar = new google.maps.Marker({
-                position: pos,
+                position: avatarLatLng,
                 map: panorama,
                 icon: {
                     url: getAvatarUrl(loc.avatar),
@@ -244,7 +259,6 @@ window.showStreetView = function(loc) {
             });
             avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
 
-            const heading = google.maps.geometry.spherical.computeHeading(data.location.latLng, pos);
             panorama.setPov({ heading: heading, pitch: 0 });
 
             lastStreetViewLoc = loc;
@@ -470,7 +484,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Botão para esconder barra lateral
     document.getElementById('btn-hide-sidebar').addEventListener('click', function() {
         document.getElementById('chat-carousel').classList.add('hide');
-        document.getElementById('btn-show-sidebar').style.display = 'flex';
+        btnShow.style.display = 'flex';
     });
 
     // Botão lupa para mostrar barra lateral
