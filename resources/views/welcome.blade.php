@@ -21,7 +21,7 @@
     </button>
 
     <!-- Barra lateral com filtros -->
-    <div id="chat-carousel" style="position: absolute; top: 0; right: 0; bottom: 0; z-index: 20; background: rgba(255,255,255,0.95); box-shadow: -2px 0 12px rgba(0,0,0,0.08); padding: 0; display: flex; flex-direction: column; overflow-y: auto; align-items: center; min-width: 120px; max-width: 160px;">
+    <div id="chat-carousel" style="position: absolute; top: 72px; right: 0; bottom: 0; z-index: 20; background: rgba(255,255,255,0.95); box-shadow: -2px 0 12px rgba(0,0,0,0.08); padding: 0; display: flex; flex-direction: column; overflow-y: auto; align-items: center; min-width: 120px; max-width: 160px;">
         
         <!-- Botão minimizar -->
         <button id="btn-minimizar" 
@@ -75,7 +75,7 @@
 
     <!-- Botão maximizar (aparece quando sidebar está recolhida) -->
     <button id="btn-maximizar" 
-        style="position: absolute; top: 6px; right: 6px; background: #198754; color: white; 
+        style="position: absolute; top: 78px; right: 6px; background: #198754; color: white; 
                border-radius: 50%; width: 28px; height: 28px; display: none; 
                align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
                cursor: pointer; z-index: 25;">
