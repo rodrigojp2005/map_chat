@@ -20,17 +20,13 @@
         <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc28zbjI2dTRoaG4wZHRnMWhsNGZqYTNzMzVuNmNpN2M3NXVhc2RqZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/S89ccIhj3e0xyMcLOp/giphy.gif" alt="Voltar para o Street View" style="width: 96px; height: 72px;">
     </button>
 
-    <!-- Barra lateral com filtros -->
-    <div id="chat-carousel" style="position: absolute; top: 72px; right: 0; bottom: 0; z-index: 20; background: rgba(255,255,255,0.95); box-shadow: -2px 0 12px rgba(0,0,0,0.08); padding: 0; display: flex; flex-direction: column; overflow-y: auto; align-items: center; min-width: 120px; max-width: 160px;">
-        
-        <!-- Botão minimizar -->
-        <button id="btn-minimizar" 
-            style="position: absolute; top: 6px; left: -28px; background: #198754; color: white; 
-                   border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; 
-                   justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); cursor: pointer; z-index: 25;">
-            «
+    <!-- Barra lateral com filtros integrados -->
+    <div id="chat-carousel" style="position: absolute; top: 0; right: 0; bottom: 0; z-index: 20; background: rgba(255,255,255,0.95); box-shadow: -2px 0 12px rgba(0,0,0,0.08); padding: 0; display: flex; flex-direction: column; overflow-y: auto; align-items: center; min-width: 100px; max-width: 120px;">
+        <!-- Botão para esconder barra -->
+        <button id="btn-hide-sidebar" title="Esconder barra" style="position: absolute; top: 8px; left: 8px; background: none; border: none; color: #198754; font-size: 1.3em; cursor: pointer; z-index: 30; padding: 2px;">
+            &#10005;
         </button>
-
+        
         <!-- Filtros -->
         <div style="position: sticky; top: 0; background: rgba(255,255,255,0.98); padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.08); width: 100%;">
             <div style="text-align: center; font-size: 0.85em; font-weight: 600; color: #198754; margin-bottom: 12px;">FILTROS</div>
@@ -59,12 +55,29 @@
 
         <!-- Container dos avatares -->
         <div id="avatars-container" style="flex: 1; width: 100%; padding: 18px 6px; display: flex; flex-direction: column; gap: 18px; align-items: center;">
+            <!-- Seletor de quantidade de posts -->
+            <div style="width: 100%; text-align: center; margin-bottom: 10px;">
+                <label for="post-limit" style="font-size: 0.85em; color: #198754; font-weight: 600;">Qtd. posts:</label>
+                <select id="post-limit" style="margin-left: 6px; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95em;">
+                    <option value="20">20</option>
+                    <option value="40">40</option>
+                    <option value="60">60</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
             @foreach(($locations ?? []) as $loc)
                 @if(empty($loc['no_gincana']))
+                @php
+                    // Sanitiza o avatar: pega só o nome do arquivo, sem path, e garante fallback
+                    $avatar = $loc['avatar'] ?? '';
+                    $avatar = trim($avatar);
+                    $avatar = $avatar ? basename($avatar) : 'default.gif';
+                    if (!$avatar || $avatar === '.' || $avatar === '..') $avatar = 'default.gif';
+                @endphp
                 <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;">
-                    <img src="{{ $loc['avatar'] ? (Str::startsWith($loc['avatar'], 'http') ? $loc['avatar'] : 'https://media4.giphy.com/media/' . $loc['avatar']) : 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif' }}"
+                    <img src="{{ asset('images/' . $avatar) }}"
                         alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;"
-                        onerror="this.src='https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif'">
+                        onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
                     <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['name'] ?? $loc['nome'] ?? 'Sala' }}</div>
                     <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['cidade'] ?? '' }}</div>
                 </div>
@@ -72,15 +85,6 @@
             @endforeach
         </div>
     </div>
-
-    <!-- Botão maximizar (aparece quando sidebar está recolhida) -->
-    <button id="btn-maximizar" 
-        style="position: absolute; top: 78px; right: 6px; background: #198754; color: white; 
-               border-radius: 50%; width: 28px; height: 28px; display: none; 
-               align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); 
-               cursor: pointer; z-index: 25;">
-        »
-    </button>
 </div>
 
 <style>
@@ -123,9 +127,33 @@
 #avatars-container.loading .carousel-item {
     opacity: 0.5;
 }
+#btn-show-sidebar {
+    position: fixed;
+    top: 90px;
+    right: 18px;
+    z-index: 50;
+    background: #198754;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    box-shadow: 0 2px 8px rgba(25,135,84,0.18);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.7em;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+#btn-show-sidebar:hover {
+    background: #20c997;
+}
+#chat-carousel.hide {
+    display: none !important;
+}
 </style>
 
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzEzusC_k3oEoPnqynq2N4a0aA3arzH-c&libraries=geometry"></script>
 <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
 
 <script>
@@ -136,6 +164,7 @@ let map, markers = [], panorama, markerCluster;
 let lastStreetViewLoc = null;
 let currentPosts = MC_LOCATIONS.filter(loc => !loc.no_gincana);
 let userPosition = null;
+let postLimit = 20;
 
 // Geolocalização simples
 function getUserLocation() {
@@ -146,6 +175,7 @@ function getUserLocation() {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
+                console.log('Localização obtida:', userPosition);
             },
             (error) => {
                 console.log('Erro na geolocalização:', error.message);
@@ -155,8 +185,12 @@ function getUserLocation() {
 }
 
 function getAvatarUrl(avatar) {
-    if (!avatar) return 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif';
-    return avatar.startsWith('http') ? avatar : 'https://media4.giphy.com/media/' + avatar;
+    // Sempre usa o caminho local, igual ao Blade
+    if (!avatar || avatar === '.' || avatar === '..') return '/images/default.gif';
+    // Remove path, se vier
+    let file = avatar.split('/').pop();
+    if (!file) file = 'default.gif';
+    return '/images/' + file;
 }
 
 function focusMapOnLocation(loc, zoomLevel = 18) {
@@ -170,6 +204,7 @@ function focusMapOnLocation(loc, zoomLevel = 18) {
 }
 
 function handleStreetViewError(loc) {
+    console.error("Erro ao carregar Street View:", loc);
     const errorDiv = document.getElementById('streetview-error');
     errorDiv.style.display = 'block';
     focusMapOnLocation(loc);
@@ -209,6 +244,9 @@ window.showStreetView = function(loc) {
             });
             avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
 
+            const heading = google.maps.geometry.spherical.computeHeading(data.location.latLng, pos);
+            panorama.setPov({ heading: heading, pitch: 0 });
+
             lastStreetViewLoc = loc;
             document.getElementById('btn-voltar-streetview').style.display = 'none';
         } else {
@@ -217,39 +255,35 @@ window.showStreetView = function(loc) {
     });
 }
 
-// Sistema de filtros combinados
-async function applyFilter() {
+// Sistema de filtros simplificado
+async function applyFilter(filterType) {
     showLoading(true);
     updateStatus('Carregando...');
-
+    
     try {
-        const activeFilters = Array.from(document.querySelectorAll('.filter-btn.active'))
-                                   .map(btn => btn.getAttribute('data-filter'));
-
-        let filteredPosts = [...currentPosts];
-
-        if (activeFilters.length === 0) {
-            // Nenhum filtro → todos no mapa, nenhum na lista
-            updateSidebar([]);
-            updateMapMarkers(currentPosts);
-            updateStatus(`${currentPosts.length} posts no mapa`);
-            return;
+        let filteredPosts = [];
+        
+        switch(filterType) {
+            case 'proximity':
+                filteredPosts = await getPostsByProximity();
+                break;
+            case 'friends':
+                filteredPosts = await getPostsByFriends();
+                break;
+            case 'commercial':
+                filteredPosts = await getPostsByCommercial();
+                break;
+            case 'recent':
+                filteredPosts = getPostsByRecent();
+                break;
+            default:
+                filteredPosts = currentPosts;
         }
-
-        if (activeFilters.includes('proximity')) {
-            filteredPosts = await getPostsByProximity();
-        }
-        if (activeFilters.includes('recent')) {
-            const recent = getPostsByRecent();
-            filteredPosts = filteredPosts.filter(p => 
-                recent.find(r => r.lat == p.lat && r.lng == p.lng)
-            );
-        }
-
+        
         updateSidebar(filteredPosts);
         updateMapMarkers(filteredPosts);
         updateStatus(`${filteredPosts.length} posts encontrados`);
-
+        
     } catch (error) {
         console.error('Erro ao aplicar filtro:', error);
         updateStatus('Erro ao carregar');
@@ -258,38 +292,67 @@ async function applyFilter() {
     }
 }
 
-// Filtros auxiliares
+// Filtros (versão simplificada - você pode conectar ao backend depois)
 async function getPostsByProximity() {
-    if (!userPosition) return getPostsByRecent();
-
+    if (!userPosition) {
+        return getPostsByRecent(); // Fallback
+    }
+    
+    // Calcula distância e ordena
     const postsWithDistance = currentPosts.map(post => {
-        const distance = calculateDistance(userPosition.lat, userPosition.lng, post.lat, post.lng);
+        const distance = calculateDistance(
+            userPosition.lat, userPosition.lng,
+            post.lat, post.lng
+        );
         return { ...post, distance };
     });
+    
+    return postsWithDistance
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, postLimit);
+}
 
-    return postsWithDistance.sort((a, b) => a.distance - b.distance).slice(0, 20);
+async function getPostsByFriends() {
+    // Por enquanto retorna posts aleatórios - conecte ao backend depois
+    const shuffled = [...currentPosts].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.min(postLimit, shuffled.length));
+}
+
+async function getPostsByCommercial() {
+    // Filtra posts comerciais (você pode adicionar um campo no banco)
+    return currentPosts.filter(post => 
+        post.user_type === 'comercial' || 
+        (post.name && (post.name.includes('Loja') || post.name.includes('Restaurante')))
+    ).slice(0, postLimit);
 }
 
 function getPostsByRecent() {
-    return [...currentPosts].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, 20);
+    // Ordena por data (mais recentes primeiro)
+    return [...currentPosts]
+        .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+        .slice(0, postLimit);
 }
 
 // Utilitários
 function calculateDistance(lat1, lng1, lat2, lng2) {
-    const R = 6371;
+    const R = 6371; // Raio da Terra em km
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2)**2 +
-              Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
-              Math.sin(dLng/2)**2;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     return R * c;
 }
 
 function updateSidebar(posts) {
     const container = document.getElementById('avatars-container');
-    container.innerHTML = '';
-
+    
+    // Remove itens existentes
+    const existingItems = container.querySelectorAll('.carousel-item');
+    existingItems.forEach(item => item.remove());
+    
+    // Adiciona novos itens
     posts.forEach(post => {
         const item = document.createElement('div');
         item.className = 'carousel-item';
@@ -303,74 +366,184 @@ function updateSidebar(posts) {
             <img src="${getAvatarUrl(post.avatar)}" 
                  alt="Avatar" 
                  style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;"
-                 onerror="this.src='https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExeTRweGJoMHk1eG5nb2tyOHMyMHp1ZGlpYTFoZDZ6Ym9zZ3ZkYXB2MSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/bvQHYGOF8UOXqXSFir/giphy.gif'">
+                 onerror="this.onerror=null;this.src='/images/default.gif'">
             <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">
-                ${post.username}${distance}
+                ${post.name || post.nome || 'Sala'}
+            </div>
+            <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">
+                ${post.cidade || ''}${distance}
             </div>
         `;
-        item.addEventListener('click', () => {
-            map.setCenter({ lat: post.lat, lng: post.lng });
-            map.setZoom(15);
-        });
+        
         container.appendChild(item);
     });
 }
 
-// Funções auxiliares de filtro
-function getPostsByRecent() {
-    const sorted = [...currentPosts].sort((a, b) => new Date(b.date) - new Date(a.date));
-    return sorted.slice(0, 10);
+function updateMapMarkers(posts) {
+    // Remove marcadores existentes
+    if (markerCluster) {
+        markerCluster.clearMarkers();
+    }
+    markers.forEach(marker => marker.setMap(null));
+    markers = [];
+
+    // Adiciona novos marcadores
+    posts.forEach(post => {
+        const marker = new google.maps.Marker({
+            position: { lat: Number(post.lat), lng: Number(post.lng) },
+            title: post.name || 'Local',
+            icon: {
+                url: getAvatarUrl(post.avatar),
+                scaledSize: new google.maps.Size(50, 65),
+                anchor: new google.maps.Point(25, 65)
+            }
+        });
+        marker.addListener('click', () => {
+            window.MapChat && window.MapChat.showPostModal(post, { modo: 'mapa' });
+        });
+        markers.push(marker);
+    });
+
+    if (window.markerClusterer && window.markerClusterer.MarkerClusterer) {
+        markerCluster = new markerClusterer.MarkerClusterer({ map, markers });
+    }
+
+    // Ajusta zoom para mostrar todos os marcadores
+    if (markers.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        markers.forEach(marker => bounds.extend(marker.getPosition()));
+        map.fitBounds(bounds);
+    }
 }
 
-        async function getPostsByProximity() {
-            if (!userLocation) return [];
-            return currentPosts
-                .map(post => ({
-                    ...post,
-                    distance: google.maps.geometry.spherical.computeDistanceBetween(
-                        new google.maps.LatLng(userLocation.lat, userLocation.lng),
-                        new google.maps.LatLng(post.lat, post.lng)
-                    )
-                }))
-                .sort((a, b) => a.distance - b.distance)
-                .slice(0, 10);
+function showLoading(show) {
+    const container = document.getElementById('avatars-container');
+    const buttons = document.querySelectorAll('.filter-btn');
+    
+    if (show) {
+        container.classList.add('loading');
+        buttons.forEach(btn => btn.classList.add('loading'));
+    } else {
+        container.classList.remove('loading');
+        buttons.forEach(btn => btn.classList.remove('loading'));
+    }
+}
+
+function updateStatus(text) {
+    const statusEl = document.getElementById('status-text');
+    if (statusEl) statusEl.textContent = text;
+}
+
+function initMapChatHome() {
+    if (!window.google || !window.google.maps) return;
+
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: -14.2350, lng: -51.9253 },
+        zoom: 4,
+        streetViewControl: false,
+        mapTypeControl: false,
+        fullscreenControl: false,
+        gestureHandling: 'greedy'
+    });
+
+    // Inicializa com dados existentes
+    updateMapMarkers(currentPosts);
+
+    // Inicializa Street View se disponível
+    if (currentPosts.length > 0) {
+        showStreetView(currentPosts[0]);
+    } else {
+        document.getElementById('map').style.display = 'block';
+        document.getElementById('streetview').style.display = 'none';
+    }
+    
+    // Obtém localização do usuário
+    getUserLocation();
+    
+    // Aplica filtro inicial
+    setTimeout(() => {
+        applyFilter('proximity');
+    }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Botão para esconder barra lateral
+    document.getElementById('btn-hide-sidebar').addEventListener('click', function() {
+        document.getElementById('chat-carousel').classList.add('hide');
+        document.getElementById('btn-show-sidebar').style.display = 'flex';
+    });
+
+    // Botão lupa para mostrar barra lateral
+    let btnShow = document.createElement('button');
+    btnShow.id = 'btn-show-sidebar';
+    btnShow.title = 'Mostrar barra lateral';
+    btnShow.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+    document.body.appendChild(btnShow);
+    btnShow.addEventListener('click', function() {
+        document.getElementById('chat-carousel').classList.remove('hide');
+        btnShow.style.display = 'none';
+    });
+    // Seletor de quantidade de posts
+    document.getElementById('post-limit').addEventListener('change', function() {
+        postLimit = parseInt(this.value, 10) || 20;
+        // Reaplica o filtro ativo
+        const activeBtn = document.querySelector('.filter-btn.active');
+        if (activeBtn) {
+            applyFilter(activeBtn.getAttribute('data-filter'));
         }
+    });
+    // Botões de navegação
+    document.getElementById('btn-voltar-mapa').addEventListener('click', function () {
+        document.getElementById('map').style.display = 'block';
+        document.getElementById('streetview').style.display = 'none';
+        this.style.display = 'none';
+        if (lastStreetViewLoc) document.getElementById('btn-voltar-streetview').style.display = 'block';
+        if (panorama) panorama.setVisible(false);
+    });
 
-        // ================================
-        // ✅ Minimizar/Maximizar Sidebar
-        // ================================
-        document.getElementById('btn-minimizar').addEventListener('click', function() {
-            document.getElementById('chat-carousel').style.display = 'none';
-            document.getElementById('btn-maximizar').style.display = 'flex';
-        });
-
-        document.getElementById('btn-maximizar').addEventListener('click', function() {
-            document.getElementById('chat-carousel').style.display = 'flex';
+    document.getElementById('btn-voltar-streetview').addEventListener('click', function () {
+        if (lastStreetViewLoc) {
+            showStreetView(lastStreetViewLoc);
             this.style.display = 'none';
+        }
+    });
+
+    // Event listeners para filtros
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active de todos
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            // Adiciona active no clicado
+            this.classList.add('active');
+            // Aplica filtro
+            applyFilter(this.getAttribute('data-filter'));
         });
+    });
 
-        // ================================
-        // Inicialização
-        // ================================
-        // Inicialização do Google Maps
-        window.initMap = function() {
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: { lat: -14.2350, lng: -51.9253 }, // Centro do Brasil
-                zoom: 4,
-                streetViewControl: false,
-                mapTypeControl: false,
-                fullscreenControl: false
-            });
-            // Aqui você pode adicionar marcadores iniciais, se quiser
-        };
+    // Event listener para avatares
+    document.getElementById('avatars-container').addEventListener('click', function(e) {
+        const item = e.target.closest('.carousel-item');
+        if (item) {
+            const lat = parseFloat(item.getAttribute('data-lat'));
+            const lng = parseFloat(item.getAttribute('data-lng'));
+            
+            const loc = currentPosts.find(l => 
+                Number(l.lat).toFixed(5) === lat.toFixed(5) && 
+                Number(l.lng).toFixed(5) === lng.toFixed(5)
+            );
 
-        window.onload = async () => {
-            if (typeof window.initMap === 'function') {
-                window.initMap();
+            if (loc) {
+                window.showStreetView(loc);
+            } else {
+                focusMapOnLocation({lat, lng});
             }
-            // await fetchPosts(); // Se necessário, descomente e implemente fetchPosts
-            applyFilter();
-        };
-    </script>
-</body>
-</html>
+        }
+    });
+});
+</script>
+
+@section('scripts')
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'SUA_CHAVE_API_AQUI') }}&libraries=geometry&callback=initMapChatHome"></script>
+@endsection
+
+@endsection
