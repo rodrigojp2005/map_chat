@@ -147,14 +147,27 @@ document.addEventListener('DOMContentLoaded', function ( ) {
     }
 
     window.showStreetView = function(loc) {
+        // Valida se o local tem coordenadas válidas
+        if (!loc || !loc.lat || !loc.lng || 
+            isNaN(parseFloat(loc.lat)) || isNaN(parseFloat(loc.lng)) ||
+            parseFloat(loc.lat) === 0 || parseFloat(loc.lng) === 0) {
+            console.error('Local inválido para Street View:', loc);
+            handleStreetViewError(loc);
+            return;
+        }
+        
         const pos = { lat: Number(loc.lat), lng: Number(loc.lng) };
         const streetViewService = new google.maps.StreetViewService();
         document.getElementById('streetview-error').style.display = 'none';
+        
+        console.log('Tentando carregar Street View para:', pos);
+        
         streetViewService.getPanorama({ location: pos, radius: 50 }, (data, status) => {
             if (status === google.maps.StreetViewStatus.OK) {
                 document.getElementById('map').style.display = 'none';
                 document.getElementById('streetview').style.display = 'block';
                 btnVoltarMapa.style.display = 'block';
+                
                 panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
                     pano: data.location.pano, pov: { heading: 0, pitch: 0 }, zoom: 1,
                     disableDefaultUI: true, showRoadLabels: false, motionTracking: false
@@ -192,7 +205,10 @@ document.addEventListener('DOMContentLoaded', function ( ) {
                 
                 lastStreetViewLoc = loc;
                 btnVoltarStreetview.style.display = 'none';
+                
+                console.log('Street View carregado com sucesso');
             } else {
+                console.error('Falha ao carregar Street View:', status);
                 handleStreetViewError(loc);
             }
         });
@@ -292,22 +308,54 @@ document.addEventListener('DOMContentLoaded', function ( ) {
         // Inicializa marcadores com todos os posts
         updateMapMarkers(currentPosts);
         
-        // Carrega primeiro post no Street View se disponível
-        if (currentPosts.length > 0) {
+        // Encontra o primeiro local válido para mostrar no Street View
+        const validLocation = findValidLocation();
+        
+        if (validLocation) {
             // Aguarda um pouco para o mapa carregar completamente
             setTimeout(() => {
-                showStreetView(currentPosts[0]);
-            }, 500);
+                showStreetView(validLocation);
+            }, 800);
         } else {
+            // Se não encontrar nenhum local válido, mostra o mapa
             document.getElementById('map').style.display = 'block';
             document.getElementById('streetview').style.display = 'none';
+            console.log('Nenhum local válido encontrado para Street View');
         }
         
         // Obtém localização do usuário
         getUserLocation();
         
-        // Aplica filtro inicial com delay
-        setTimeout(() => applyFilter('proximity'), 1500);
+        // Aplica filtro inicial com delay maior
+        setTimeout(() => applyFilter('proximity'), 2000);
+    }
+    
+    // Função para encontrar um local válido
+    function findValidLocation() {
+        // Procura por um local que tenha coordenadas válidas
+        for (let i = 0; i < currentPosts.length; i++) {
+            const loc = currentPosts[i];
+            if (loc && loc.lat && loc.lng && 
+                !isNaN(parseFloat(loc.lat)) && !isNaN(parseFloat(loc.lng)) &&
+                parseFloat(loc.lat) !== 0 && parseFloat(loc.lng) !== 0) {
+                console.log('Local válido encontrado:', loc);
+                return loc;
+            }
+        }
+        
+        // Se não encontrar nos posts filtrados, procura nos dados originais
+        const allPosts = MC_LOCATIONS.filter(l => !l.no_gincana);
+        for (let i = 0; i < allPosts.length; i++) {
+            const loc = allPosts[i];
+            if (loc && loc.lat && loc.lng && 
+                !isNaN(parseFloat(loc.lat)) && !isNaN(parseFloat(loc.lng)) &&
+                parseFloat(loc.lat) !== 0 && parseFloat(loc.lng) !== 0) {
+                console.log('Local válido encontrado nos dados originais:', loc);
+                return loc;
+            }
+        }
+        
+        return null;
     }
 
     btnHideSidebar.addEventListener('click', () => {
