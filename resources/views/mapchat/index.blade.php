@@ -5,7 +5,7 @@
     <h2 style="margin: 0; font-weight: 600; color: #198754; font-size: 2rem;">Minhas Salas</h2>
     </div>
     
-    @if($gincanas->isEmpty())
+    @if($mapchats->isEmpty())
         <div class="text-center py-16">
             <div class="max-w-md mx-auto">
                 <div class="text-6xl mb-6">🎯</div>
@@ -31,29 +31,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($gincanas as $i => $gincana)
+                    @foreach($mapchats as $i => $mapchat)
                         <tr style="background: {{ $i % 2 == 0 ? '#eafaf1' : '#c7eed8' }};">
-                            <td style="padding: 10px 8px;">{{ $gincana->nome }}</td>
-                            <td style="padding: 10px 8px;">{{ $gincana->duracao }} min</td>
-                            <td style="padding: 10px 8px;">{{ number_format($gincana->latitude, 4) }}, {{ number_format($gincana->longitude, 4) }}</td>
+                            <td style="padding: 10px 8px;">{{ $mapchat->nome }}</td>
+                            <td style="padding: 10px 8px;">{{ $mapchat->duracao }} min</td>
+                            <td style="padding: 10px 8px;">{{ number_format($mapchat->latitude, 4) }}, {{ number_format($mapchat->longitude, 4) }}</td>
                             <td style="padding: 10px 8px;">
-                                <span style="padding: 4px 8px; border-radius: 12px; font-size: 12px; background: {{ $gincana->privacidade == 'publica' ? '#d4edda' : '#fff3cd' }}; color: {{ $gincana->privacidade == 'publica' ? '#155724' : '#856404' }};">
-                                    {{ $gincana->privacidade == 'publica' ? '🌍 Pública' : '🔒 Privada' }}
+                                <span style="padding: 4px 8px; border-radius: 12px; font-size: 12px; background: {{ $mapchat->privacidade == 'publica' ? '#d4edda' : '#fff3cd' }}; color: {{ $mapchat->privacidade == 'publica' ? '#155724' : '#856404' }};">
+                                    {{ $mapchat->privacidade == 'publica' ? '🌍 Pública' : '🔒 Privada' }}
                                 </span>
                             </td>
-                            <td style="padding: 10px 8px;">{{ $gincana->created_at->format('d/m/Y') }}</td>
+                            <td style="padding: 10px 8px;">{{ $mapchat->created_at->format('d/m/Y') }}</td>
                             <td style="padding: 10px 8px; text-align:center;">
                                 <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
-                                    <button type="button" title="Compartilhar" onclick="compartilharGincana('{{ $gincana->nome }}', '{{ route('mapchat.show', $gincana) }}')" style="background: none; border: none; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; cursor: pointer;">
+                                    <button type="button" title="Compartilhar" onclick="compartilharMapchat('{{ $mapchat->nome }}', '{{ route('mapchat.show', $mapchat) }}')" style="background: none; border: none; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; cursor: pointer;">
                                         <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2R5aDI5bnVkNHAyMG5zM2tnNHVlOGY5NjA1ZW04ZzZrNzNpZGx4biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/XfmFPcUZTddaFZhLgt/giphy.gif" alt="Compartilhar" style="width: 33px; height: 33px; display: inline-block; margin-right: 2px;">
                                     </button>
-                                    <a href="{{ route('mapchat.edit', $gincana) }}" title="Editar" style="background: none; border: none; color: #ffc107; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; text-decoration: none;">
+                                    <a href="{{ route('mapchat.edit', $mapchat) }}" title="Editar" style="background: none; border: none; color: #ffc107; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; text-decoration: none;">
                                         ✏️
                                     </a>
-                                    <form action="{{ route('mapchat.destroy', $gincana) }}" method="POST" style="display:inline; margin:0;">
+                                    <form action="{{ route('mapchat.destroy', $mapchat) }}" method="POST" style="display:inline; margin:0;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" title="Excluir" style="background: none; border: none; color: #dc3545; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; cursor: pointer;" onclick="return confirm('Tem certeza que deseja excluir esta gincana?')">
+                                        <button type="submit" title="Excluir" style="background: none; border: none; color: #dc3545; font-size: 1.3em; vertical-align: middle; display: flex; align-items: center; cursor: pointer;" onclick="return confirm('Tem certeza que deseja excluir esta sala?')">
                                             🗑️
                                         </button>
                                     </form>
@@ -71,11 +71,11 @@
     </div>
 
     <script>
-    function compartilharGincana(nome, url) {
+    function compartilharMapchat(nome, url) {
         if (navigator.share) {
             navigator.share({
                 title: nome,
-                text: `Jogue a gincana "${nome}"!`,
+                text: `Visite a sala "${nome}"!`,
                 url: url
             });
         } else {

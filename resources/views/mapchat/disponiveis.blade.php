@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-@if($gincanasDisponiveis->count() > 0)
+@if($mapchatsDisponiveis->count() > 0)
 <div class="bg-gradient-to-br from-green-50 to-blue-100 py-8">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 @else
@@ -17,22 +17,22 @@
             </p>
         </div>
 
-        @if($gincanasDisponiveis->count() > 0)
+        @if($mapchatsDisponiveis->count() > 0)
             <!-- Statistics Card -->
             <div class="bg-white rounded-xl shadow-lg p-6 text-center mb-8">
-                <div class="text-3xl font-bold text-green-600">{{ $gincanasDisponiveis->count() }}</div>
-                <div class="text-gray-600 mt-2">{{ $gincanasDisponiveis->count() == 1 ? 'Sala Disponível' : 'Salas Disponíveis' }}</div>
+                <div class="text-3xl font-bold text-green-600">{{ $mapchatsDisponiveis->count() }}</div>
+                <div class="text-gray-600 mt-2">{{ $mapchatsDisponiveis->count() == 1 ? 'Sala Disponível' : 'Salas Disponíveis' }}</div>
             </div>
 
-            <!-- Gincanas List -->
+            <!-- Mapchats List -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($gincanasDisponiveis as $gincana)
+                @foreach($mapchatsDisponiveis as $mapchat)
                     <div class="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-l-4 border-green-500">
                         <div class="p-6">
                             <!-- Header -->
                             <div class="flex justify-between items-start mb-4">
                                 <h3 class="text-xl font-bold text-gray-900 line-clamp-2">
-                                    {{ $gincana->nome }}
+                                    {{ $mapchat->nome }}
                                 </h3>
                                 <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
                                     🆕 Disponível
@@ -43,17 +43,17 @@
                             <div class="flex items-center gap-2 mb-3">
                                 <div class="w-8 h-8 bg-green-300 rounded-full flex items-center justify-center">
                                     <span class="text-sm font-medium text-green-800">
-                                        {{ $gincana->user ? substr($gincana->user->name, 0, 1) : '?' }}
+                                        {{ $mapchat->user ? substr($mapchat->user->name, 0, 1) : '?' }}
                                     </span>
                                 </div>
                                 <span class="text-sm text-gray-600">
-                                    Criada por {{ $gincana->user ? $gincana->user->name : 'Usuário Desconhecido' }}
+                                    Criada por {{ $mapchat->user ? $mapchat->user->name : 'Usuário Desconhecido' }}
                                 </span>
                             </div>
 
                             <!-- Context -->
                             <p class="text-gray-600 text-sm mb-4 line-clamp-2">
-                                {{ $gincana->contexto }}
+                                {{ $mapchat->contexto }}
                             </p>
 
                             <!-- Stats -->
@@ -61,7 +61,7 @@
                                 <div class="flex justify-between">
                                     <span class="text-sm text-gray-600">Duração:</span>
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ $gincana->duracao }} {{ $gincana->duracao == 1 ? 'local' : 'locais' }}
+                                        {{ $mapchat->duracao }} {{ $mapchat->duracao == 1 ? 'local' : 'locais' }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between">
@@ -73,20 +73,20 @@
                                 <div class="flex justify-between">
                                     <span class="text-sm text-gray-600">Criada em:</span>
                                     <span class="text-sm font-medium text-gray-700">
-                                        {{ $gincana->created_at->format('d/m/Y') }}
+                                        {{ $mapchat->created_at->format('d/m/Y') }}
                                     </span>
                                 </div>
                             </div>
 
                             <!-- Actions -->
                             <div class="flex gap-2">
-                                @if(Auth::id() !== $gincana->user_id)
-                                                <a href="{{ route('mapchat.jogar', $gincana) }}" 
+                                @if(Auth::id() !== $mapchat->user_id)
+                                                <a href="{{ route('mapchat.jogar', $mapchat) }}" 
                                                     class="flex-1 bg-green-600 text-white text-center px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium">
                                                      💬 Entrar no Chat
                                     </a>
                                 @endif
-                                    <button type="button" onclick="compartilharGincanaDisponivel('{{ $gincana->nome }}', '{{ route('mapchat.show', $gincana) }}')" class="flex-1 bg-blue-600 text-white text-center px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2">
+                                    <button type="button" onclick="compartilharMapchatDisponivel('{{ $mapchat->nome }}', '{{ route('mapchat.show', $mapchat) }}')" class="flex-1 bg-blue-600 text-white text-center px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center gap-2">
                                         <img src="https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExd2R5aDI5bnVkNHAyMG5zM2tnNHVlOGY5NjA1ZW04ZzZrNzNpZGx4biZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/XfmFPcUZTddaFZhLgt/giphy.gif" alt="Compartilhar" style="width: 20px; height: 20px;">
                                         Compartilhar com amigo
                                     </button>
@@ -114,17 +114,45 @@
 </div>
 
 <script>
-function compartilharGincanaDisponivel(nome, url) {
-    if (navigator.share) {
-        navigator.share({
-            title: nome,
-            text: `Jogue a gincana "${nome}"! Que tal criar uma gincana para mim também?`,
-            url: url
-        });
-    } else {
-        alert('Compartilhamento nativo não disponível neste dispositivo.');
+    // Função para compartilhar uma mapchat disponível
+    function compartilharMapchatDisponivel(nomeMapchat, urlMapchat) {
+        if (navigator.share) {
+            navigator.share({
+                title: `MapChat: ${nomeMapchat}`,
+                text: `Confira esta MapChat disponível: ${nomeMapchat}. Entre agora e participe!`,
+                url: urlMapchat
+            }).then(() => {
+                console.log('Compartilhamento realizado com sucesso');
+            }).catch((error) => {
+                console.error('Erro ao compartilhar:', error);
+                compartilharFallbackDisponivel(nomeMapchat, urlMapchat);
+            });
+        } else {
+            compartilharFallbackDisponivel(nomeMapchat, urlMapchat);
+        }
     }
-}
+
+    // Função de fallback para navegadores sem suporte ao Web Share API
+    function compartilharFallbackDisponivel(nomeMapchat, urlMapchat) {
+        const texto = `Confira esta MapChat disponível: ${nomeMapchat}. Entre agora e participe! ${urlMapchat}`;
+        
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('Link copiado para a área de transferência! Compartilhe com seus amigos.');
+            }).catch(() => {
+                mostrarModalCompartilhamento(texto);
+            });
+        } else {
+            mostrarModalCompartilhamento(texto);
+        }
+    }
+
+    // Função para mostrar modal com o texto para copiar
+    function mostrarModalCompartilhamento(texto) {
+        alert(`Copie este texto para compartilhar:
+
+${texto}`);
+    }
 </script>
 <style>
 .line-clamp-2 {

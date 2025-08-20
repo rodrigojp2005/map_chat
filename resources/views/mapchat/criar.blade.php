@@ -2,7 +2,7 @@
 @section('content')
 <div id="form_container" style="max-width: 600px; margin: 24px auto 0 auto; padding: 28px 24px 22px 24px; background: #eafaf1; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
     <h2 style="margin-bottom: 22px; text-align: center; font-weight: 700; color: #198754; font-size: 2rem; letter-spacing: 0.5px;">Criar Post</h2>
-    <form id="form-criar-gincana" method="POST" action="{{ route('mapchat.store') }}">
+    <form id="form-criar-mapchat" method="POST" action="{{ route('mapchat.store') }}">
         @csrf
 
         <!-- Nome da Sala -->
