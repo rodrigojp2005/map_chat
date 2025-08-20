@@ -159,13 +159,37 @@ document.addEventListener('DOMContentLoaded', function ( ) {
                     pano: data.location.pano, pov: { heading: 0, pitch: 0 }, zoom: 1,
                     disableDefaultUI: true, showRoadLabels: false, motionTracking: false
                 });
-                const avatarLatLng = google.maps.geometry.spherical.computeOffset(data.location.latLng, 10, panorama.getPov().heading || 0);
+                
+                // Calcula posição do avatar 10 metros à frente da câmera
+                const cameraLatLng = data.location.latLng;
+                const initialHeading = panorama.getPov().heading || 0;
+                
+                // Posiciona o avatar 10 metros à frente da câmera na direção que ela está olhando
+                const avatarLatLng = google.maps.geometry.spherical.computeOffset(
+                    cameraLatLng,
+                    10, // 10 metros à frente
+                    initialHeading // direção inicial da câmera
+                );
+                
                 const avatar = new google.maps.Marker({
-                    position: avatarLatLng, map: panorama,
-                    icon: { url: getAvatarUrl(loc.avatar), scaledSize: new google.maps.Size(60, 80), anchor: new google.maps.Point(30, 80) },
+                    position: avatarLatLng, 
+                    map: panorama,
+                    icon: { 
+                        url: getAvatarUrl(loc.avatar), 
+                        scaledSize: new google.maps.Size(60, 80), 
+                        anchor: new google.maps.Point(30, 80) 
+                    },
                     title: loc.name || 'Local'
                 });
+                
                 avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
+                
+                // Ajusta a câmera para olhar em direção ao avatar
+                panorama.setPov({ 
+                    heading: initialHeading, 
+                    pitch: -5 // leve inclinação para baixo para ver melhor o avatar
+                });
+                
                 lastStreetViewLoc = loc;
                 btnVoltarStreetview.style.display = 'none';
             } else {
