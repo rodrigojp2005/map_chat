@@ -1,5 +1,7 @@
 @extends('layouts.app')
+
 @section('title', 'MapChat - Converse no mapa!')
+
 @section('content')
 <div class="relative w-full" style="height: calc(100vh - 120px);">
     <div id="map" class="absolute left-0 top-0" style="width: 100%; height: 100%; z-index: 1;"></div>
@@ -51,11 +53,8 @@
                 $avatar = $loc['avatar'] ?? ''; $avatar = trim($avatar); $avatar = $avatar ? basename($avatar) : 'default.gif';
                 if (!$avatar || $avatar === '.' || $avatar === '..') $avatar = 'default.gif';
             @endphp
-           <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;">
-                <!-- MUDANÇA AQUI: Cor da borda alterada para cinza claro (#ddd) -->
-                <img src="{{ asset('images/' . $avatar) }}"
-                    alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ddd; margin-bottom: 4px; object-fit: cover;"
-                    onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
+            <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;">
+                <img src="{{ asset('images/' . $avatar) }}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
                 <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['name'] ?? $loc['nome'] ?? 'Sala' }}</div>
                 <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['cidade'] ?? '' }}</div>
             </div>
@@ -148,55 +147,48 @@ document.addEventListener('DOMContentLoaded', function ( ) {
     }
 
     window.showStreetView = function(loc) {
-    const avatarPosition = { lat: Number(loc.lat), lng: Number(loc.lng) };
-    const streetViewService = new google.maps.StreetViewService();
-    
-    document.getElementById('streetview-error').style.display = 'none';
-
-    // 1. Encontra o panorama mais próximo da localização do post
-    streetViewService.getPanorama({ location: avatarPosition, radius: 50 }, (data, status) => {
-        if (status === google.maps.StreetViewStatus.OK) {
-            document.getElementById('map').style.display = 'none';
-            document.getElementById('streetview').style.display = 'block';
-            btnVoltarMapa.style.display = 'block';
-
-            const cameraPosition = data.location.latLng; // Posição real da câmera do Street View
-
-            // 2. Calcula o ângulo (heading) da câmera para o avatar
-            // Isso faz a câmera "encarar" o avatar
-            const heading = google.maps.geometry.spherical.computeHeading(cameraPosition, new google.maps.LatLng(avatarPosition));
-            panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
-                position: cameraPosition, // Posição da câmera
-                pov: {
-                    heading: heading, // Aponta a câmera para o avatar
-                    pitch: -5,        // Inclina a câmera um pouco para baixo para melhor enquadramento
-                    zoom: 0.5         // Ajuste o zoom para controlar a "distância" (0 é mais longe, 1 é mais perto)
+        const avatarPosition = { lat: Number(loc.lat), lng: Number(loc.lng) };
+        const streetViewService = new google.maps.StreetViewService();
+        document.getElementById('streetview-error').style.display = 'none';
+        // 1. Encontra o panorama mais próximo da localização do post
+        streetViewService.getPanorama({ location: avatarPosition, radius: 50 }, (data, status) => {
+            if (status === google.maps.StreetViewStatus.OK) {
+                document.getElementById('map').style.display = 'none';
+                document.getElementById('streetview').style.display = 'block';
+                btnVoltarMapa.style.display = 'block';
+                const cameraPosition = data.location.latLng; // Posição real da câmera do Street View
+                // 2. Calcula o ângulo (heading) da câmera para o avatar
+                // Isso faz a câmera "encarar" o avatar
+                const heading = google.maps.geometry.spherical.computeHeading(cameraPosition, new google.maps.LatLng(avatarPosition));
+                panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
+                    position: cameraPosition, // Posição da câmera
+                    pov: {
+                        heading: heading, // Aponta a câmera para o avatar
+                        pitch: -5,        // Inclina a câmera um pouco para baixo para melhor enquadramento
+                        zoom: 0.5         // Ajuste o zoom para controlar a "distância" (0 é mais longe, 1 é mais perto)
                     },
-                disableDefaultUI: true,
-                showRoadLabels: false,
-                motionTracking: false
-            });
-            // 3. Cria o marcador do avatar na sua posição original
-            const avatarMarker = new google.maps.Marker({
-                position: avatarPosition, // Posição exata do post
-                map: panorama,
-                icon: {
-                    url: getAvatarUrl(loc.avatar),
-                    scaledSize: new google.maps.Size(60, 80),
-                    anchor: new google.maps.Point(30, 80)
+                    disableDefaultUI: true,
+                    showRoadLabels: false,
+                    motionTracking: false
+                });
+                // 3. Cria o marcador do avatar na sua posição original
+                const avatarMarker = new google.maps.Marker({
+                    position: avatarPosition, // Posição exata do post
+                    map: panorama,
+                    icon: {
+                        url: getAvatarUrl(loc.avatar),
+                        scaledSize: new google.maps.Size(60, 80),
+                        anchor: new google.maps.Point(30, 80)
                     },
-                title: loc.name || 'Local'
-            });
-
-            avatarMarker.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
-                
-            lastStreetViewLoc = loc;
-            btnVoltarStreetview.style.display = 'none';
-
-        } else {
-            // Se não encontrar Street View, mostra o erro
-            handleStreetViewError(loc);
-        }
+                    title: loc.name || 'Local'
+                });
+                avatarMarker.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
+                lastStreetViewLoc = loc;
+                btnVoltarStreetview.style.display = 'none';
+            } else {
+                // Se não encontrar Street View, mostra o erro
+                handleStreetViewError(loc);
+            }
         });
     }
 
@@ -242,19 +234,6 @@ document.addEventListener('DOMContentLoaded', function ( ) {
         avatarsContainer.innerHTML = '';
         posts.forEach(post => {
             const item = document.createElement('div');
-             // MUDANÇA AQUI: Cor da borda alterada para cinza claro (#ddd) no template JS
-            item.innerHTML = `
-                <img src="${getAvatarUrl(post.avatar)}" 
-                     alt="Avatar" 
-                     style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ddd; margin-bottom: 4px; object-fit: cover;"
-                     onerror="this.onerror=null;this.src='/images/default.gif'">
-                <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">
-                    ${post.name || post.nome || 'Sala'}
-                </div>
-                <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">
-                    ${post.cidade || ''}${distance}
-                </div>
-            `;
             item.className = 'carousel-item';
             item.setAttribute('data-lat', post.lat); item.setAttribute('data-lng', post.lng);
             item.style.cssText = 'flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;';
@@ -362,5 +341,5 @@ document.addEventListener('DOMContentLoaded', function ( ) {
 @endsection
 
 @section('scripts')
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&libraries=geometry&callback=initMapChatHome"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY', 'SUA_CHAVE_API_AQUI' ) }}&libraries=geometry&callback=initMapChatHome"></script>
 @endsection
