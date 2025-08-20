@@ -259,19 +259,31 @@ document.addEventListener('DOMContentLoaded', function ( ) {
 
     window.initMapChatHome = function() {
         if (!window.google || !window.google.maps) return;
+        
         map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: -14.2350, lng: -51.9253 }, zoom: 4, streetViewControl: false,
             mapTypeControl: false, fullscreenControl: false, gestureHandling: 'greedy'
         });
+        
+        // Inicializa marcadores com todos os posts
         updateMapMarkers(currentPosts);
+        
+        // Carrega primeiro post no Street View se disponível
         if (currentPosts.length > 0) {
-            showStreetView(currentPosts[0]);
+            // Aguarda um pouco para o mapa carregar completamente
+            setTimeout(() => {
+                showStreetView(currentPosts[0]);
+            }, 500);
         } else {
             document.getElementById('map').style.display = 'block';
             document.getElementById('streetview').style.display = 'none';
         }
+        
+        // Obtém localização do usuário
         getUserLocation();
-        setTimeout(() => applyFilter('proximity'), 1000);
+        
+        // Aplica filtro inicial com delay
+        setTimeout(() => applyFilter('proximity'), 1500);
     }
 
     btnHideSidebar.addEventListener('click', () => {
@@ -312,9 +324,27 @@ document.addEventListener('DOMContentLoaded', function ( ) {
         if (item) {
             const lat = parseFloat(item.getAttribute('data-lat'));
             const lng = parseFloat(item.getAttribute('data-lng'));
-            const loc = currentPosts.find(l => Number(l.lat).toFixed(5) === lat.toFixed(5) && Number(l.lng).toFixed(5) === lng.toFixed(5));
-            if (loc) window.showStreetView(loc);
-            else focusMapOnLocation({lat, lng});
+            
+            // Busca primeiro nos posts filtrados/atualizados
+            let loc = currentPosts.find(l => 
+                Number(l.lat).toFixed(5) === lat.toFixed(5) && 
+                Number(l.lng).toFixed(5) === lng.toFixed(5)
+            );
+            
+            // Se não encontrar, busca nos dados originais
+            if (!loc) {
+                const allPosts = MC_LOCATIONS.filter(l => !l.no_gincana);
+                loc = allPosts.find(l => 
+                    Number(l.lat).toFixed(5) === lat.toFixed(5) && 
+                    Number(l.lng).toFixed(5) === lng.toFixed(5)
+                );
+            }
+            
+            if (loc) {
+                window.showStreetView(loc);
+            } else {
+                focusMapOnLocation({lat, lng});
+            }
         }
     });
 });
