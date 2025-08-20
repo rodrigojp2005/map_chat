@@ -53,8 +53,8 @@
                 $avatar = $loc['avatar'] ?? ''; $avatar = trim($avatar); $avatar = $avatar ? basename($avatar) : 'default.gif';
                 if (!$avatar || $avatar === '.' || $avatar === '..') $avatar = 'default.gif';
             @endphp
-            <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;">
-                <img src="{{ asset('images/' . $avatar) }}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
+            <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; width: 100%; display: flex; flex-direction: column; align-items: center;">
+                <img src="{{ asset('images/' . $avatar) }}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ddd; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
                 <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['name'] ?? $loc['nome'] ?? 'Sala' }}</div>
                 <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['cidade'] ?? '' }}</div>
             </div>
@@ -217,9 +217,9 @@ document.addEventListener('DOMContentLoaded', function ( ) {
             const item = document.createElement('div');
             item.className = 'carousel-item';
             item.setAttribute('data-lat', post.lat); item.setAttribute('data-lng', post.lng);
-            item.style.cssText = 'flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;';
+            item.style.cssText = 'flex: 0 0 auto; text-align: center; cursor: pointer; width: 100%; display: flex; flex-direction: column; align-items: center;';
             const distance = post.distance ? ` (${post.distance.toFixed(1)}km)` : '';
-            item.innerHTML = `<img src="${getAvatarUrl(post.avatar)}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='/images/default.gif'"><div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.name || post.nome || 'Sala'}</div><div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.cidade || ''}${distance}</div>`;
+            item.innerHTML = `<img src="${getAvatarUrl(post.avatar)}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ddd; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='/images/default.gif'"><div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.name || post.nome || 'Sala'}</div><div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.cidade || ''}${distance}</div>`;
             avatarsContainer.appendChild(item);
         });
     }
