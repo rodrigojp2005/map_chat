@@ -1,7 +1,5 @@
 @extends('layouts.app')
-
 @section('title', 'MapChat - Converse no mapa!')
-
 @section('content')
 <div class="relative w-full" style="height: calc(100vh - 120px);">
     <div id="map" class="absolute left-0 top-0" style="width: 100%; height: 100%; z-index: 1;"></div>
@@ -53,8 +51,8 @@
                 $avatar = $loc['avatar'] ?? ''; $avatar = trim($avatar); $avatar = $avatar ? basename($avatar) : 'default.gif';
                 if (!$avatar || $avatar === '.' || $avatar === '..') $avatar = 'default.gif';
             @endphp
-            <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; width: 100%; display: flex; flex-direction: column; align-items: center;">
-                <img src="{{ asset('images/' . $avatar) }}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ddd; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
+            <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;">
+                <img src="{{ asset('images/' . $avatar) }}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
                 <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['name'] ?? $loc['nome'] ?? 'Sala' }}</div>
                 <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['cidade'] ?? '' }}</div>
             </div>
@@ -147,68 +145,28 @@ document.addEventListener('DOMContentLoaded', function ( ) {
     }
 
     window.showStreetView = function(loc) {
-        // Valida se o local tem coordenadas válidas
-        if (!loc || !loc.lat || !loc.lng || 
-            isNaN(parseFloat(loc.lat)) || isNaN(parseFloat(loc.lng)) ||
-            parseFloat(loc.lat) === 0 || parseFloat(loc.lng) === 0) {
-            console.error('Local inválido para Street View:', loc);
-            handleStreetViewError(loc);
-            return;
-        }
-        
         const pos = { lat: Number(loc.lat), lng: Number(loc.lng) };
         const streetViewService = new google.maps.StreetViewService();
         document.getElementById('streetview-error').style.display = 'none';
-        
-        console.log('Tentando carregar Street View para:', pos);
-        
         streetViewService.getPanorama({ location: pos, radius: 50 }, (data, status) => {
             if (status === google.maps.StreetViewStatus.OK) {
                 document.getElementById('map').style.display = 'none';
                 document.getElementById('streetview').style.display = 'block';
                 btnVoltarMapa.style.display = 'block';
-                
                 panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
                     pano: data.location.pano, pov: { heading: 0, pitch: 0 }, zoom: 1,
                     disableDefaultUI: true, showRoadLabels: false, motionTracking: false
                 });
-                
-                // Calcula posição do avatar 10 metros à frente da câmera
-                const cameraLatLng = data.location.latLng;
-                const initialHeading = panorama.getPov().heading || 0;
-                
-                // Posiciona o avatar 10 metros à frente da câmera na direção que ela está olhando
-                const avatarLatLng = google.maps.geometry.spherical.computeOffset(
-                    cameraLatLng,
-                    10, // 10 metros à frente
-                    initialHeading // direção inicial da câmera
-                );
-                
+                const avatarLatLng = google.maps.geometry.spherical.computeOffset(data.location.latLng, 10, panorama.getPov().heading || 0);
                 const avatar = new google.maps.Marker({
-                    position: avatarLatLng, 
-                    map: panorama,
-                    icon: { 
-                        url: getAvatarUrl(loc.avatar), 
-                        scaledSize: new google.maps.Size(60, 80), 
-                        anchor: new google.maps.Point(30, 80) 
-                    },
+                    position: avatarLatLng, map: panorama,
+                    icon: { url: getAvatarUrl(loc.avatar), scaledSize: new google.maps.Size(60, 80), anchor: new google.maps.Point(30, 80) },
                     title: loc.name || 'Local'
                 });
-                
                 avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
-                
-                // Ajusta a câmera para olhar em direção ao avatar
-                panorama.setPov({ 
-                    heading: initialHeading, 
-                    pitch: -5 // leve inclinação para baixo para ver melhor o avatar
-                });
-                
                 lastStreetViewLoc = loc;
                 btnVoltarStreetview.style.display = 'none';
-                
-                console.log('Street View carregado com sucesso');
             } else {
-                console.error('Falha ao carregar Street View:', status);
                 handleStreetViewError(loc);
             }
         });
@@ -257,9 +215,9 @@ document.addEventListener('DOMContentLoaded', function ( ) {
             const item = document.createElement('div');
             item.className = 'carousel-item';
             item.setAttribute('data-lat', post.lat); item.setAttribute('data-lng', post.lng);
-            item.style.cssText = 'flex: 0 0 auto; text-align: center; cursor: pointer; width: 100%; display: flex; flex-direction: column; align-items: center;';
+            item.style.cssText = 'flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;';
             const distance = post.distance ? ` (${post.distance.toFixed(1)}km)` : '';
-            item.innerHTML = `<img src="${getAvatarUrl(post.avatar)}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ddd; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='/images/default.gif'"><div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.name || post.nome || 'Sala'}</div><div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.cidade || ''}${distance}</div>`;
+            item.innerHTML = `<img src="${getAvatarUrl(post.avatar)}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='/images/default.gif'"><div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.name || post.nome || 'Sala'}</div><div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.cidade || ''}${distance}</div>`;
             avatarsContainer.appendChild(item);
         });
     }
@@ -299,63 +257,19 @@ document.addEventListener('DOMContentLoaded', function ( ) {
 
     window.initMapChatHome = function() {
         if (!window.google || !window.google.maps) return;
-        
         map = new google.maps.Map(document.getElementById('map'), {
             center: { lat: -14.2350, lng: -51.9253 }, zoom: 4, streetViewControl: false,
             mapTypeControl: false, fullscreenControl: false, gestureHandling: 'greedy'
         });
-        
-        // Inicializa marcadores com todos os posts
         updateMapMarkers(currentPosts);
-        
-        // Encontra o primeiro local válido para mostrar no Street View
-        const validLocation = findValidLocation();
-        
-        if (validLocation) {
-            // Aguarda um pouco para o mapa carregar completamente
-            setTimeout(() => {
-                showStreetView(validLocation);
-            }, 800);
+        if (currentPosts.length > 0) {
+            showStreetView(currentPosts[0]);
         } else {
-            // Se não encontrar nenhum local válido, mostra o mapa
             document.getElementById('map').style.display = 'block';
             document.getElementById('streetview').style.display = 'none';
-            console.log('Nenhum local válido encontrado para Street View');
         }
-        
-        // Obtém localização do usuário
         getUserLocation();
-        
-        // Aplica filtro inicial com delay maior
-        setTimeout(() => applyFilter('proximity'), 2000);
-    }
-    
-    // Função para encontrar um local válido
-    function findValidLocation() {
-        // Procura por um local que tenha coordenadas válidas
-        for (let i = 0; i < currentPosts.length; i++) {
-            const loc = currentPosts[i];
-            if (loc && loc.lat && loc.lng && 
-                !isNaN(parseFloat(loc.lat)) && !isNaN(parseFloat(loc.lng)) &&
-                parseFloat(loc.lat) !== 0 && parseFloat(loc.lng) !== 0) {
-                console.log('Local válido encontrado:', loc);
-                return loc;
-            }
-        }
-        
-        // Se não encontrar nos posts filtrados, procura nos dados originais
-        const allPosts = MC_LOCATIONS.filter(l => !l.no_gincana);
-        for (let i = 0; i < allPosts.length; i++) {
-            const loc = allPosts[i];
-            if (loc && loc.lat && loc.lng && 
-                !isNaN(parseFloat(loc.lat)) && !isNaN(parseFloat(loc.lng)) &&
-                parseFloat(loc.lat) !== 0 && parseFloat(loc.lng) !== 0) {
-                console.log('Local válido encontrado nos dados originais:', loc);
-                return loc;
-            }
-        }
-        
-        return null;
+        setTimeout(() => applyFilter('proximity'), 1000);
     }
 
     btnHideSidebar.addEventListener('click', () => {
@@ -396,27 +310,9 @@ document.addEventListener('DOMContentLoaded', function ( ) {
         if (item) {
             const lat = parseFloat(item.getAttribute('data-lat'));
             const lng = parseFloat(item.getAttribute('data-lng'));
-            
-            // Busca primeiro nos posts filtrados/atualizados
-            let loc = currentPosts.find(l => 
-                Number(l.lat).toFixed(5) === lat.toFixed(5) && 
-                Number(l.lng).toFixed(5) === lng.toFixed(5)
-            );
-            
-            // Se não encontrar, busca nos dados originais
-            if (!loc) {
-                const allPosts = MC_LOCATIONS.filter(l => !l.no_gincana);
-                loc = allPosts.find(l => 
-                    Number(l.lat).toFixed(5) === lat.toFixed(5) && 
-                    Number(l.lng).toFixed(5) === lng.toFixed(5)
-                );
-            }
-            
-            if (loc) {
-                window.showStreetView(loc);
-            } else {
-                focusMapOnLocation({lat, lng});
-            }
+            const loc = currentPosts.find(l => Number(l.lat).toFixed(5) === lat.toFixed(5) && Number(l.lng).toFixed(5) === lng.toFixed(5));
+            if (loc) window.showStreetView(loc);
+            else focusMapOnLocation({lat, lng});
         }
     });
 });
