@@ -492,11 +492,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Botão lupa para mostrar barra lateral
-    let btnShow = document.createElement('button');
-    btnShow.id = 'btn-show-sidebar';
-    btnShow.title = 'Mostrar barra lateral';
-    btnShow.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
-    document.body.appendChild(btnShow);
     btnShow.addEventListener('click', function() {
         document.getElementById('chat-carousel').classList.remove('hide');
         btnShow.style.display = 'none';
