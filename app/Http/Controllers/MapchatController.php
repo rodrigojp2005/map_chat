@@ -12,26 +12,27 @@ class MapchatController extends Controller
     public function welcome()
     {
         $locations = [];
-        $gincanas = Mapchat::where('privacidade', 'publica')->get();
-        foreach ($gincanas as $gincana) {
+        $mapchats = Mapchat::where('privacidade', 'publica')->get();
+        foreach ($mapchats as $mapchat) {
             $locations[] = [
-                'lat' => (float) $gincana->latitude,
-                'lng' => (float) $gincana->longitude,
-                'name' => $gincana->nome,
-                'mapchat_id' => $gincana->id,
-                'contexto' => $gincana->contexto,
-                'avatar' => $gincana->avatar,
+                'lat' => (float) $mapchat->latitude,
+                'lng' => (float) $mapchat->longitude,
+                'name' => $mapchat->nome,
+                'mapchat_id' => $mapchat->id,
+                'contexto' => $mapchat->contexto,
+                'avatar' => $mapchat->avatar,
+                'cidade' => $mapchat->cidade,
             ];
         }
         if (empty($locations)) {
-            $locations[] = ['no_gincana' => true];
+            $locations[] = ['no_mapchat' => true];
         }
         return view('welcome', compact('locations'));
     }
     public function index()
     {
-        $gincanas = Mapchat::where('user_id', Auth::id())->get();
-    return view('mapchat.index', ['gincanas' => $gincanas]);
+        $mapchats = Mapchat::where('user_id', Auth::id())->get();
+        return view('mapchat.index', ['mapchats' => $mapchats]);
     }
 
     public function create()
@@ -63,12 +64,12 @@ class MapchatController extends Controller
                 ->where('mapchat_id', $mapchat->id)
                 ->update(['unread_count' => 0]);
         }
-    return view('mapchat.show', ['gincana' => $mapchat]);
+        return view('mapchat.show', ['mapchat' => $mapchat]);
     }
 
     public function edit(Mapchat $mapchat)
     {
-    return view('mapchat.edit', ['gincana' => $mapchat]);
+        return view('mapchat.edit', ['mapchat' => $mapchat]);
     }
 
     public function update(Request $request, Mapchat $mapchat)
@@ -94,12 +95,12 @@ class MapchatController extends Controller
     public function disponiveis()
     {
         $user = auth()->user();
-    $jogadasIds = $user->participacoes()->pluck('mapchat_id')->toArray();
-        $gincanasDisponiveis = Mapchat::where('privacidade', 'publica')
+        $jogadasIds = $user->participacoes()->pluck('mapchat_id')->toArray();
+        $mapchatsDisponiveis = Mapchat::where('privacidade', 'publica')
             ->whereNotIn('id', $jogadasIds)
             ->with('user')
             ->get();
-    return view('mapchat.disponiveis', compact('gincanasDisponiveis'));
+        return view('mapchat.disponiveis', compact('mapchatsDisponiveis'));
     }
 
     // Jogar uma sala específica (alias)
@@ -118,7 +119,7 @@ class MapchatController extends Controller
             'mapchat_id' => $mapchat->id,
             'contexto' => $mapchat->contexto
         ]];
-    return view('mapchat.play', ['gincana' => $mapchat, 'locations' => $locations]);
+        return view('mapchat.play', ['mapchat' => $mapchat, 'locations' => $locations]);
     }
 
     /**

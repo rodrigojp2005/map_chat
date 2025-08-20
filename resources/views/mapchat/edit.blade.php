@@ -2,13 +2,13 @@
 @section('content')
 <div id="form_container" style="max-width: 600px; margin: 24px auto 0 auto; padding: 28px 24px 22px 24px; background: #eafaf1; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
     <h2 style="margin-bottom: 22px; text-align: center; font-weight: 700; color: #198754; font-size: 2rem; letter-spacing: 0.5px;">Editar Sala</h2>
-    <form id="form-editar-gincana" method="POST" action="{{ route('mapchat.update', $gincana->id) }}">
+    <form id="form-editar-mapchat" method="POST" action="{{ route('mapchat.update', $mapchat->id) }}">
         @csrf
         @method('PUT')
         <!-- Nome -->
         <div style="margin-bottom: 16px;">
             <label for="nome" style="display: block; font-weight: bold; margin-bottom: 6px;">Nome</label>
-            <input type="text" id="nome" name="nome" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" value="{{ old('nome', $gincana->nome) }}">
+            <input type="text" id="nome" name="nome" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" value="{{ old('nome', $mapchat->nome) }}">
         </div>
         <!-- Avatar -->
         <div style="margin-bottom: 16px;">
@@ -25,13 +25,13 @@
                 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcTRsNnBmdXl6ZHJibXM3N3dweXlqbjk5ZGQ4aXJ6bjMzMjR3eGg5dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/RJPvSu5cKfg9cZplHn/giphy.gif'
             ];
             $user = Auth::user();
-            if (!empty($gincana->avatar) && Str::startsWith($gincana->avatar, 'http')) {
-                array_unshift($avatars, $gincana->avatar);
+            if (!empty($mapchat->avatar) && Str::startsWith($mapchat->avatar, 'http')) {
+                array_unshift($avatars, $mapchat->avatar);
             }
             @endphp
             @foreach($avatars as $index => $avatar)
             <label style="cursor: pointer;">
-                <input type="radio" name="avatar" value="{{ $avatar }}" {{ (old('avatar', $gincana->avatar) == $avatar || ($index === 0 && empty($gincana->avatar))) ? 'checked' : '' }} style="display: none;">
+                <input type="radio" name="avatar" value="{{ $avatar }}" {{ (old('avatar', $mapchat->avatar) == $avatar || ($index === 0 && empty($mapchat->avatar))) ? 'checked' : '' }} style="display: none;">
                 <img src="{{ $avatar }}" alt="Avatar {{ $index + 1 }}" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ccc; transition: border-color 0.2s;">
             </label>
             @endforeach
@@ -59,8 +59,8 @@
             <div style="flex: 1;">
                 <label style="display: block; font-weight: bold; margin-bottom: 6px;">Escolha o local</label>
                 <div id="map-editar" style="height: 300px; width: 100%; border: 1px solid #ccc; border-radius: 4px;"></div>
-                <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $gincana->latitude) }}">
-                <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $gincana->longitude) }}">
+                <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $mapchat->latitude) }}">
+                <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $mapchat->longitude) }}">
             </div>
             <div style="flex: 1;">
                 <label style="display: block; font-weight: bold; margin-bottom: 6px;">Street View</label>
@@ -70,28 +70,28 @@
         <!-- Campo de Cidade -->
         <div style="margin-bottom: 16px;">
             <label for="cidade" style="display: block; font-weight: bold; margin-bottom: 6px;">Cidade / Localização</label>
-            <input type="text" id="cidade" name="cidade" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" value="{{ old('cidade', $gincana->cidade ?? '') }}" placeholder="Digite uma cidade ou endereço" oninput="debouncedBuscarCidadeEditar()">
+            <input type="text" id="cidade" name="cidade" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;" value="{{ old('cidade', $mapchat->cidade ?? '') }}" placeholder="Digite uma cidade ou endereço" oninput="debouncedBuscarCidadeEditar()">
             <small id="cidade-feedback" style="color: #6c757d; font-size: 12px;"></small>
         </div>
         <!-- Contexto -->
         <div style="margin-bottom: 16px;">
             <label for="contexto" style="display: block; font-weight: bold; margin-bottom: 6px;">Contexto/Dica</label>
-            <textarea id="contexto" name="contexto" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-height: 80px;" placeholder="Dê uma dica sobre o local ou conte uma história...">{{ old('contexto', $gincana->contexto) }}</textarea>
+            <textarea id="contexto" name="contexto" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-height: 80px;" placeholder="Dê uma dica sobre o local ou conte uma história...">{{ old('contexto', $mapchat->contexto) }}</textarea>
         </div>
         <!-- Privacidade -->
         <div style="margin-bottom: 16px;">
             <label style="display: block; font-weight: bold; margin-bottom: 6px;">Privacidade</label>
             <div style="display: flex; gap: 16px;">
                 <div>
-                    <input type="radio" id="publica" name="privacidade" value="publica" {{ $gincana->privacidade == 'publica' ? 'checked' : '' }}>
+                    <input type="radio" id="publica" name="privacidade" value="publica" {{ $mapchat->privacidade == 'publica' ? 'checked' : '' }}>
                     <label for="publica">Pública </label>
                 </div>
                 <div>
-                    <input type="radio" id="privada" name="privacidade" value="privada" {{ $gincana->privacidade == 'privada' ? 'checked' : '' }}>
+                    <input type="radio" id="privada" name="privacidade" value="privada" {{ $mapchat->privacidade == 'privada' ? 'checked' : '' }}>
                     <label for="privada">Privada (amigos)</label>
                 </div>
                 <div>
-                    <input type="radio" id="comercial" name="privacidade" value="comercial" {{ $gincana->privacidade == 'comercial' ? 'checked' : '' }}>
+                    <input type="radio" id="comercial" name="privacidade" value="comercial" {{ $mapchat->privacidade == 'comercial' ? 'checked' : '' }}>
                     <label for="comercial">Comercial (72 horas)</label>
                 </div>
             </div>
@@ -111,9 +111,9 @@
             <div style="background:#fff; border-radius:10px; padding:28px 22px; max-width:340px; width:90vw; box-shadow:0 2px 12px rgba(0,0,0,0.12); text-align:center;">
                 <h3 style="font-size:1.3em; font-weight:700; color:#198754; margin-bottom:18px;">Compartilhe com amigos!</h3>
                 <div style="display:flex; flex-direction:column; gap:14px;">
-                    <a href="https://wa.me/?text={{ urlencode(route('mapchat.show', $gincana->id)) }}" target="_blank" style="background:#25D366; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">WhatsApp</a>
-                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('mapchat.show', $gincana->id)) }}" target="_blank" style="background:#4267B2; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">Facebook</a>
-                    <button onclick="copiarLinkGincana()" style="background:#6c757d; color:#fff; padding:10px; border-radius:6px; font-weight:600; border:none;">Copiar Link</button>
+                    <a href="https://wa.me/?text={{ urlencode(route('mapchat.show', $mapchat->id)) }}" target="_blank" style="background:#25D366; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">WhatsApp</a>
+                    <a href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode(route('mapchat.show', $mapchat->id)) }}" target="_blank" style="background:#4267B2; color:#fff; padding:10px; border-radius:6px; font-weight:600; text-decoration:none;">Facebook</a>
+                    <button onclick="copiarLinkMapchat()" style="background:#6c757d; color:#fff; padding:10px; border-radius:6px; font-weight:600; border:none;">Copiar Link</button>
                 </div>
                 <button onclick="fecharModalCompartilhar()" style="margin-top:18px; background:#dc3545; color:#fff; padding:8px 18px; border-radius:6px; border:none; font-weight:600;">Fechar</button>
             </div>
@@ -121,7 +121,7 @@
 
         <script>
             function fecharModalCompartilhar() { document.getElementById('modal-compartilhar').style.display = 'none'; }
-            function copiarLinkGincana() { const link = "{{ route('mapchat.show', $gincana->id) }}"; navigator.clipboard.writeText(link); alert('Link copiado!'); }
+            function copiarLinkMapchat() { const link = "{{ route('mapchat.show', $mapchat->id) }}"; navigator.clipboard.writeText(link); alert('Link copiado!'); }
         </script>
     </form>
 </div>

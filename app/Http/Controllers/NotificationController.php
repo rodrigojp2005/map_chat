@@ -28,14 +28,14 @@ class NotificationController extends Controller
             });
 
         return response()->json([
-            'unread_groups' => $items->count(), // sino = número de gincanas com novidades
+            'unread_groups' => $items->count(), // sino = número de mapchats com novidades
             'gincanas' => $items,
         ]);
     }
 
     public function markRead(Request $request)
     {
-        // Marca como lido de forma agregada por gincana (zera o contador)
+        // Marca como lido de forma agregada por mapchat (zera o contador)
         $request->validate([
             'gincana_id' => 'nullable|integer'
         ]);
