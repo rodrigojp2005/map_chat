@@ -473,28 +473,21 @@ function initMapChatHome() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Começa com a barra lateral oculta e a lupa visível
-    document.getElementById('chat-carousel').classList.add('hide');
-    let btnSidebarToggle = document.getElementById('btn-show-sidebar');
-    if (!btnSidebarToggle) {
-        btnSidebarToggle = document.createElement('button');
-        btnSidebarToggle.id = 'btn-show-sidebar';
-        btnSidebarToggle.title = 'Mostrar barra lateral';
-        btnSidebarToggle.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
-        document.body.appendChild(btnSidebarToggle);
-    }
-    btnSidebarToggle.style.display = 'flex';
-
     // Botão para esconder barra lateral
     document.getElementById('btn-hide-sidebar').addEventListener('click', function() {
         document.getElementById('chat-carousel').classList.add('hide');
-        btnSidebarToggle.style.display = 'flex';
+        btnShow.style.display = 'flex';
     });
 
     // Botão lupa para mostrar barra lateral
-    btnSidebarToggle.addEventListener('click', function() {
+    let btnShow = document.createElement('button');
+    btnShow.id = 'btn-show-sidebar';
+    btnShow.title = 'Mostrar barra lateral';
+    btnShow.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+    document.body.appendChild(btnShow);
+    btnShow.addEventListener('click', function() {
         document.getElementById('chat-carousel').classList.remove('hide');
-        btnSidebarToggle.style.display = 'none';
+        btnShow.style.display = 'none';
     });
     // Seletor de quantidade de posts
     document.getElementById('post-limit').addEventListener('change', function() {
