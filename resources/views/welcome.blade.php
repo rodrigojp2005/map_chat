@@ -148,32 +148,58 @@ document.addEventListener('DOMContentLoaded', function ( ) {
     }
 
     window.showStreetView = function(loc) {
-        const pos = { lat: Number(loc.lat), lng: Number(loc.lng) };
-        const streetViewService = new google.maps.StreetViewService();
-        document.getElementById('streetview-error').style.display = 'none';
-        streetViewService.getPanorama({ location: pos, radius: 50 }, (data, status) => {
-            if (status === google.maps.StreetViewStatus.OK) {
-                document.getElementById('map').style.display = 'none';
-                document.getElementById('streetview').style.display = 'block';
-                btnVoltarMapa.style.display = 'block';
-                panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
-                    pano: data.location.pano, pov: { heading: 0, pitch: 0 }, zoom: 1,
-                    disableDefaultUI: true, showRoadLabels: false, motionTracking: false
-                });
-                const avatarLatLng = google.maps.geometry.spherical.computeOffset(data.location.latLng, 10, panorama.getPov().heading || 0);
-                const avatar = new google.maps.Marker({
-                    position: avatarLatLng, map: panorama,
-                    icon: { url: getAvatarUrl(loc.avatar), scaledSize: new google.maps.Size(60, 80), anchor: new google.maps.Point(30, 80) },
-                    title: loc.name || 'Local'
-                });
-                avatar.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
-                lastStreetViewLoc = loc;
-                btnVoltarStreetview.style.display = 'none';
-            } else {
-                handleStreetViewError(loc);
-            }
+    const avatarPosition = { lat: Number(loc.lat), lng: Number(loc.lng) };
+    const streetViewService = new google.maps.StreetViewService();
+    
+    document.getElementById('streetview-error').style.display = 'none';
+
+    // 1. Encontra o panorama mais próximo da localização do post
+    streetViewService.getPanorama({ location: avatarPosition, radius: 50 }, (data, status) => {
+        if (status === google.maps.StreetViewStatus.OK) {
+            document.getElementById('map').style.display = 'none';
+            document.getElementById('streetview').style.display = 'block';
+            btnVoltarMapa.style.display = 'block';
+
+            const cameraPosition = data.location.latLng; // Posição real da câmera do Street View
+
+            // 2. Calcula o ângulo (heading) da câmera para o avatar
+            // Isso faz a câmera "encarar" o avatar
+            const heading = google.maps.geometry.spherical.computeHeading(cameraPosition, new google.maps.LatLng(avatarPosition));
+            panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
+                position: cameraPosition, // Posição da câmera
+                pov: {
+                    heading: heading, // Aponta a câmera para o avatar
+                    pitch: -5,        // Inclina a câmera um pouco para baixo para melhor enquadramento
+                    zoom: 0.5         // Ajuste o zoom para controlar a "distância" (0 é mais longe, 1 é mais perto)
+                    },
+                disableDefaultUI: true,
+                showRoadLabels: false,
+                motionTracking: false
+            });
+            // 3. Cria o marcador do avatar na sua posição original
+            const avatarMarker = new google.maps.Marker({
+                position: avatarPosition, // Posição exata do post
+                map: panorama,
+                icon: {
+                    url: getAvatarUrl(loc.avatar),
+                    scaledSize: new google.maps.Size(60, 80),
+                    anchor: new google.maps.Point(30, 80)
+                    },
+                title: loc.name || 'Local'
+            });
+
+            avatarMarker.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
+                
+            lastStreetViewLoc = loc;
+            btnVoltarStreetview.style.display = 'none';
+
+        } else {
+            // Se não encontrar Street View, mostra o erro
+            handleStreetViewError(loc);
+        }
         });
     }
+
 
     async function applyFilter(filterType) {
         showLoading(true);
