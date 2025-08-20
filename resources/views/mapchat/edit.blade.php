@@ -2,6 +2,17 @@
 @section('content')
 <div id="form_container" style="max-width: 600px; margin: 24px auto 0 auto; padding: 28px 24px 22px 24px; background: #eafaf1; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
     <h2 style="margin-bottom: 22px; text-align: center; font-weight: 700; color: #198754; font-size: 2rem; letter-spacing: 0.5px;">Editar Sala</h2>
+    
+    @if ($errors->any())
+        <div style="background-color: #f8d7da; border: 1px solid #f1aeb5; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+            <ul style="margin: 0; padding-left: 20px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    
     <form id="form-editar-mapchat" method="POST" action="{{ route('mapchat.update', $mapchat->id) }}">
         @csrf
         @method('PUT')
@@ -13,7 +24,7 @@
         <!-- Avatar -->
         <div style="margin-bottom: 16px;">
             <label for="avatar" style="display: block; font-weight: bold; margin-bottom: 6px;">Escolha um Avatar </label>
-            <div style="display: flex; gap: 16px;">
+            <div style="display: flex; gap: 16px; flex-wrap: wrap;">
             @php
             $avatars = [
                 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExbG9vZW50YmIxbDQxZWN3cWM4NmRrZjVxNnBpN2ViMnEzbG10d2ZyaiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/ufnnVkxyqyuA6dAwDO/giphy.gif',
@@ -24,15 +35,22 @@
                 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWEwdTJpenFjdDg2YWZiYm4yMHo5azZpeGQ1Y2ptZ2ozaGIwOHdpdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/Dl1vSg7nXEJ9sw1H1o/giphy.gif',
                 'https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExcTRsNnBmdXl6ZHJibXM3N3dweXlqbjk5ZGQ4aXJ6bjMzMjR3eGg5dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/RJPvSu5cKfg9cZplHn/giphy.gif'
             ];
-            $user = Auth::user();
-            if (!empty($mapchat->avatar) && Str::startsWith($mapchat->avatar, 'http')) {
-                array_unshift($avatars, $mapchat->avatar);
+            
+            $currentAvatar = old('avatar', $mapchat->avatar);
+            
+            // Se o avatar atual não estiver na lista, adicioná-lo no início
+            if (!empty($currentAvatar) && !in_array($currentAvatar, $avatars)) {
+                array_unshift($avatars, $currentAvatar);
             }
             @endphp
             @foreach($avatars as $index => $avatar)
             <label style="cursor: pointer;">
-                <input type="radio" name="avatar" value="{{ $avatar }}" {{ (old('avatar', $mapchat->avatar) == $avatar || ($index === 0 && empty($mapchat->avatar))) ? 'checked' : '' }} style="display: none;">
-                <img src="{{ $avatar }}" alt="Avatar {{ $index + 1 }}" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ccc; transition: border-color 0.2s;">
+                <input type="radio" name="avatar" value="{{ $avatar }}" {{ $currentAvatar == $avatar ? 'checked' : '' }} style="display: none;">
+                @if(Str::startsWith($avatar, 'http'))
+                    <img src="{{ $avatar }}" alt="Avatar {{ $index + 1 }}" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ccc; transition: border-color 0.2s;" onerror="this.src='/images/default.gif'">
+                @else
+                    <img src="{{ asset($avatar) }}" alt="Avatar {{ $index + 1 }}" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #ccc; transition: border-color 0.2s;" onerror="this.src='/images/default.gif'">
+                @endif
             </label>
             @endforeach
             </div>
@@ -75,24 +93,24 @@
         </div>
         <!-- Contexto -->
         <div style="margin-bottom: 16px;">
-            <label for="contexto" style="display: block; font-weight: bold; margin-bottom: 6px;">Contexto/Dica</label>
-            <textarea id="contexto" name="contexto" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-height: 80px;" placeholder="Dê uma dica sobre o local ou conte uma história...">{{ old('contexto', $mapchat->contexto) }}</textarea>
+            <label for="contexto" style="display: block; font-weight: bold; margin-bottom: 6px;">O que há nesse local?</label>
+            <textarea id="contexto" name="contexto" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; min-height: 80px;" placeholder="Conte sua história com este local ou sugira algo interessante...">{{ old('contexto', $mapchat->contexto) }}</textarea>
         </div>
         <!-- Privacidade -->
         <div style="margin-bottom: 16px;">
-            <label style="display: block; font-weight: bold; margin-bottom: 6px;">Privacidade</label>
-            <div style="display: flex; gap: 16px;">
-                <div>
-                    <input type="radio" id="publica" name="privacidade" value="publica" {{ $mapchat->privacidade == 'publica' ? 'checked' : '' }}>
-                    <label for="publica">Pública </label>
+            <label style="display: block; font-weight: bold; margin-bottom: 6px; text-align: center; width: 100%;">Privacidade</label>
+            <div style="display: flex; gap: 32px; justify-content: center; align-items: center;">
+                <div style="display: flex; align-items: center;">
+                    <input type="radio" id="publica" name="privacidade" value="publica" {{ old('privacidade', $mapchat->privacidade) == 'publica' ? 'checked' : '' }}>
+                    <label for="publica" style="margin-left: 6px;">Pública</label>
                 </div>
-                <div>
-                    <input type="radio" id="privada" name="privacidade" value="privada" {{ $mapchat->privacidade == 'privada' ? 'checked' : '' }}>
-                    <label for="privada">Privada (amigos)</label>
+                <div style="display: flex; align-items: center;">
+                    <input type="radio" id="privada" name="privacidade" value="privada" {{ old('privacidade', $mapchat->privacidade) == 'privada' ? 'checked' : '' }}>
+                    <label for="privada" style="margin-left: 6px;">Privada (amigos)</label>
                 </div>
-                <div>
-                    <input type="radio" id="comercial" name="privacidade" value="comercial" {{ $mapchat->privacidade == 'comercial' ? 'checked' : '' }}>
-                    <label for="comercial">Comercial (72 horas)</label>
+                <div style="display: flex; align-items: center;">
+                    <input type="radio" id="comercial" name="privacidade" value="comercial" {{ old('privacidade', $mapchat->privacidade) == 'comercial' ? 'checked' : '' }}>
+                    <label for="comercial" style="margin-left: 6px;">Comercial (72 horas)</label>
                 </div>
             </div>
         </div>

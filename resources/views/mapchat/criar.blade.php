@@ -2,6 +2,17 @@
 @section('content')
 <div id="form_container" style="max-width: 600px; margin: 24px auto 0 auto; padding: 28px 24px 22px 24px; background: #eafaf1; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
     <h2 style="margin-bottom: 22px; text-align: center; font-weight: 700; color: #198754; font-size: 2rem; letter-spacing: 0.5px;">Criar Post</h2>
+    
+    @if ($errors->any())
+        <div style="background-color: #f8d7da; border: 1px solid #f1aeb5; color: #721c24; padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+            <ul style="margin: 0; padding-left: 20px;">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    
     <form id="form-criar-mapchat" method="POST" action="{{ route('mapchat.store') }}">
         @csrf
 
