@@ -23,6 +23,14 @@ class User extends Authenticatable
         'email',
         'password',
         'google_id',
+        'latitude',
+        'longitude',
+        'real_latitude',
+        'real_longitude',
+        'privacy_radius',
+        'avatar_type',
+        'is_online',
+        'last_seen',
     ];
 
     /**
@@ -43,6 +51,12 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'last_seen' => 'datetime',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8',
+        'real_latitude' => 'decimal:8',
+        'real_longitude' => 'decimal:8',
+        'is_online' => 'boolean',
     ];
 
     /**

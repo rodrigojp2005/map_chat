@@ -4,30 +4,66 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Mapchat; // alias of Gincana
+use App\Services\LocationService;
 use Illuminate\Support\Facades\Auth;
 
 class MapchatController extends Controller
 {
-    // Landing page showing public mapchats (was GincanaController@welcome)
+    protected $locationService;
+    
+    public function __construct(LocationService $locationService)
+    {
+        $this->locationService = $locationService;
+    }
+    
+    // Landing page showing online users on the map
     public function welcome()
     {
+        // Obter usuários online como localizações para o mapa
+        $onlineUsers = $this->locationService->getOnlineUsers();
+        
         $locations = [];
-        $mapchats = Mapchat::where('privacidade', 'publica')->get();
-        foreach ($mapchats as $mapchat) {
+        foreach ($onlineUsers as $user) {
             $locations[] = [
-                'lat' => (float) $mapchat->latitude,
-                'lng' => (float) $mapchat->longitude,
-                'name' => $mapchat->nome,
-                'mapchat_id' => $mapchat->id,
-                'contexto' => $mapchat->contexto,
-                'avatar' => $mapchat->avatar,
-                'cidade' => $mapchat->cidade,
+                'lat' => $user['latitude'],
+                'lng' => $user['longitude'],
+                'name' => $user['name'],
+                'user_id' => $user['id'],
+                'avatar' => $this->getAvatarFilename($user['avatar_type']),
+                'tipo' => 'usuario_online',
+                'last_seen' => $user['last_seen']
             ];
         }
+        
+        // Se não houver usuários online, adicionar marcador padrão
         if (empty($locations)) {
-            $locations[] = ['no_mapchat' => true];
+            $locations[] = [
+                'lat' => -14.2350,
+                'lng' => -51.9253,
+                'name' => 'Aguardando usuários...',
+                'avatar' => 'default.gif',
+                'tipo' => 'placeholder'
+            ];
         }
+        
         return view('welcome', compact('locations'));
+    }
+    
+    /**
+     * Mapear tipo de avatar para nome do arquivo
+     */
+    private function getAvatarFilename($avatarType)
+    {
+        $avatarMap = [
+            'default' => 'default.gif',
+            'man' => 'mario.gif',
+            'woman' => 'girl.gif',
+            'pet' => 'pets.gif',
+            'geek' => 'geek.gif',
+            'sport' => 'sport.gif'
+        ];
+        
+        return $avatarMap[$avatarType] ?? 'default.gif';
     }
     public function index()
     {

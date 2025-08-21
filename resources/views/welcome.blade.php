@@ -1,339 +1,725 @@
 @extends('layouts.app')
 
-@section('title', 'MapChat - Converse no mapa!')
+@section('title', 'MapChat - Conecte-se no mapa!')
 
 @section('content')
 <div class="relative w-full" style="height: calc(100vh - 120px);">
-    <div id="map" class="absolute left-0 top-0" style="width: 100%; height: 100%; z-index: 1;"></div>
-    <div id="streetview" class="absolute left-0 top-0" style="width: 100%; height: 100%; display: none; z-index: 2;"></div>
+    <!-- Mapa principal -->
+    <div id="map" class="absolute left-0 top-0 w-full h-full z-1"></div>
     
-    <div id="streetview-error" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 bg-white rounded-lg shadow-lg text-center" style="z-index: 11; display: none;">
-        <p class="font-semibold text-gray-800">Oops! Street View indisponível.</p>
-        <p class="text-sm text-gray-600">Não foi possível carregar a vista da rua para este local. Mostrando no mapa.</p>
-    </div>
-
-    <button id="btn-voltar-mapa" class="px-4 py-2 focus:outline-none absolute top-5 left-5" style="z-index: 10; display: none;">
-        <img src="https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3JmOW9vODF4OGJqMHpxNWJ4M3h3MXhncXF6NnZ6eHF6dnlucmwweCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/EOIQArrlGT8SeIvYma/giphy.gif" alt="Alternar para o mapa" style="width: 72px; height: 72px;">
-    </button>
-    <button id="btn-voltar-streetview" class="focus:outline-none absolute top-5 left-5" style="z-index: 10; display: none;">
-        <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExc28zbjI2dTRoaG4wZHRnMWhsNGZqYTNzMzVuNmNpN2M3NXVhc2RqZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/S89ccIhj3e0xyMcLOp/giphy.gif" alt="Voltar para o Street View" style="width: 96px; height: 72px;">
-    </button>
-
-    <!-- Barra lateral com filtros integrados - COMEÇA ESCONDIDA -->
-    <div id="chat-carousel" class="hide" style="position: absolute; top: 0; right: 0; bottom: 0; z-index: 20; background: rgba(255,255,255,0.95 ); box-shadow: -2px 0 12px rgba(0,0,0,0.08); padding: 0; display: flex; flex-direction: column; overflow-y: auto; align-items: center; min-width: 100px; max-width: 120px;">
-        <div style="position: sticky; top: 0; background: rgba(255,255,255,0.98); padding: 12px 8px; border-bottom: 1px solid rgba(0,0,0,0.08); width: 100%; display: flex; align-items: center; justify-content: space-between; z-index: 21;">
-            <div style="font-size: 0.85em; font-weight: 600; color: #198754;">FILTROS</div>
-            <button id="btn-hide-sidebar" title="Esconder barra" style="background: none; border: none; color: #198754; font-size: 1.3em; cursor: pointer; z-index: 30; padding: 2px; margin-left: 8px;">&#10005;</button>
-        </div>
-        <div style="width: 100%; padding: 8px 0 0 0;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px;">
-                <button class="filter-btn active" data-filter="proximity" title="Próximos">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    <span>Próx</span>
+    <!-- Painel de controle superior esquerdo -->
+    <div class="absolute top-4 left-4 z-20 bg-white rounded-lg shadow-lg p-4 max-w-80">
+        <h3 class="font-bold text-green-600 mb-3">🌍 Seu Perfil no Mapa</h3>
+        
+        <!-- Seleção de Avatar -->
+        <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Escolha seu avatar:</label>
+            <div class="grid grid-cols-3 gap-2">
+                <button class="avatar-btn active" data-avatar="default" title="Padrão">
+                    <img src="{{ asset('images/default.gif') }}" alt="Padrão" class="w-10 h-10 rounded-full border-2 border-green-500 hover:border-green-600">
                 </button>
-                <button class="filter-btn" data-filter="recent" title="Recentes">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12,6 12,12 16,14"></polyline></svg>
-                    <span>Recentes</span>
+                <button class="avatar-btn" data-avatar="man" title="Homem">
+                    <img src="{{ asset('images/mario.gif') }}" alt="Homem" class="w-10 h-10 rounded-full border-2 border-gray-300 hover:border-green-600">
+                </button>
+                <button class="avatar-btn" data-avatar="woman" title="Mulher">
+                    <img src="{{ asset('images/girl.gif') }}" alt="Mulher" class="w-10 h-10 rounded-full border-2 border-gray-300 hover:border-green-600">
+                </button>
+                <button class="avatar-btn" data-avatar="pet" title="Pet">
+                    <img src="{{ asset('images/pets.gif') }}" alt="Pet" class="w-10 h-10 rounded-full border-2 border-gray-300 hover:border-green-600">
+                </button>
+                <button class="avatar-btn" data-avatar="geek" title="Geek">
+                    <img src="{{ asset('images/geek.gif') }}" alt="Geek" class="w-10 h-10 rounded-full border-2 border-gray-300 hover:border-green-600">
+                </button>
+                <button class="avatar-btn" data-avatar="sport" title="Esporte">
+                    <img src="{{ asset('images/sport.gif') }}" alt="Esporte" class="w-10 h-10 rounded-full border-2 border-gray-300 hover:border-green-600">
                 </button>
             </div>
-            <div id="filter-status" style="text-align: center; font-size: 0.7em; color: #6c757d; margin-bottom: 8px;">
-                <span id="status-text">Carregando...</span>
-            </div>
-            <div style="width: 100%; text-align: center; margin-bottom: 10px;">
-                <label for="post-limit" style="font-size: 0.85em; color: #198754; font-weight: 600;">Qtd. posts:</label>
-                <select id="post-limit" style="margin-left: 6px; padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95em;">
-                    <option value="20">20</option><option value="40">40</option><option value="60">60</option><option value="100">100</option>
-                </select>
+        </div>
+        
+        <!-- Controle de raio de privacidade -->
+        <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Raio de Privacidade: <span id="radius-display">50 km</span>
+            </label>
+            <input type="range" id="privacy-radius" min="500" max="5000000" value="50000" step="500" 
+                   class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>500m</span>
+                <span>5000km</span>
             </div>
         </div>
-        <div id="avatars-container" style="flex: 1; width: 100%; padding: 0 6px 18px 6px; display: flex; flex-direction: column; gap: 18px; align-items: center; overflow-y: auto;">
-        @foreach(($locations ?? []) as $loc)
-            @if(empty($loc['no_gincana']))
-            @php
-                $avatar = $loc['avatar'] ?? ''; $avatar = trim($avatar); $avatar = $avatar ? basename($avatar) : 'default.gif';
-                if (!$avatar || $avatar === '.' || $avatar === '..') $avatar = 'default.gif';
-            @endphp
-            <div class="carousel-item" data-lat="{{ $loc['lat'] }}" data-lng="{{ $loc['lng'] }}" style="flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;">
-                <img src="{{ asset('images/' . $avatar) }}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('images/default.gif') }}'">
-                <div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['name'] ?? $loc['nome'] ?? 'Sala' }}</div>
-                <div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">{{ $loc['cidade'] ?? '' }}</div>
+        
+        <!-- Status de localização -->
+        <div class="text-sm text-gray-600">
+            <div id="location-status" class="flex items-center">
+                <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                <span>Obtendo localização...</span>
             </div>
-            @endif
-        @endforeach
+        </div>
+        
+        <!-- Debug info (development only) -->
+        <div id="debug-info" class="mt-2 text-xs text-gray-500 p-2 bg-gray-50 rounded" style="display: none;">
+            <div><strong>Debug Info:</strong></div>
+            <div id="debug-location">Localização: Aguardando...</div>
+            <div id="debug-users">Usuários: Carregando...</div>
+            <div id="debug-auth">Auth: <span id="auth-status">{{ auth()->check() ? 'Logado' : 'Visitante' }}</span></div>
+        </div>
+        
+        <button id="toggle-debug" class="mt-2 text-xs text-blue-600 underline">Mostrar Debug</button>
+        
+        @guest
+        <div class="mt-3 p-2 bg-blue-50 rounded text-sm text-blue-700">
+            💡 <a href="{{ route('login') }}" class="underline">Faça login</a> para aparecer no mapa e conversar com outros usuários!
+        </div>
+        @endguest
+    </div>
+    
+    <!-- Painel de usuários online (direita) -->
+    <div class="absolute top-4 right-4 z-20 bg-white rounded-lg shadow-lg p-4 w-64 max-h-96 overflow-y-auto">
+        <h3 class="font-bold text-green-600 mb-3">👥 Online Agora (<span id="users-count">0</span>)</h3>
+        <div id="users-list" class="space-y-2">
+            <div class="text-gray-500 text-sm text-center py-4">
+                Carregando usuários...
+            </div>
+        </div>
+        
+        <div class="mt-3 pt-3 border-t text-xs text-gray-500">
+            🔄 Atualiza automaticamente a cada 30s
         </div>
     </div>
-
-    <!-- Botão para MOSTRAR a barra lateral -->
-    <button id="btn-show-sidebar" title="Mostrar barra lateral">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-    </button>
+    
+    <!-- Botão de toggle para painéis mobile -->
+    <div class="md:hidden">
+        <button id="toggle-panels" class="absolute top-4 left-4 z-30 bg-green-600 text-white p-2 rounded-full shadow-lg">
+            ⚙️
+        </button>
+    </div>
 </div>
 
 <style>
-.filter-btn { display: flex; flex-direction: column; align-items: center; padding: 6px 4px; background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; font-size: 0.7em; font-weight: 500; }
-.filter-btn:hover { background: #e9ecef; transform: translateY(-1px); }
-.filter-btn.active { background: linear-gradient(135deg, #198754, #20c997); color: white; border: none; box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3); }
-.filter-btn svg { margin-bottom: 2px; }
-.filter-btn.loading { opacity: 0.7; pointer-events: none; }
-#avatars-container.loading .carousel-item { opacity: 0.5; }
-
-#btn-show-sidebar {
-    position: fixed; top: 90px; right: 18px; z-index: 50; background: #198754; color: #fff; border: none; border-radius: 50%;
-    width: 48px; height: 48px; box-shadow: 0 2px 8px rgba(25,135,84,0.18);
-    /* COMEÇA VISÍVEL */
-    display: flex; 
-    align-items: center; justify-content: center; font-size: 1.7em; cursor: pointer; transition: background 0.2s;
+.avatar-btn.active img {
+    border-color: #10B981 !important;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
-#btn-show-sidebar:hover { background: #20c997; }
-#chat-carousel.hide { display: none !important; }
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+    .absolute.top-4.left-4 {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .absolute.top-4.right-4 {
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    }
+    
+    .panels-visible .absolute.top-4.left-4,
+    .panels-visible .absolute.top-4.right-4 {
+        transform: translateX(0);
+    }
+}
+
+/* Estilo do slider */
+#privacy-radius::-webkit-slider-thumb {
+    appearance: none;
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #10B981;
+    cursor: pointer;
+}
+
+#privacy-radius::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: #10B981;
+    cursor: pointer;
+    border: none;
+}
 </style>
 
+<!-- Scripts -->
 <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+<script>
+// Incluir LocationManager aprimorado inline para evitar problemas de carregamento
+/**
+ * Sistema de localização aprimorado para MapChat
+ * Inclui simulação de localização para desktops sem GPS
+ */
+class LocationManager {
+    constructor() {
+        this.userPosition = null;
+        this.privacyRadius = 50000;
+        this.selectedAvatar = 'default';
+        this.isAuthenticated = window.isAuthenticated || false;
+        this.updateInterval = null;
+        this.onlineUsers = [];
+        this.isSimulated = false;
+        this.init();
+    }
+    
+    init() {
+        this.setupEventListeners();
+        this.requestLocationWithFallback();
+        this.loadOnlineUsers();
+        this.startPeriodicUpdates();
+    }
+    
+    setupEventListeners() {
+        window.addEventListener('beforeunload', () => {
+            if (this.isAuthenticated) {
+                this.setOffline();
+            }
+        });
+        
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                this.pauseUpdates();
+            } else {
+                this.resumeUpdates();
+            }
+        });
+    }
+    
+    requestLocationWithFallback() {
+        if (!navigator.geolocation) {
+            console.warn('Geolocalização não suportada');
+            this.simulateLocation();
+            return;
+        }
+        
+        const options = {
+            enableHighAccuracy: false,
+            timeout: 5000,
+            maximumAge: 300000
+        };
+        
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                this.userPosition = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude
+                };
+                this.isSimulated = false;
+                console.log('Localização real obtida:', this.userPosition);
+                if (this.isAuthenticated) this.updateServerLocation();
+                this.onLocationUpdate(this.userPosition);
+            },
+            (error) => {
+                console.warn('Erro GPS, usando simulação:', error.message);
+                this.simulateLocation();
+            },
+            options
+        );
+        
+        setTimeout(() => {
+            if (!this.userPosition) {
+                console.log('Timeout GPS, usando simulação...');
+                this.simulateLocation();
+            }
+        }, 3000);
+    }
+    
+    simulateLocation() {
+        const brazilianCities = [
+            { lat: -23.5505, lng: -46.6333, name: "São Paulo, SP" },
+            { lat: -22.9068, lng: -43.1729, name: "Rio de Janeiro, RJ" },
+            { lat: -15.7942, lng: -47.8822, name: "Brasília, DF" },
+            { lat: -25.4244, lng: -49.2654, name: "Curitiba, PR" },
+            { lat: -30.0346, lng: -51.2177, name: "Porto Alegre, RS" },
+            { lat: -8.0476, lng: -34.8770, name: "Recife, PE" },
+            { lat: -12.9714, lng: -38.5014, name: "Salvador, BA" },
+            { lat: -19.9167, lng: -43.9345, name: "Belo Horizonte, MG" }
+        ];
+        
+        const randomCity = brazilianCities[Math.floor(Math.random() * brazilianCities.length)];
+        const variation = 0.1;
+        const lat = randomCity.lat + (Math.random() - 0.5) * variation;
+        const lng = randomCity.lng + (Math.random() - 0.5) * variation;
+        
+        this.userPosition = { lat, lng };
+        this.isSimulated = true;
+        console.log(`Localização simulada em ${randomCity.name}:`, this.userPosition);
+        this.onLocationUpdate(this.userPosition, randomCity.name);
+        if (this.isAuthenticated) this.updateServerLocation();
+    }
+    
+    async updateServerLocation() {
+        if (!this.userPosition || !this.isAuthenticated) return;
+        try {
+            const response = await fetch('/location/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                },
+                body: JSON.stringify({
+                    latitude: this.userPosition.lat,
+                    longitude: this.userPosition.lng,
+                    privacy_radius: this.privacyRadius
+                })
+            });
+            const data = await response.json();
+            if (data.success) {
+                console.log('Localização atualizada no servidor');
+                this.loadOnlineUsers();
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar localização:', error);
+        }
+    }
+    
+    async updateAvatar(avatarType) {
+        if (!this.isAuthenticated) {
+            this.selectedAvatar = avatarType;
+            this.onAvatarUpdate(avatarType);
+            return;
+        }
+        try {
+            const response = await fetch('/location/avatar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                },
+                body: JSON.stringify({ avatar_type: avatarType })
+            });
+            const data = await response.json();
+            if (data.success) {
+                this.selectedAvatar = avatarType;
+                this.onAvatarUpdate(avatarType);
+                this.loadOnlineUsers();
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar avatar:', error);
+        }
+    }
+    
+    async updatePrivacyRadius(radiusMeters) {
+        this.privacyRadius = radiusMeters;
+        if (!this.isAuthenticated || !this.userPosition) {
+            this.onPrivacyRadiusUpdate(radiusMeters);
+            return;
+        }
+        try {
+            const response = await fetch('/location/privacy-radius', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                },
+                body: JSON.stringify({ radius: radiusMeters })
+            });
+            const data = await response.json();
+            if (data.success) {
+                this.onPrivacyRadiusUpdate(radiusMeters, data.new_location);
+                this.loadOnlineUsers();
+            }
+        } catch (error) {
+            console.error('Erro ao atualizar raio:', error);
+        }
+    }
+    
+    async setOffline() {
+        if (!this.isAuthenticated) return;
+        try {
+            await fetch('/location/offline', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+                }
+            });
+        } catch (error) {
+            console.error('Erro offline:', error);
+        }
+    }
+    
+    async loadOnlineUsers() {
+        try {
+            const response = await fetch('/usuarios-online.json');
+            const data = await response.json();
+            if (data.success) {
+                this.onlineUsers = data.users;
+                console.log(`Carregados ${data.users.length} usuários online`);
+                this.onUsersUpdate(this.onlineUsers);
+            } else {
+                console.warn('Falha ao carregar usuários:', data);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar usuários:', error);
+        }
+    }
+    
+    startPeriodicUpdates() {
+        this.updateInterval = setInterval(() => {
+            this.loadOnlineUsers();
+        }, 30000);
+    }
+    
+    pauseUpdates() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+        }
+    }
+    
+    resumeUpdates() {
+        if (!this.updateInterval) {
+            this.startPeriodicUpdates();
+            this.loadOnlineUsers();
+        }
+    }
+    
+    getAvatarFilename(avatarType) {
+        const avatarMap = {
+            'default': 'default.gif',
+            'man': 'mario.gif',
+            'woman': 'girl.gif',
+            'pet': 'pets.gif',
+            'geek': 'geek.gif',
+            'sport': 'sport.gif'
+        };
+        return avatarMap[avatarType] || 'default.gif';
+    }
+    
+    // Callbacks
+    onLocationUpdate(position, cityName = null) { console.log('Localização:', position); }
+    onAvatarUpdate(avatarType) { console.log('Avatar:', avatarType); }
+    onPrivacyRadiusUpdate(radius, newLocation = null) { console.log('Raio:', radius); }
+    onUsersUpdate(users) { console.log('Usuários:', users); }
+    onLocationError(error, message) { console.error('Erro:', message, error); }
+    
+    destroy() {
+        if (this.updateInterval) clearInterval(this.updateInterval);
+        if (this.isAuthenticated) this.setOffline();
+    }
+}
+</script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function ( ) {
+document.addEventListener('DOMContentLoaded', function() {
     window.isAuthenticated = @json(auth()->check());
-    const MC_LOCATIONS = @json($locations ?? []);
-
-    let map, markers = [], panorama, markerCluster;
-    let lastStreetViewLoc = null;
-    let currentPosts = MC_LOCATIONS.filter(loc => !loc.no_gincana);
-    let userPosition = null;
-    let postLimit = 20;
-
-    const chatCarousel = document.getElementById('chat-carousel');
-    const btnHideSidebar = document.getElementById('btn-hide-sidebar');
-    const btnShowSidebar = document.getElementById('btn-show-sidebar');
-    const avatarsContainer = document.getElementById('avatars-container');
-    const postLimitSelect = document.getElementById('post-limit');
-    const btnVoltarMapa = document.getElementById('btn-voltar-mapa');
-    const btnVoltarStreetview = document.getElementById('btn-voltar-streetview');
-
-    function getUserLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    userPosition = { lat: position.coords.latitude, lng: position.coords.longitude };
-                    console.log('Localização obtida:', userPosition);
-                },
-                (error) => { console.log('Erro na geolocalização:', error.message); }
-            );
+    
+    let map, markers = [], markerCluster;
+    let locationManager;
+    let userMarker = null;
+    
+    // Inicializar gerenciador de localização
+    locationManager = new LocationManager();
+    
+    // Sobrescrever callbacks do LocationManager
+    locationManager.onLocationUpdate = function(position, cityName) {
+        const statusMsg = cityName ? `Localização simulada em ${cityName}` : 'Localização obtida';
+        const statusType = cityName ? 'warning' : 'success';
+        updateLocationStatus(statusType, statusMsg);
+        
+        // Debug info
+        document.getElementById('debug-location').textContent = 
+            `Localização: ${position.lat.toFixed(4)}, ${position.lng.toFixed(4)} ${cityName ? '(Simulada)' : '(Real)'}`;
+        
+        // Centralizar mapa na localização aproximada (não exata)
+        if (map) {
+            map.setCenter({ lat: position.lat, lng: position.lng });
+            map.setZoom(cityName ? 8 : 10); // Zoom menor para cidades simuladas
         }
-    }
-
-    function getAvatarUrl(avatar) {
-        if (!avatar || avatar === '.' || avatar === '..') return '/images/default.gif';
-        let file = avatar.split('/').pop();
-        if (!file) file = 'default.gif';
-        return '/images/' + file;
-    }
-
-    function focusMapOnLocation(loc, zoomLevel = 18) {
-        if (map && loc) {
-            document.getElementById('map').style.display = 'block';
-            document.getElementById('streetview').style.display = 'none';
-            btnVoltarMapa.style.display = 'none';
-            map.setCenter({ lat: Number(loc.lat), lng: Number(loc.lng) });
-            map.setZoom(zoomLevel);
+    };
+    
+    locationManager.onUsersUpdate = function(users) {
+        updateUsersDisplay(users);
+        updateMapMarkers(users);
+        
+        // Debug info
+        document.getElementById('debug-users').textContent = `Usuários: ${users.length} online`;
+    };
+    
+    locationManager.onAvatarUpdate = function(avatarType) {
+        updateAvatarSelection(avatarType);
+    };
+    
+    locationManager.onPrivacyRadiusUpdate = function(radius, newLocation) {
+        updateRadiusDisplay(radius);
+        if (newLocation && userMarker) {
+            userMarker.setPosition({ lat: newLocation.latitude, lng: newLocation.longitude });
         }
-    }
-
-    function handleStreetViewError(loc) {
-        console.error("Erro ao carregar Street View:", loc);
-        const errorDiv = document.getElementById('streetview-error');
-        errorDiv.style.display = 'block';
-        focusMapOnLocation(loc);
-        setTimeout(() => errorDiv.style.display = 'none', 4000);
-    }
-
-    window.showStreetView = function(loc) {
-        const avatarPosition = { lat: Number(loc.lat), lng: Number(loc.lng) };
-        const streetViewService = new google.maps.StreetViewService();
-        document.getElementById('streetview-error').style.display = 'none';
-        // 1. Encontra o panorama mais próximo da localização do post
-        streetViewService.getPanorama({ location: avatarPosition, radius: 50 }, (data, status) => {
-            if (status === google.maps.StreetViewStatus.OK) {
-                document.getElementById('map').style.display = 'none';
-                document.getElementById('streetview').style.display = 'block';
-                btnVoltarMapa.style.display = 'block';
-                const cameraPosition = data.location.latLng; // Posição real da câmera do Street View
-                // 2. Calcula o ângulo (heading) da câmera para o avatar
-                // Isso faz a câmera "encarar" o avatar
-                const heading = google.maps.geometry.spherical.computeHeading(cameraPosition, new google.maps.LatLng(avatarPosition));
-                panorama = new google.maps.StreetViewPanorama(document.getElementById('streetview'), {
-                    position: cameraPosition, // Posição da câmera
-                    pov: {
-                        heading: heading, // Aponta a câmera para o avatar
-                        pitch: -5,        // Inclina a câmera um pouco para baixo para melhor enquadramento
-                        zoom: 0.5         // Ajuste o zoom para controlar a "distância" (0 é mais longe, 1 é mais perto)
-                    },
-                    disableDefaultUI: true,
-                    showRoadLabels: false,
-                    motionTracking: false
-                });
-                // 3. Cria o marcador do avatar na sua posição original
-                const avatarMarker = new google.maps.Marker({
-                    position: avatarPosition, // Posição exata do post
-                    map: panorama,
-                    icon: {
-                        url: getAvatarUrl(loc.avatar),
-                        scaledSize: new google.maps.Size(60, 80),
-                        anchor: new google.maps.Point(30, 80)
-                    },
-                    title: loc.name || 'Local'
-                });
-                avatarMarker.addListener('click', () => window.MapChat && window.MapChat.showPostModal(loc));
-                lastStreetViewLoc = loc;
-                btnVoltarStreetview.style.display = 'none';
-            } else {
-                // Se não encontrar Street View, mostra o erro
-                handleStreetViewError(loc);
-            }
-        });
-    }
-
-
-    async function applyFilter(filterType) {
-        showLoading(true);
-        updateStatus('Carregando...');
-        try {
-            let filteredPosts = [];
-            switch(filterType) {
-                case 'proximity': filteredPosts = await getPostsByProximity(); break;
-                case 'recent': filteredPosts = getPostsByRecent(); break;
-                default: filteredPosts = currentPosts;
-            }
-            updateSidebar(filteredPosts);
-            updateMapMarkers(filteredPosts);
-            updateStatus(`${filteredPosts.length} posts encontrados`);
-        } catch (error) {
-            console.error('Erro ao aplicar filtro:', error);
-            updateStatus('Erro ao carregar');
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    async function getPostsByProximity() {
-        if (!userPosition) return getPostsByRecent();
-        const postsWithDistance = currentPosts.map(post => ({ ...post, distance: calculateDistance(userPosition.lat, userPosition.lng, post.lat, post.lng) }));
-        return postsWithDistance.sort((a, b) => a.distance - b.distance).slice(0, postLimit);
-    }
-
-    function getPostsByRecent() {
-        return [...currentPosts].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)).slice(0, postLimit);
-    }
-
-    function calculateDistance(lat1, lng1, lat2, lng2) {
-        const R = 6371, dLat = (lat2 - lat1) * Math.PI / 180, dLng = (lng2 - lng1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng/2) * Math.sin(dLng/2);
-        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
-    }
-
-    function updateSidebar(posts) {
-        avatarsContainer.innerHTML = '';
-        posts.forEach(post => {
-            const item = document.createElement('div');
-            item.className = 'carousel-item';
-            item.setAttribute('data-lat', post.lat); item.setAttribute('data-lng', post.lng);
-            item.style.cssText = 'flex: 0 0 auto; text-align: center; cursor: pointer; min-width: 80px; max-width: 100px;';
-            const distance = post.distance ? ` (${post.distance.toFixed(1)}km)` : '';
-            item.innerHTML = `<img src="${getAvatarUrl(post.avatar)}" alt="Avatar" style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #198754; margin-bottom: 4px; object-fit: cover;" onerror="this.onerror=null;this.src='/images/default.gif'"><div style="font-size: 0.98em; font-weight: 600; color: #198754; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.name || post.nome || 'Sala'}</div><div style="font-size: 0.85em; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90px;">${post.cidade || ''}${distance}</div>`;
-            avatarsContainer.appendChild(item);
-        });
-    }
-
-    function updateMapMarkers(posts) {
-        if (markerCluster) markerCluster.clearMarkers();
-        markers.forEach(marker => marker.setMap(null));
-        markers = [];
-        posts.forEach(post => {
-            const marker = new google.maps.Marker({
-                position: { lat: Number(post.lat), lng: Number(post.lng) }, title: post.name || 'Local',
-                icon: { url: getAvatarUrl(post.avatar), scaledSize: new google.maps.Size(50, 65), anchor: new google.maps.Point(25, 65) }
-            });
-            marker.addListener('click', () => window.MapChat && window.MapChat.showPostModal(post, { modo: 'mapa' }));
-            markers.push(marker);
-        });
-        if (window.markerClusterer && window.markerClusterer.MarkerClusterer) {
-            markerCluster = new markerClusterer.MarkerClusterer({ map, markers });
-        }
-        if (markers.length > 0) {
-            const bounds = new google.maps.LatLngBounds();
-            markers.forEach(marker => bounds.extend(marker.getPosition()));
-            map.fitBounds(bounds);
-        }
-    }
-
-    function showLoading(show) {
-        const buttons = document.querySelectorAll('.filter-btn');
-        avatarsContainer.classList.toggle('loading', show);
-        buttons.forEach(btn => btn.classList.toggle('loading', show));
-    }
-
-    function updateStatus(text) {
-        const statusEl = document.getElementById('status-text');
-        if (statusEl) statusEl.textContent = text;
-    }
-
+    };
+    
+    // Configurar eventos dos controles
+    setupControlEvents();
+    
+    // Função para inicializar o mapa
     window.initMapChatHome = function() {
         if (!window.google || !window.google.maps) return;
+        
         map = new google.maps.Map(document.getElementById('map'), {
-            center: { lat: -14.2350, lng: -51.9253 }, zoom: 4, streetViewControl: false,
-            mapTypeControl: false, fullscreenControl: false, gestureHandling: 'greedy'
+            center: { lat: -14.2350, lng: -51.9253 }, // Centro do Brasil
+            zoom: 4,
+            streetViewControl: false,
+            mapTypeControl: true,
+            fullscreenControl: true,
+            zoomControl: true,
+            gestureHandling: 'greedy',
+            styles: [
+                {
+                    featureType: 'poi',
+                    elementType: 'labels',
+                    stylers: [{ visibility: 'off' }]
+                }
+            ]
         });
-        updateMapMarkers(currentPosts);
-        if (currentPosts.length > 0) {
-            showStreetView(currentPosts[0]);
-        } else {
-            document.getElementById('map').style.display = 'block';
-            document.getElementById('streetview').style.display = 'none';
+        
+        // Carregar dados iniciais SEMPRE, independente da localização
+        setTimeout(() => {
+            console.log('Forçando carregamento de usuários online...');
+            locationManager.loadOnlineUsers();
+        }, 1000);
+        
+        // Carregar novamente após 3 segundos para garantir
+        setTimeout(() => {
+            locationManager.loadOnlineUsers();
+        }, 3000);
+    };
+    
+    function setupControlEvents() {
+        // Seleção de avatar
+        document.querySelectorAll('.avatar-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const avatarType = this.getAttribute('data-avatar');
+                locationManager.updateAvatar(avatarType);
+            });
+        });
+        
+        // Controle de raio de privacidade
+        const radiusSlider = document.getElementById('privacy-radius');
+        const radiusDisplay = document.getElementById('radius-display');
+        
+        radiusSlider.addEventListener('input', function() {
+            const radius = parseInt(this.value);
+            updateRadiusDisplay(radius);
+        });
+        
+        radiusSlider.addEventListener('change', function() {
+            const radius = parseInt(this.value);
+            locationManager.updatePrivacyRadius(radius);
+        });
+        
+        // Toggle de painéis em mobile
+        const toggleBtn = document.getElementById('toggle-panels');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                document.body.classList.toggle('panels-visible');
+            });
         }
-        getUserLocation();
-        setTimeout(() => applyFilter('proximity'), 1000);
+        
+        // Debug toggle
+        const debugBtn = document.getElementById('toggle-debug');
+        const debugInfo = document.getElementById('debug-info');
+        debugBtn.addEventListener('click', function() {
+            if (debugInfo.style.display === 'none') {
+                debugInfo.style.display = 'block';
+                debugBtn.textContent = 'Ocultar Debug';
+            } else {
+                debugInfo.style.display = 'none';
+                debugBtn.textContent = 'Mostrar Debug';
+            }
+        });
     }
-
-    btnHideSidebar.addEventListener('click', () => {
-        chatCarousel.classList.add('hide');
-        btnShowSidebar.style.display = 'flex';
-    });
-    btnShowSidebar.addEventListener('click', function() {
-        chatCarousel.classList.remove('hide');
-        this.style.display = 'none';
-    });
-    postLimitSelect.addEventListener('change', function() {
-        postLimit = parseInt(this.value, 10) || 20;
-        const activeBtn = document.querySelector('.filter-btn.active');
-        if (activeBtn) applyFilter(activeBtn.getAttribute('data-filter'));
-    });
-    btnVoltarMapa.addEventListener('click', function () {
-        document.getElementById('map').style.display = 'block';
-        document.getElementById('streetview').style.display = 'none';
-        this.style.display = 'none';
-        if (lastStreetViewLoc) btnVoltarStreetview.style.display = 'block';
-        if (panorama) panorama.setVisible(false);
-    });
-    btnVoltarStreetview.addEventListener('click', function () {
-        if (lastStreetViewLoc) {
-            showStreetView(lastStreetViewLoc);
-            this.style.display = 'none';
+    
+    function updateLocationStatus(status, message) {
+        const statusEl = document.getElementById('location-status');
+        const dot = statusEl.querySelector('div');
+        const text = statusEl.querySelector('span');
+        
+        if (status === 'success') {
+            dot.className = 'w-2 h-2 bg-green-500 rounded-full mr-2';
+            text.textContent = message;
+        } else if (status === 'error') {
+            dot.className = 'w-2 h-2 bg-red-500 rounded-full mr-2';
+            text.textContent = message;
+        } else if (status === 'warning') {
+            dot.className = 'w-2 h-2 bg-yellow-500 rounded-full mr-2';
+            text.textContent = message;
+        } else {
+            dot.className = 'w-2 h-2 bg-yellow-500 rounded-full mr-2';
+            text.textContent = message;
         }
-    });
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            applyFilter(this.getAttribute('data-filter'));
+    }
+    
+    function updateRadiusDisplay(radiusMeters) {
+        const display = document.getElementById('radius-display');
+        if (radiusMeters < 1000) {
+            display.textContent = radiusMeters + ' m';
+        } else {
+            display.textContent = Math.round(radiusMeters / 1000) + ' km';
+        }
+    }
+    
+    function updateAvatarSelection(avatarType) {
+        document.querySelectorAll('.avatar-btn').forEach(btn => {
+            btn.classList.remove('active');
         });
-    });
-    avatarsContainer.addEventListener('click', function(e) {
-        const item = e.target.closest('.carousel-item');
-        if (item) {
-            const lat = parseFloat(item.getAttribute('data-lat'));
-            const lng = parseFloat(item.getAttribute('data-lng'));
-            const loc = currentPosts.find(l => Number(l.lat).toFixed(5) === lat.toFixed(5) && Number(l.lng).toFixed(5) === lng.toFixed(5));
-            if (loc) window.showStreetView(loc);
-            else focusMapOnLocation({lat, lng});
+        
+        document.querySelector(`[data-avatar="${avatarType}"]`)?.classList.add('active');
+    }
+    
+    function updateUsersDisplay(users) {
+        const usersList = document.getElementById('users-list');
+        const usersCount = document.getElementById('users-count');
+        
+        usersCount.textContent = users.length;
+        
+        if (users.length === 0) {
+            usersList.innerHTML = '<div class="text-gray-500 text-sm text-center py-4">Nenhum usuário online</div>';
+            return;
+        }
+        
+        const html = users.map(user => {
+            const avatar = locationManager.getAvatarFilename(user.avatar_type);
+            const lastSeen = new Date(user.last_seen);
+            const timeAgo = getTimeAgo(lastSeen);
+            
+            return `
+                <div class="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer" data-user-id="${user.id}" data-lat="${user.latitude}" data-lng="${user.longitude}">
+                    <img src="/images/${avatar}" alt="${user.name}" class="w-8 h-8 rounded-full border border-gray-300">
+                    <div class="flex-1 min-w-0">
+                        <div class="font-medium text-sm truncate">${user.name}</div>
+                        <div class="text-xs text-gray-500">${timeAgo}</div>
+                    </div>
+                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                </div>
+            `;
+        }).join('');
+        
+        usersList.innerHTML = html;
+        
+        // Adicionar eventos de clique
+        usersList.querySelectorAll('[data-user-id]').forEach(userEl => {
+            userEl.addEventListener('click', function() {
+                const lat = parseFloat(this.getAttribute('data-lat'));
+                const lng = parseFloat(this.getAttribute('data-lng'));
+                
+                if (map) {
+                    map.setCenter({ lat, lng });
+                    map.setZoom(15);
+                }
+            });
+        });
+    }
+    
+    function updateMapMarkers(users) {
+        console.log('Atualizando marcadores no mapa:', users.length, 'usuários');
+        
+        // Limpar marcadores existentes
+        if (markerCluster) {
+            markerCluster.clearMarkers();
+        }
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+        
+        // Verificar se temos usuários
+        if (!users || users.length === 0) {
+            console.warn('Nenhum usuário online para exibir no mapa');
+            return;
+        }
+        
+        // Adicionar marcadores para usuários online
+        users.forEach((user, index) => {
+            console.log(`Criando marcador ${index + 1}:`, user);
+            
+            const avatar = locationManager.getAvatarFilename(user.avatar_type);
+            
+            const marker = new google.maps.Marker({
+                position: { lat: user.latitude, lng: user.longitude },
+                title: user.name,
+                icon: {
+                    url: `/images/${avatar}`,
+                    scaledSize: new google.maps.Size(40, 40),
+                    anchor: new google.maps.Point(20, 20)
+                }
+            });
+            
+            // Adicionar info window
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div class="p-2">
+                        <div class="flex items-center space-x-2 mb-2">
+                            <img src="/images/${avatar}" alt="${user.name}" class="w-6 h-6 rounded-full">
+                            <strong>${user.name}</strong>
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            Online agora • Avatar: ${user.avatar_type}
+                        </div>
+                        ${window.isAuthenticated ? '<button class="mt-2 px-3 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700">Conversar</button>' : '<div class="mt-2 text-xs text-gray-500">Faça login para conversar</div>'}
+                    </div>
+                `
+            });
+            
+            marker.addListener('click', () => {
+                console.log('Clicou no marcador de:', user.name);
+                infoWindow.open(map, marker);
+            });
+            
+            markers.push(marker);
+        });
+        
+        console.log(`${markers.length} marcadores criados`);
+        
+        // Aplicar cluster aos marcadores se houver muitos
+        if (window.markerClusterer && markers.length > 0) {
+            try {
+                markerCluster = new markerClusterer.MarkerClusterer({ 
+                    map, 
+                    markers,
+                    gridSize: 60,
+                    maxZoom: 15
+                });
+                console.log('Cluster aplicado aos marcadores');
+            } catch (error) {
+                console.error('Erro ao criar cluster:', error);
+                // Fallback: adicionar marcadores diretamente ao mapa
+                markers.forEach(marker => marker.setMap(map));
+            }
+        } else if (markers.length > 0) {
+            // Se não há cluster disponível, adicionar marcadores diretamente
+            markers.forEach(marker => marker.setMap(map));
+            console.log('Marcadores adicionados diretamente ao mapa');
+        }
+        
+        // Ajustar visualização do mapa para mostrar todos os marcadores
+        if (markers.length > 0 && map) {
+            const bounds = new google.maps.LatLngBounds();
+            markers.forEach(marker => bounds.extend(marker.getPosition()));
+            
+            if (markers.length === 1) {
+                // Para um único marcador, centralizar e definir zoom
+                map.setCenter(markers[0].getPosition());
+                map.setZoom(10);
+            } else {
+                // Para múltiplos marcadores, ajustar aos limites
+                map.fitBounds(bounds);
+            }
+            
+            console.log('Vista do mapa ajustada para mostrar todos os marcadores');
+        }
+    }
+    
+    function getTimeAgo(date) {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) return 'agora';
+        if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + ' min';
+        if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + ' h';
+        return Math.floor(diffInSeconds / 86400) + ' d';
+    }
+    
+    // Cleanup quando a página for fechada
+    window.addEventListener('beforeunload', function() {
+        if (locationManager) {
+            locationManager.destroy();
         }
     });
 });
