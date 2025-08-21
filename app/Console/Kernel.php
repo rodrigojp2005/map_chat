@@ -12,7 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        // Limpar usuários offline a cada 5 minutos
+        $schedule->command('users:clean-offline --minutes=10')->everyFiveMinutes();
     }
 
     /**

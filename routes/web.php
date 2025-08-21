@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 // use App\Http\Controllers\GincanaController; // legacy removed
 use App\Http\Controllers\MapchatController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\ComentarioController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [MapchatController::class, 'welcome'])->name('home');
 // Endpoint público para listar chats ativos em JSON (usado pelo mapa lateral)
 Route::get('/mapchat-ativos.json', [MapchatController::class, 'ativosJson'])->name('mapchat.ativos.json');
+
+// Endpoint público para listar usuários online
+Route::get('/usuarios-online.json', [LocationController::class, 'getOnlineUsers'])->name('usuarios.online.json');
+
+// Endpoint público para buscar endereços
+Route::post('/location/search-address', [LocationController::class, 'searchAddress'])->name('location.search-address');
 
 // Rota pública para visualizar comentários (qualquer um pode ver)
 Route::get('/comentarios/{mapchat_id}', [ComentarioController::class, 'index'])->name('comentarios.index');
@@ -49,6 +56,12 @@ Route::middleware('auth')->group(function () {
     // Push subscription
     Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');
     Route::post('/push/unsubscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push.unsubscribe');
+
+    // Rotas de localização
+    Route::post('/location/update', [LocationController::class, 'updateLocation'])->name('location.update');
+    Route::post('/location/avatar', [LocationController::class, 'updateAvatar'])->name('location.avatar');
+    Route::post('/location/offline', [LocationController::class, 'setOffline'])->name('location.offline');
+    Route::post('/location/privacy-radius', [LocationController::class, 'updatePrivacyRadius'])->name('location.privacy-radius');
 
     // Notificações internas
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
