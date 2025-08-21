@@ -18,6 +18,9 @@ Route::get('/', [MapchatController::class, 'welcome'])->name('home');
 // Endpoint público para listar chats ativos em JSON (usado pelo mapa lateral)
 Route::get('/mapchat-ativos.json', [MapchatController::class, 'ativosJson'])->name('mapchat.ativos.json');
 
+// Rota pública para visualizar comentários (qualquer um pode ver)
+Route::get('/comentarios/{mapchat_id}', [ComentarioController::class, 'index'])->name('comentarios.index');
+
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -40,9 +43,8 @@ Route::middleware('auth')->group(function () {
     
     // Rankings removidos
     
-    // Rotas para comentários
+    // Rotas para comentários (apenas POST precisa de auth)
     Route::post('/comentarios', [ComentarioController::class, 'store'])->name('comentarios.store');
-    Route::get('/comentarios/{mapchat_id}', [ComentarioController::class, 'index'])->name('comentarios.index');
 
     // Push subscription
     Route::post('/push/subscribe', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push.subscribe');

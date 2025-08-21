@@ -1,0 +1,19 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-9ojSdJfy.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-Cy5rQFun.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  },
+  "resources/js/mapchat.js": {
+    "file": "assets/mapchat-0SrPYKKY.js",
+    "name": "mapchat",
+    "src": "resources/js/mapchat.js",
+    "isEntry": true
+  }
+}

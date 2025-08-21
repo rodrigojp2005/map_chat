@@ -23,9 +23,9 @@ composer.phar
 !/bootstrap/cache/.gitignore
 
 # === FRONTEND (gerados no build local, não enviar) ===
-/public/build/
-/public/hot
-/public/mix-manifest.json
+#/public/build/
+#/public/hot
+#/public/mix-manifest.json
 
 # === LOGS & DEBUG ===
 *.log
