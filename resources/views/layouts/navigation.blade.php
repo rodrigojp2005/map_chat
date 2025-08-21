@@ -10,11 +10,11 @@
 
         <!-- Cronômetro central (somente na home) -->
         @if(request()->is('/'))
-        <div class="hidden md:flex items-center bg-red-100 px-4 py-2 rounded-lg border border-red-200">
-            <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center bg-red-100 px-2 md:px-4 py-1 md:py-2 rounded-lg border border-red-200">
+            <svg class="w-4 h-4 md:w-5 md:h-5 text-red-600 mr-1 md:mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
-            <div class="text-red-700 font-mono font-semibold">
+            <div class="text-red-700 font-mono font-semibold text-sm md:text-base">
                 <span id="global-countdown-timer">10:00</span>
             </div>
         </div>

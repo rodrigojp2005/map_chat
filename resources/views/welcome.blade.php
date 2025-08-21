@@ -6,12 +6,12 @@
 @section('title', 'MapChat - Conecte-se no mapa!')
 
 @section('content')
-<div class="relative w-full" style="height: calc(100vh - 120px);">
+<div class="relative w-full" style="height: calc(100vh - 80px);">
     <!-- Mapa principal -->
     <div id="map" class="absolute left-0 top-0 w-full h-full z-10"></div>
 
     <!-- Painel de configuração (esquerda) -->
-    <div class="absolute left-4 top-4 z-20 bg-white rounded-lg shadow-lg max-w-80 sidebar-panel">
+    <div id="config-panel" class="absolute left-4 top-4 z-20 bg-white rounded-lg shadow-lg max-w-80 sidebar-panel">
         <div class="p-4 border-b bg-green-50">
             <h3 class="font-bold text-green-600 mb-1">🌍 Configure seu Perfil</h3>
         </div>
@@ -156,7 +156,7 @@
     </div>
     
     <!-- Painel de usuários online (direita) -->
-    <div class="absolute right-4 top-4 z-20 bg-white rounded-lg shadow-lg p-4 w-64 max-h-96 overflow-y-auto sidebar-panel">
+    <div id="online-panel" class="absolute right-4 top-4 z-20 bg-white rounded-lg shadow-lg p-4 w-64 max-h-96 overflow-y-auto sidebar-panel">
         <h3 class="font-bold text-green-600 mb-3">👥 Online Agora (<span id="users-count">0</span>)</h3>
         <div id="users-list" class="space-y-2">
             <div class="text-gray-500 text-sm text-center py-4">
@@ -169,10 +169,16 @@
         </div>
     </div>
     
-    <!-- Botão de toggle para painéis mobile -->
+    <!-- Botões de toggle para painéis mobile -->
     <div class="md:hidden">
-        <button id="toggle-panels" class="absolute top-4 left-4 z-30 bg-green-600 text-white p-2 rounded-full shadow-lg" aria-label="Abrir configurações">
+        <!-- Botão para painel de configuração (esquerda) -->
+        <button id="toggle-config" class="absolute top-4 left-4 z-30 bg-green-600 text-white p-2 rounded-full shadow-lg" aria-label="Abrir configurações">
             ⚙️
+        </button>
+        
+        <!-- Botão para painel online (direita) -->
+        <button id="toggle-online" class="absolute top-4 right-4 z-30 bg-blue-600 text-white p-2 rounded-full shadow-lg" aria-label="Ver usuários online">
+            👥
         </button>
     </div>
 </div>
@@ -232,17 +238,93 @@
 
 /* ====== Mobile ====== */
 @media (max-width: 768px) {
+    /* Garantir que mapa seja visível em mobile */
+    #map {
+        height: calc(100vh - 60px) !important;
+    }
+    
+    /* Container principal em mobile */
+    .relative.w-full {
+        height: calc(100vh - 60px) !important;
+    }
+    
+    /* Esconder painéis por padrão no mobile */
     .sidebar-panel { 
-        top: 60px !important; 
+        display: none !important;
+    }
+    
+    /* Painel de configuração quando visível */
+    .sidebar-panel.mobile-config-visible { 
+        display: block !important;
+        position: fixed !important;
+        top: 140px !important; 
         left: 8px !important; 
         right: 8px !important; 
+        bottom: 20px !important;
         max-width: calc(100vw - 16px) !important;
-        max-height: calc(100vh - 140px) !important;
+        max-height: calc(100vh - 160px) !important;
+        z-index: 45 !important;
+        overflow-y: auto !important;
     }
-    .absolute.top-4.left-4 { width: calc(100% - 32px); max-width: none; left: 16px; right: 16px; }
-    .absolute.top-4.right-4 { position: fixed; top: auto; bottom: 16px; right: 16px; left: 16px; width: auto; max-height: 200px; }
+    
+    /* Painel online quando visível */
+    .sidebar-panel.mobile-online-visible {
+        display: block !important;
+        position: fixed !important;
+        top: 140px !important;
+        left: 8px !important;
+        right: 8px !important;
+        bottom: 20px !important;
+        max-width: calc(100vw - 16px) !important;
+        max-height: calc(100vh - 160px) !important;
+        z-index: 45 !important;
+        overflow-y: auto !important;
+    }
+    
+    /* Melhorar botões mobile */
     .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
     .avatar-btn img { width: 2rem; height: 2rem; }
+    
+    /* Botões toggle sempre visíveis */
+    #toggle-config,
+    #toggle-online {
+        position: fixed !important;
+        top: 80px !important;
+        z-index: 50 !important;
+        border-radius: 50% !important;
+        padding: 12px !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+        border: none !important;
+        width: 48px !important;
+        height: 48px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 18px !important;
+        color: white !important;
+    }
+    
+    #toggle-config {
+        left: 16px !important;
+        background-color: #059669 !important;
+    }
+    
+    #toggle-online {
+        right: 16px !important;
+        background-color: #2563eb !important;
+    }
+    
+    /* Overlay escuro quando painéis abertos */
+    .mobile-panels-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        background: rgba(0,0,0,0.5) !important;
+        z-index: 35 !important;
+        backdrop-filter: blur(2px) !important;
+    }
 }
 </style>
 
@@ -292,10 +374,17 @@ class LocationManager {
     initializeUIByPlatform() {
         const desktopLocation = document.getElementById('desktop-location');
         const mobileLocation = document.getElementById('mobile-location');
+        
         if (this.isMobile) {
-            // Mostrar UI de GPS e tentar obter localização
+            // Mobile: Mostrar UI de GPS e esconder painéis por padrão
             mobileLocation?.classList.remove('hidden');
             desktopLocation?.classList.add('hidden');
+            
+            // Garantir que painéis estão escondidos inicialmente
+            document.querySelectorAll('.sidebar-panel').forEach(panel => {
+                panel.classList.remove('mobile-config-visible', 'mobile-online-visible');
+            });
+            
             this.requestGPSLocation();
         } else {
             // Desktop: mostrar campo de endereço
@@ -539,6 +628,20 @@ class LocationManager {
                 document.getElementById('address-input')?.focus();
             }
         });
+        
+        // Mobile toggle panels (separados)
+        const toggleConfigBtn = document.getElementById('toggle-config');
+        const toggleOnlineBtn = document.getElementById('toggle-online');
+        
+        // Debug: verificar se elementos existem
+        console.log('Botões encontrados:', {
+            config: !!toggleConfigBtn,
+            online: !!toggleOnlineBtn,
+            paineis: document.querySelectorAll('.sidebar-panel').length
+        });
+        
+        toggleConfigBtn?.addEventListener('click', () => this.toggleConfigPanel());
+        toggleOnlineBtn?.addEventListener('click', () => this.toggleOnlinePanel());
         
         // Debug
         document.getElementById('toggle-debug')?.addEventListener('click', () => this.toggleDebug());
@@ -848,6 +951,122 @@ class LocationManager {
         } else {
             debugInfo.classList.add('hidden');
             debugBtn.textContent = 'Debug Info';
+        }
+    }
+
+    toggleConfigPanel() {
+        const configPanel = document.getElementById('config-panel');
+        const toggleBtn = document.getElementById('toggle-config');
+        
+        console.log('Toggle config - painel encontrado:', !!configPanel);
+        
+        if (!configPanel || !toggleBtn) {
+            console.error('Painel de config ou botão não encontrado');
+            return;
+        }
+        
+        const isVisible = configPanel.classList.contains('mobile-config-visible');
+        console.log('Config panel visível:', isVisible);
+        
+        if (isVisible) {
+            // Fechar painel
+            configPanel.classList.remove('mobile-config-visible');
+            toggleBtn.textContent = '⚙️';
+            toggleBtn.setAttribute('aria-label', 'Abrir configurações');
+            
+            // Remover overlay se não há outros painéis abertos
+            const onlineVisible = document.getElementById('online-panel')?.classList.contains('mobile-online-visible');
+            if (!onlineVisible) {
+                const overlay = document.querySelector('.mobile-panels-overlay');
+                if (overlay) overlay.remove();
+            }
+        } else {
+            // Abrir painel
+            configPanel.classList.add('mobile-config-visible');
+            toggleBtn.textContent = '✕';
+            toggleBtn.setAttribute('aria-label', 'Fechar configurações');
+            
+            // Criar overlay se não existe
+            if (!document.querySelector('.mobile-panels-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'mobile-panels-overlay';
+                overlay.addEventListener('click', () => this.closeAllMobilePanels());
+                document.body.appendChild(overlay);
+            }
+        }
+    }
+
+    toggleOnlinePanel() {
+        const onlinePanel = document.getElementById('online-panel');
+        const toggleBtn = document.getElementById('toggle-online');
+        
+        console.log('Toggle online - painel encontrado:', !!onlinePanel);
+        
+        if (!onlinePanel || !toggleBtn) {
+            console.error('Painel online ou botão não encontrado');
+            return;
+        }
+        
+        const isVisible = onlinePanel.classList.contains('mobile-online-visible');
+        console.log('Online panel visível:', isVisible);
+        
+        if (isVisible) {
+            // Fechar painel
+            onlinePanel.classList.remove('mobile-online-visible');
+            toggleBtn.textContent = '👥';
+            toggleBtn.setAttribute('aria-label', 'Ver usuários online');
+            
+            // Remover overlay se não há outros painéis abertos
+            const configVisible = document.getElementById('config-panel')?.classList.contains('mobile-config-visible');
+            if (!configVisible) {
+                const overlay = document.querySelector('.mobile-panels-overlay');
+                if (overlay) overlay.remove();
+            }
+        } else {
+            // Abrir painel
+            onlinePanel.classList.add('mobile-online-visible');
+            toggleBtn.textContent = '✕';
+            toggleBtn.setAttribute('aria-label', 'Fechar usuários online');
+            
+            // Criar overlay se não existe
+            if (!document.querySelector('.mobile-panels-overlay')) {
+                const overlay = document.createElement('div');
+                overlay.className = 'mobile-panels-overlay';
+                overlay.addEventListener('click', () => this.closeAllMobilePanels());
+                document.body.appendChild(overlay);
+            }
+        }
+    }
+
+    closeAllMobilePanels() {
+        console.log('Fechando todos os painéis mobile');
+        
+        // Fechar ambos os painéis usando IDs
+        const configPanel = document.getElementById('config-panel');
+        const onlinePanel = document.getElementById('online-panel');
+        
+        if (configPanel) configPanel.classList.remove('mobile-config-visible');
+        if (onlinePanel) onlinePanel.classList.remove('mobile-online-visible');
+        
+        // Remover overlay
+        const overlay = document.querySelector('.mobile-panels-overlay');
+        if (overlay) {
+            overlay.remove();
+            console.log('Overlay removido');
+        }
+        
+        // Restaurar botões
+        const toggleConfigBtn = document.getElementById('toggle-config');
+        const toggleOnlineBtn = document.getElementById('toggle-online');
+        
+        if (toggleConfigBtn) {
+            toggleConfigBtn.textContent = '⚙️';
+            toggleConfigBtn.setAttribute('aria-label', 'Abrir configurações');
+        }
+        
+        if (toggleOnlineBtn) {
+            toggleOnlineBtn.textContent = '👥';
+            toggleOnlineBtn.setAttribute('aria-label', 'Ver usuários online');
         }
     }
 
