@@ -22,6 +22,9 @@ Route::get('/mapchat-ativos.json', [MapchatController::class, 'ativosJson'])->na
 // Endpoint público para listar usuários online
 Route::get('/usuarios-online.json', [LocationController::class, 'getOnlineUsers'])->name('usuarios.online.json');
 
+// Endpoint público para buscar endereços
+Route::post('/location/search-address', [LocationController::class, 'searchAddress'])->name('location.search-address');
+
 // Rota pública para visualizar comentários (qualquer um pode ver)
 Route::get('/comentarios/{mapchat_id}', [ComentarioController::class, 'index'])->name('comentarios.index');
 

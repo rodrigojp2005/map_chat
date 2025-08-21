@@ -75,6 +75,61 @@ class LocationController extends Controller
     /**
      * Marca usuário como offline
      */
+    public function searchAddress(Request $request)
+    {
+        $request->validate([
+            'address' => 'required|string|max:255'
+        ]);
+
+        try {
+            $address = $request->address . ', Brasil';
+            $apiKey = env('GOOGLE_MAPS_API_KEY');
+            
+            if (!$apiKey) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Google Maps API key not configured'
+                ], 500);
+            }
+
+            $url = "https://maps.googleapis.com/maps/api/geocode/json?" . http_build_query([
+                'address' => $address,
+                'key' => $apiKey,
+                'components' => 'country:BR'
+            ]);
+
+            $response = file_get_contents($url);
+            $data = json_decode($response, true);
+
+            if ($data['status'] === 'OK' && !empty($data['results'])) {
+                $location = $data['results'][0];
+                $coordinates = $location['geometry']['location'];
+                
+                return response()->json([
+                    'success' => true,
+                    'location' => [
+                        'latitude' => $coordinates['lat'],
+                        'longitude' => $coordinates['lng'],
+                        'formatted_address' => $location['formatted_address'],
+                        'place_id' => $location['place_id']
+                    ]
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Address not found'
+                ], 404);
+            }
+
+        } catch (Exception $e) {
+            Log::error('Address search error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to search address'
+            ], 500);
+        }
+    }
+
     public function setOffline()
     {
         $user = Auth::user();
