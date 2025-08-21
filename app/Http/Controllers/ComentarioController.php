@@ -34,6 +34,15 @@ class ComentarioController extends Controller
 
     public function store(Request $request)
     {
+        // Verificar se o usuário está logado
+        if (!Auth::check()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Você precisa fazer login para comentar.',
+                'redirect' => '/login'
+            ], 401);
+        }
+
         try {
             // Validação básica
             $validated = $request->validate([
@@ -41,12 +50,9 @@ class ComentarioController extends Controller
                 'conteudo' => 'required|string|max:500'
             ]);
 
-            // Se não estiver logado, usar user_id = 1 para teste
-            $userId = Auth::check() ? Auth::id() : 1;
-
             $comentario = Comentario::create([
                 'mapchat_id' => $validated['mapchat_id'],
-                'user_id' => $userId,
+                'user_id' => Auth::id(),
                 'conteudo' => $validated['conteudo']
             ]);
 
@@ -57,6 +63,8 @@ class ComentarioController extends Controller
                 $mapchat = Mapchat::find($comentario->mapchat_id);
                 if ($mapchat) {
                     $criadorId = $mapchat->user_id;
+                    $userId = Auth::id();
+                    
                     // quem comentou antes neste mapchat (exclui o comentário atual e o autor atual)
                     $comentouAntesIds = Comentario::where('mapchat_id', $mapchat->id)
                         ->where('id', '!=', $comentario->id)
