@@ -23,12 +23,18 @@ class LocationController extends Controller
         $request->validate([
             'latitude' => 'required|numeric|between:-90,90',
             'longitude' => 'required|numeric|between:-180,180',
-            'privacy_radius' => 'nullable|integer|min:500|max:5000000' // 500m a 5000km em metros
+            'privacy_radius' => 'nullable|integer|min:500|max:5000000', // 500m a 5000km em metros
+            'avatar_type' => 'nullable|string|in:default,man,woman,pet,geek,sport,anonymous'
         ]);
         
         $user = Auth::user();
         if (!$user) {
             return response()->json(['error' => 'Usuário não autenticado'], 401);
+        }
+        
+        // Atualizar avatar se fornecido
+        if ($request->has('avatar_type')) {
+            $user->update(['avatar_type' => $request->avatar_type]);
         }
         
         $radiusKm = $request->privacy_radius ? $request->privacy_radius / 1000 : 50; // converter para km
@@ -201,18 +207,22 @@ class LocationController extends Controller
                 'latitude' => 'required|numeric|between:-90,90',
                 'longitude' => 'required|numeric|between:-180,180',
                 'privacy_radius' => 'nullable|integer|min:500|max:5000000',
-                'session_id' => 'required|string|max:255'
+                'session_id' => 'required|string|max:255',
+                'avatar_type' => 'nullable|string|in:default,man,woman,pet,geek,sport,anonymous'
             ]);
 
             $radiusKm = isset($validated['privacy_radius']) 
                 ? $validated['privacy_radius'] / 1000 
                 : 5; // padrão 5km
+            
+            $avatarType = $validated['avatar_type'] ?? 'anonymous';
 
             $this->locationService->updateAnonymousUserLocation(
                 $validated['session_id'],
                 $validated['latitude'],
                 $validated['longitude'],
-                $radiusKm
+                $radiusKm,
+                $avatarType
             );
 
             return response()->json(['success' => true, 'message' => 'Localização anônima atualizada']);

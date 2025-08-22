@@ -203,7 +203,7 @@ class LocationService
     /**
      * Atualizar localização de usuário anônimo
      */
-    public function updateAnonymousUserLocation(string $sessionId, float $realLat, float $realLng, int $radiusKm = 5): void
+    public function updateAnonymousUserLocation(string $sessionId, float $realLat, float $realLng, int $radiusKm = 5, string $avatarType = 'anonymous'): void
     {
         $randomLocation = $this->generateRandomLocation($realLat, $realLng, $radiusKm);
         
@@ -212,11 +212,11 @@ class LocationService
             ['session_id' => $sessionId],
             [
                 'name' => 'Usuário Anônimo',
-                'avatar_type' => 'anonymous'
+                'avatar_type' => $avatarType
             ]
         );
 
-        // Atualizar localização
+        // Atualizar localização e avatar
         $anonymousUser->update([
             'real_latitude' => $realLat,
             'real_longitude' => $realLng,
@@ -224,7 +224,8 @@ class LocationService
             'longitude' => $randomLocation['longitude'],
             'privacy_radius' => $radiusKm * 1000, // salvar em metros
             'is_online' => true,
-            'last_seen' => now()
+            'last_seen' => now(),
+            'avatar_type' => $avatarType // Atualizar avatar também
         ]);
     }
 }
