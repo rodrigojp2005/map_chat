@@ -395,8 +395,40 @@ class LocationManager {
     }
 
     initializeCountdown() {
-        // Inicia cronômetro para todos (logados e não logados)
-        this.startGlobalCountdown();
+        // Iniciar cronômetro sincronizado com horário de Brasília
+        this.syncCountdownWithBrasilia();
+    }
+
+    syncCountdownWithBrasilia() {
+        try {
+            // Obter horário atual de Brasília
+            const now = new Date();
+            const brasiliaTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+            
+            // Calcular quantos segundos se passaram no minuto atual
+            const currentSeconds = brasiliaTime.getSeconds();
+            const currentMinutes = brasiliaTime.getMinutes();
+            
+            // Cronômetro de 10 minutos que reinicia a cada 10 minutos
+            const minutesCycle = currentMinutes % 10; // 0-9
+            const totalSecondsInCycle = (minutesCycle * 60) + currentSeconds;
+            
+            // Segundos restantes até completar os 10 minutos
+            this.globalTimeRemaining = 600 - totalSecondsInCycle; // 10min = 600s
+            
+            console.log('Cronômetro sincronizado com Brasília:', {
+                horarioBrasilia: brasiliaTime.toLocaleTimeString(),
+                minutosNoCiclo: minutesCycle,
+                segundosRestantes: this.globalTimeRemaining
+            });
+            
+            this.startGlobalCountdown();
+        } catch (error) {
+            console.error('Erro ao sincronizar cronômetro:', error);
+            // Fallback para cronômetro normal
+            this.globalTimeRemaining = 600;
+            this.startGlobalCountdown();
+        }
     }
 
     requestGPSLocation() {
@@ -491,8 +523,28 @@ class LocationManager {
                 }
             }
 
+            // Quando o tempo acaba, reiniciar o cronômetro
             if (this.globalTimeRemaining <= 0) {
-                this.handleGlobalTimeExpired();
+                console.log('Cronômetro finalizado, reiniciando...');
+                clearInterval(this.globalCountdown);
+                
+                // Resetar para 10 minutos e recomeçar
+                this.globalTimeRemaining = 600;
+                
+                // Resetar visual do timer
+                const timerContainer = countdownEl.closest('.bg-red-200, .bg-red-100');
+                if (timerContainer) {
+                    timerContainer.classList.remove('bg-red-200', 'border-red-300', 'animate-pulse');
+                    timerContainer.classList.add('bg-red-100', 'border-red-200');
+                }
+                
+                // Reiniciar cronômetro
+                setTimeout(() => this.startGlobalCountdown(), 100);
+                
+                // Para usuários não autenticados, mostrar modal de login após reset
+                if (!this.isAuthenticated) {
+                    setTimeout(() => this.handleGlobalTimeExpired(), 1000);
+                }
             }
         }, 1000);
     }
@@ -883,25 +935,69 @@ class LocationManager {
         }
         try {
             this.isConfigured = true;
-            // Atualiza servidor se autenticado
+            
+            // Sempre tentar enviar localização para o servidor (mesmo para usuários não autenticados)
+            try {
+                await this.sendLocationToServer();
+            } catch (error) {
+                console.log('Usuário não autenticado - localização não salva no servidor');
+            }
+            
+            // Atualizar dados se autenticado
             if (this.isAuthenticated) {
-                await this.updateServerLocation();
                 await this.updateAvatar(this.selectedAvatar);
                 await this.updatePrivacyRadius(this.privacyRadius);
             }
+            
             // UI
             document.getElementById('config-section')?.classList.add('hidden');
             document.getElementById('status-section')?.classList.remove('hidden');
             this.addUserMarkerToMap();
+            
             // Carregar usuários e iniciar atualização periódica
             await this.loadOnlineUsers();
             this.startPeriodicUpdates();
+            
             // Callbacks
             this.onConfigurationApplied();
         } catch (error) {
             console.error('Erro ao aplicar configuração:', error);
             alert('Erro ao aplicar configuração. Tente novamente.');
         }
+    }
+
+    async sendLocationToServer() {
+        if (!this.userPosition) return;
+        
+        const endpoint = this.isAuthenticated ? '/location/update' : '/location/anonymous';
+        
+        try {
+            await fetch(endpoint, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                body: JSON.stringify({ 
+                    latitude: this.userPosition.lat, 
+                    longitude: this.userPosition.lng,
+                    avatar_type: this.selectedAvatar,
+                    privacy_radius: this.privacyRadius,
+                    session_id: this.isAuthenticated ? null : this.generateSessionId()
+                })
+            });
+        } catch (error) {
+            console.error('Erro ao enviar localização:', error);
+        }
+    }
+
+    generateSessionId() {
+        // Criar ID único para sessão anônima
+        if (!this.anonymousSessionId) {
+            this.anonymousSessionId = 'anon_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+        return this.anonymousSessionId;
     }
 
     addUserMarkerToMap() {
@@ -1245,7 +1341,14 @@ class LocationManager {
 
     startPeriodicUpdates() {
         if (this.updateInterval) return;
-        this.updateInterval = setInterval(() => this.loadOnlineUsers(), 30000);
+        this.updateInterval = setInterval(() => this.loadOnlineUsers(), 15000); // Reduzir para 15s
+        
+        // Forçar atualização quando a página voltar a ter foco
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.loadOnlineUsers();
+            }
+        });
     }
 
     getAvatarFilename(avatarType) {
