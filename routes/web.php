@@ -25,6 +25,9 @@ Route::get('/usuarios-online.json', [LocationController::class, 'getOnlineUsers'
 // Endpoint público para buscar endereços
 Route::post('/location/search-address', [LocationController::class, 'searchAddress'])->name('location.search-address');
 
+// Endpoint público para localização de usuários anônimos
+Route::post('/location/anonymous', [LocationController::class, 'updateAnonymousLocation'])->name('location.anonymous');
+
 // Rota pública para visualizar comentários (qualquer um pode ver)
 Route::get('/comentarios/{mapchat_id}', [ComentarioController::class, 'index'])->name('comentarios.index');
 
