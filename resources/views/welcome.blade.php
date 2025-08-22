@@ -165,7 +165,7 @@
         </div>
         
         <div class="mt-3 pt-3 border-t text-xs text-gray-500">
-            🔄 Atualiza automaticamente a cada 30s
+            🔄 Atualiza a cada 30s
         </div>
     </div>
     
