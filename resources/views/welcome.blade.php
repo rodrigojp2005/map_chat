@@ -967,12 +967,24 @@ class LocationManager {
     }
 
     async sendLocationToServer() {
-        if (!this.userPosition) return;
+        if (!this.userPosition) {
+            console.warn('⚠️ Sem posição do usuário para enviar');
+            return;
+        }
         
         const endpoint = this.isAuthenticated ? '/location/update' : '/location/anonymous';
+        const sessionId = this.isAuthenticated ? null : this.generateSessionId();
+        
+        console.log('📍 Enviando localização:', {
+            endpoint,
+            authenticated: this.isAuthenticated,
+            sessionId,
+            position: this.userPosition,
+            privacyRadius: this.privacyRadius
+        });
         
         try {
-            await fetch(endpoint, {
+            const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json', 
@@ -984,11 +996,19 @@ class LocationManager {
                     longitude: this.userPosition.lng,
                     avatar_type: this.selectedAvatar,
                     privacy_radius: this.privacyRadius,
-                    session_id: this.isAuthenticated ? null : this.generateSessionId()
+                    session_id: sessionId
                 })
             });
+            
+            const result = await response.json();
+            console.log('✅ Resposta do servidor:', result);
+            
+            if (!result.success) {
+                console.error('❌ Erro na resposta:', result);
+            }
+            
         } catch (error) {
-            console.error('Erro ao enviar localização:', error);
+            console.error('❌ Erro ao enviar localização:', error);
         }
     }
 
@@ -1290,7 +1310,12 @@ class LocationManager {
     }
 
     async loadOnlineUsers() {
-        if (!this.isConfigured) return;
+        if (!this.isConfigured) {
+            console.warn('⚠️ LocationManager não configurado, pulando loadOnlineUsers');
+            return;
+        }
+        
+        console.log('🔄 Carregando usuários online...');
         
         try {
             // Tentar primeiro a nova rota, depois fallback para a antiga
@@ -1299,16 +1324,19 @@ class LocationManager {
                 response = await fetch('/usuarios-online.json', { 
                     headers: { 'Accept': 'application/json' } 
                 });
+                console.log('📡 Resposta recebida:', response.status, response.statusText);
             } catch (error) {
                 // Fallback para rota alternativa
                 response = await fetch('/users/online', { 
                     headers: { 'Accept': 'application/json' } 
                 });
+                console.log('📡 Fallback - Resposta recebida:', response.status, response.statusText);
             }
             
             if (!response.ok) throw new Error(`HTTP ${response.status}: Falha ao carregar usuários online`);
             
             const data = await response.json();
+            console.log('📊 Dados JSON recebidos:', data);
             
             // Suportar múltiplos formatos de resposta
             let users = [];
@@ -1320,6 +1348,8 @@ class LocationManager {
                 users = data.users;
             }
             
+            console.log('👥 Usuários processados:', users.length, users);
+            
             this.onUsersUpdate(users);
             
             // Atualizar debug info
@@ -1329,7 +1359,7 @@ class LocationManager {
             }
             
         } catch (error) {
-            console.error('Erro ao carregar usuários online:', error);
+            console.error('❌ Erro ao carregar usuários online:', error);
             
             // Mostrar erro no debug se disponível
             const debugUsers = document.getElementById('debug-users');
