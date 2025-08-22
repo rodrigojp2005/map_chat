@@ -554,8 +554,13 @@ class LocationManager {
         if (this.globalCountdown) clearInterval(this.globalCountdown);
         this.clearAllUserPositions();
         const modal = `
-            <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 modal-overlay">
-                <div class="bg-white rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl">
+            <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 modal-overlay" id="time-expired-modal" onclick="if(event.target === this) this.remove()">
+                <div class="bg-white rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl relative" onclick="event.stopPropagation()">
+                    <button onclick="document.getElementById('time-expired-modal').remove()" class="absolute top-3 right-3 w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors" title="Fechar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                     <div class="text-6xl mb-4">⏰</div>
                     <h3 class="text-2xl font-bold text-red-600 mb-4">Tempo Esgotado!</h3>
                     <p class="text-gray-700 mb-6">O cronômetro global zerou e todas as posições foram resetadas.</p>
@@ -567,6 +572,18 @@ class LocationManager {
                 </div>
             </div>`;
         document.body.insertAdjacentHTML('beforeend', modal);
+        
+        // Adicionar suporte para fechar com ESC
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('time-expired-modal');
+                if (modal) {
+                    modal.remove();
+                    document.removeEventListener('keydown', handleEscape);
+                }
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
     }
 
     clearAllUserPositions() {
