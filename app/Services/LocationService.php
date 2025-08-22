@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Models\AnonymousUser;
 use Illuminate\Support\Facades\Http;
 
 class LocationService
@@ -83,26 +84,50 @@ class LocationService
     }
     
     /**
-     * Obter todos os usuários online
+     * Obter todos os usuários online (incluindo anônimos)
      */
     public function getOnlineUsers(): array
     {
-        return User::where('is_online', true)
-            ->where('last_seen', '>', now()->subMinutes(5)) // considera online se visto nos últimos 5 minutos
+        // Limpar usuários anônimos antigos antes de buscar
+        AnonymousUser::cleanupOldUsers();
+        
+        // Buscar usuários registrados online
+        $registeredUsers = User::where('is_online', true)
+            ->where('last_seen', '>', now()->subMinutes(5))
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->get()
             ->map(function ($user) {
                 return [
-                    'id' => $user->id,
+                    'id' => 'user_' . $user->id,
                     'name' => $user->name,
                     'latitude' => (float) $user->latitude,
                     'longitude' => (float) $user->longitude,
                     'avatar_type' => $user->avatar_type,
-                    'last_seen' => $user->last_seen->toISOString()
+                    'last_seen' => $user->last_seen->toISOString(),
+                    'type' => 'registered'
                 ];
-            })
-            ->toArray();
+            });
+
+        // Buscar usuários anônimos online
+        $anonymousUsers = AnonymousUser::online()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'id' => 'anon_' . $user->session_id,
+                    'name' => $user->name,
+                    'latitude' => (float) $user->latitude,
+                    'longitude' => (float) $user->longitude,
+                    'avatar_type' => $user->avatar_type,
+                    'last_seen' => $user->last_seen->toISOString(),
+                    'type' => 'anonymous'
+                ];
+            });
+
+        // Combinar ambos os tipos de usuários
+        return $registeredUsers->concat($anonymousUsers)->toArray();
     }
     
     /**
@@ -173,5 +198,33 @@ class LocationService
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
         
         return $earthRadius * $c;
+    }
+
+    /**
+     * Atualizar localização de usuário anônimo
+     */
+    public function updateAnonymousUserLocation(string $sessionId, float $realLat, float $realLng, int $radiusKm = 5): void
+    {
+        $randomLocation = $this->generateRandomLocation($realLat, $realLng, $radiusKm);
+        
+        // Buscar ou criar usuário anônimo
+        $anonymousUser = AnonymousUser::firstOrCreate(
+            ['session_id' => $sessionId],
+            [
+                'name' => 'Usuário Anônimo',
+                'avatar_type' => 'anonymous'
+            ]
+        );
+
+        // Atualizar localização
+        $anonymousUser->update([
+            'real_latitude' => $realLat,
+            'real_longitude' => $realLng,
+            'latitude' => $randomLocation['latitude'],
+            'longitude' => $randomLocation['longitude'],
+            'privacy_radius' => $radiusKm * 1000, // salvar em metros
+            'is_online' => true,
+            'last_seen' => now()
+        ]);
     }
 }

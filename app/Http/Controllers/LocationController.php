@@ -190,4 +190,44 @@ class LocationController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Atualizar localização de usuário anônimo
+     */
+    public function updateAnonymousLocation(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'latitude' => 'required|numeric|between:-90,90',
+                'longitude' => 'required|numeric|between:-180,180',
+                'privacy_radius' => 'nullable|integer|min:500|max:5000000',
+                'session_id' => 'required|string|max:255'
+            ]);
+
+            $radiusKm = isset($validated['privacy_radius']) 
+                ? $validated['privacy_radius'] / 1000 
+                : 5; // padrão 5km
+
+            $this->locationService->updateAnonymousUserLocation(
+                $validated['session_id'],
+                $validated['latitude'],
+                $validated['longitude'],
+                $radiusKm
+            );
+
+            return response()->json(['success' => true, 'message' => 'Localização anônima atualizada']);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dados inválidos',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Erro ao atualizar localização anônima: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro interno do servidor'
+            ], 500);
+        }
+    }
 }
