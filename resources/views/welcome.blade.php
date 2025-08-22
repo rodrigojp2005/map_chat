@@ -357,6 +357,7 @@ class LocationManager {
 
         // Expor autenticado global para templates de infoWindow
         window.isAuthenticated = this.isAuthenticated;
+        window.currentUserId = document.querySelector('meta[name="user-id"]')?.content || null;
     }
 
     initGeocoder() {
@@ -975,13 +976,7 @@ class LocationManager {
         const endpoint = this.isAuthenticated ? '/location/update' : '/location/anonymous';
         const sessionId = this.isAuthenticated ? null : this.generateSessionId();
         
-        console.log('📍 Enviando localização:', {
-            endpoint,
-            authenticated: this.isAuthenticated,
-            sessionId,
-            position: this.userPosition,
-            privacyRadius: this.privacyRadius
-        });
+        console.log('📍 Enviando localização para:', endpoint);
         
         try {
             const response = await fetch(endpoint, {
@@ -1001,10 +996,9 @@ class LocationManager {
             });
             
             const result = await response.json();
-            console.log('✅ Resposta do servidor:', result);
             
             if (!result.success) {
-                console.error('❌ Erro na resposta:', result);
+                console.error('❌ Erro na resposta do servidor:', result.message);
             }
             
         } catch (error) {
@@ -1500,7 +1494,21 @@ function updateMapMarkers(users) {
     window.markers.forEach(m => m.setMap(null));
     window.markers = [];
     if (!users || !users.length || !window.map) return;
-    users.forEach(user => {
+    
+    // Filtrar o próprio usuário para evitar duplicação no mapa
+    const otherUsers = users.filter(user => {
+        // Se estiver autenticado, filtrar por user_id
+        if (window.locationManager.isAuthenticated && window.currentUserId) {
+            return user.id !== `user_${window.currentUserId}`;
+        }
+        // Se for anônimo, filtrar por session_id
+        const mySessionId = window.locationManager.generateSessionId();
+        return user.id !== `anon_${mySessionId}`;
+    });
+    
+    console.log(`🎯 Exibindo ${otherUsers.length} outros usuários (filtrado de ${users.length} total)`);
+    
+    otherUsers.forEach(user => {
         const avatar = window.locationManager.getAvatarFilename(user.avatar_type);
         const lat = Number(user.latitude ?? user.lat);
         const lng = Number(user.longitude ?? user.lng);
