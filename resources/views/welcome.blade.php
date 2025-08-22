@@ -1254,27 +1254,6 @@ class LocationManager {
         console.log('Configuração resetada completamente');
     }
 
-    async updateServerLocation() {
-        if (!this.userPosition || !this.isAuthenticated) return;
-        try {
-            await fetch('/location/update', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-                },
-                body: JSON.stringify({ 
-                    latitude: this.userPosition.lat, 
-                    longitude: this.userPosition.lng,
-                    privacy_radius: this.privacyRadius 
-                })
-            });
-        } catch (error) {
-            console.error('Erro ao atualizar localização no servidor:', error);
-        }
-    }
-
     async updateAvatar(avatarType) {
         if (!this.isAuthenticated) return;
         try {
@@ -1341,6 +1320,7 @@ class LocationManager {
             // Suportar múltiplos formatos de resposta
             let users = [];
             if (Array.isArray(data)) {
+
                 users = data;
             } else if (data.users && Array.isArray(data.users)) {
                 users = data.users;

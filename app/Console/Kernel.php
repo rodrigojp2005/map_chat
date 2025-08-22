@@ -14,6 +14,9 @@ class Kernel extends ConsoleKernel
     {
         // Limpar usuários offline a cada 5 minutos
         $schedule->command('users:clean-offline --minutes=10')->everyFiveMinutes();
+        
+        // Limpar usuários anônimos inativos a cada 30 minutos
+        $schedule->command('cleanup:anonymous-users --force')->everyThirtyMinutes();
     }
 
     /**
