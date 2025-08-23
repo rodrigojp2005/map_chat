@@ -208,7 +208,8 @@ class LocationController extends Controller
                 'longitude' => 'required|numeric|between:-180,180',
                 'privacy_radius' => 'nullable|integer|min:500|max:5000000',
                 'session_id' => 'required|string|max:255',
-                'avatar_type' => 'nullable|string|in:default,man,woman,pet,geek,sport,anonymous'
+                'avatar_type' => 'nullable|string|in:default,man,woman,pet,geek,sport,anonymous',
+                'name' => 'nullable|string|max:20'
             ]);
 
             $radiusKm = isset($validated['privacy_radius']) 
@@ -216,13 +217,15 @@ class LocationController extends Controller
                 : 5; // padrão 5km
             
             $avatarType = $validated['avatar_type'] ?? 'anonymous';
+            $name = $validated['name'] ?? null;
 
             $this->locationService->updateAnonymousUserLocation(
                 $validated['session_id'],
                 $validated['latitude'],
                 $validated['longitude'],
                 $radiusKm,
-                $avatarType
+                $avatarType,
+                $name
             );
 
             return response()->json(['success' => true, 'message' => 'Localização anônima atualizada']);

@@ -8,7 +8,7 @@
 @section('content')
 <div class="relative w-full" style="height: calc(100vh - 80px);">
     <!-- Mapa principal -->
-    <div id="map" class="absolute left-0 top-0 w-full h-full z-10"></div>
+    <div id="map" class="absolute left-0 top-0 w-full h-full z-10" style="background: #e5e7eb; min-height: 400px;"></div>
 
     <!-- Painel de configuração (esquerda) -->
     <div id="config-panel" class="absolute left-4 top-4 z-20 bg-white rounded-lg shadow-lg max-w-80 sidebar-panel">
@@ -45,10 +45,30 @@
                 </div>
             </div>
 
+            <!-- Nickname Section -->
+            <div class="p-4 border-b">
+                <div class="flex items-center justify-between mb-3">
+                    <h4 class="text-sm font-semibold text-gray-700">2. Seu apelido (opcional):</h4>
+                    <div id="nickname-status" class="w-2 h-2 bg-gray-300 rounded-full"></div>
+                </div>
+                <div class="space-y-2">
+                    <input 
+                        type="text" 
+                        id="nickname-input" 
+                        placeholder="Digite seu apelido... (máx. 20 chars)"
+                        maxlength="20"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500"
+                    >
+                    <p class="text-xs text-gray-500">
+                        💡 Se deixar vazio, aparecerá como "Anônimo [código]"
+                    </p>
+                </div>
+            </div>
+
             <!-- Location Input (Desktop) / Auto-detection (Mobile) -->
             <div class="p-4 border-b" id="location-section">
                 <div class="flex items-center justify-between mb-3">
-                    <h4 class="text-sm font-semibold text-gray-700">2. Sua localização:</h4>
+                    <h4 class="text-sm font-semibold text-gray-700">3. Sua localização:</h4>
                     <div id="location-status-dot" class="w-2 h-2 bg-gray-300 rounded-full"></div>
                 </div>
                 
@@ -82,7 +102,7 @@
 
             <!-- Privacy Radius -->
             <div class="p-4 border-b">
-                <h4 class="text-sm font-semibold text-gray-700 mb-3">3. Raio de Privacidade: <span id="radius-value">50 km</span></h4>
+                <h4 class="text-sm font-semibold text-gray-700 mb-3">4. Raio de Privacidade: <span id="radius-value">50 km</span></h4>
                 <input type="range" id="privacy-radius" min="500" max="500000" step="500" value="50000" 
                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider">
                 <div class="flex justify-between text-xs text-gray-500 mt-1">
@@ -119,15 +139,24 @@
     
     <!-- Painel de usuários online (direita) -->
     <div id="online-panel" class="absolute right-4 top-4 z-20 bg-white rounded-lg shadow-lg p-4 w-64 max-h-96 overflow-y-auto sidebar-panel">
-        <h3 class="font-bold text-green-600 mb-3">👥 Online Agora (<span id="users-count">0</span>)</h3>
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-green-600">👥 Online Agora (<span id="users-count">0</span>)</h3>
+            <div class="text-xs text-gray-500" title="Chat MapChat disponível">💬</div>
+        </div>
         <div id="users-list" class="space-y-2">
             <div class="text-gray-500 text-sm text-center py-4">
                 Carregando usuários...
             </div>
         </div>
         
-        <div class="mt-3 pt-3 border-t text-xs text-gray-500">
-            🔄 Atualiza a cada 30s
+        <!-- Informação sobre o chat -->
+        <div class="mt-3 pt-3 border-t">
+            <div class="text-xs text-gray-500 mb-2">
+                💡 <strong>Chat MapChat:</strong> Configure sua localização e avatar para participar de salas de chat baseadas em proximidade geográfica!
+            </div>
+            <div class="text-xs text-gray-400">
+                🔄 Atualiza a cada 30s
+            </div>
         </div>
     </div>
     
@@ -142,6 +171,95 @@
         <button id="toggle-online" class="absolute top-4 right-4 z-30 bg-blue-600 text-white p-2 rounded-full shadow-lg" aria-label="Ver usuários online">
             👥
         </button>
+    </div>
+
+    <!-- CHAT MAPCHAT - Sempre visível -->
+    <div id="chat-widget" class="fixed bottom-4 right-4 z-50">
+        <!-- Botão principal do chat -->
+        <button id="chat-toggle" class="w-16 h-16 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-2xl cursor-pointer flex items-center justify-center transition-all duration-200 transform hover:scale-110 animate-pulse" title="Chat MapChat">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-3.582 8-8 8a8.96 8.96 0 01-4.887-1.441c-.203-.108-.417-.11-.621-.04l-3.301 1.155a1 1 0 01-1.266-1.265l1.155-3.302c.07-.204.068-.418-.04-.621A8.96 8.96 0 013 12c0-4.418 3.582-8 8-8s8 3.582 8 8z"></path>
+            </svg>
+            <!-- Contador de notificações -->
+            <div id="chat-notification-badge" class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center hidden font-bold">0</div>
+            <!-- Indicador de status -->
+            <div id="chat-status-indicator" class="absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-white" title="Configurando..."></div>
+        </button>
+
+        <!-- Painel do chat -->
+        <div id="chat-panel" class="absolute bottom-20 right-0 w-80 h-96 bg-white rounded-lg shadow-2xl border hidden transform transition-all duration-200">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-3 bg-green-600 text-white rounded-t-lg">
+                <div class="flex-1">
+                    <h3 class="font-bold text-sm" id="chat-room-title">Chat MapChat</h3>
+                    <p class="text-xs opacity-90" id="chat-room-subtitle">👆 Clique no balão verde do mapa ou configure sua localização</p>
+                </div>
+                <button id="chat-close" class="w-6 h-6 hover:bg-green-700 rounded flex items-center justify-center" title="Fechar">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Conteúdo do chat -->
+            <div id="chat-content" class="h-64 flex flex-col">
+                <!-- Estado inicial -->
+                <div id="chat-initial-state" class="flex-1 flex items-center justify-center p-4 text-center">
+                    <div>
+                        <div class="text-4xl mb-3">🗺️💬</div>
+                        <h4 class="font-bold text-gray-800 mb-2">Chat por Proximidade</h4>
+                        <p class="text-sm text-gray-600 mb-4">Configure seu avatar e localização para conversar com pessoas próximas!</p>
+                        
+                        <!-- Botão para ativar chat -->
+                        <button onclick="ativarChat()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mb-3 text-sm transition-colors">
+                            💬 Entrar no Chat
+                        </button>
+                        
+                        <div class="text-xs text-gray-500">
+                            <div class="flex items-center justify-center space-x-2 mb-1">
+                                <span class="w-2 h-2 bg-red-500 rounded-full" id="avatar-indicator"></span>
+                                <span>Avatar</span>
+                            </div>
+                            <div class="flex items-center justify-center space-x-2">
+                                <span class="w-2 h-2 bg-red-500 rounded-full" id="location-indicator"></span>
+                                <span>Localização</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado de conectando -->
+                <div id="chat-connecting-state" class="flex-1 flex items-center justify-center p-4 text-center hidden">
+                    <div>
+                        <div class="animate-spin w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-3"></div>
+                        <h4 class="font-bold text-gray-800 mb-2">Conectando...</h4>
+                        <p class="text-sm text-gray-600">Encontrando pessoas próximas a você</p>
+                    </div>
+                </div>
+
+                <!-- Estado conectado - lista de mensagens -->
+                <div id="chat-messages-container" class="flex-1 overflow-y-auto p-3 hidden" style="max-height: 300px;">
+                    <div id="chat-messages" class="space-y-2 overflow-y-auto" style="max-height: 280px; padding-right: 8px;">
+                        <!-- Mensagens aparecerão aqui -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input de mensagem -->
+            <div id="chat-input-section" class="border-t p-3 hidden">
+                <div class="flex space-x-2">
+                    <input type="text" id="chat-message-input" placeholder="Digite sua mensagem..." 
+                           class="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500" 
+                           maxlength="500">
+                    <button id="chat-send-btn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium">
+                        Enviar
+                    </button>
+                </div>
+                <div class="text-xs text-gray-500 mt-1 text-right">
+                    <span id="char-count">0</span>/500
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -293,10 +411,223 @@
 <!-- Scripts -->
 <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
 <script>
+    // Debug: verificar se o script do chat está carregando
+    console.log('🔍 Carregando scripts do MapChat...');
+    
+    // ChatManager completo
+    class ChatManager {
+        constructor(locationManager) {
+            this.locationManager = locationManager;
+            this.currentRoom = null;
+            this.nickname = null;
+            this.messages = [];
+            this.heartbeatInterval = null;
+            this.messagesInterval = null;
+            this.onRoomJoined = null; // Callback para widget
+
+            this.init();
+        }
+
+        async init() {
+            console.log('🚀 ChatManager inicializado');
+        }
+
+        async findOrCreateRoom() {
+            if (!this.locationManager?.isConfigured || !this.locationManager?.anonymousSessionId) {
+                console.warn('❌ LocationManager não configurado para chat');
+                return null;
+            }
+
+            try {
+                const response = await fetch('/chat/find-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                        'X-Anonymous-Session-ID': this.locationManager.anonymousSessionId
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const data = await response.json();
+                
+                if (data.success && data.room) {
+                    this.currentRoom = data.room;
+                    console.log('✅ Sala encontrada/criada:', data.room);
+                    
+                    // Notificar widget
+                    if (this.onRoomJoined) {
+                        this.onRoomJoined(data.room);
+                    }
+
+                    // Iniciar polling de mensagens
+                    this.startPolling();
+                    
+                    return data.room;
+                } else {
+                    console.error('❌ Erro ao encontrar sala:', data.message);
+                    return null;
+                }
+            } catch (error) {
+                console.error('❌ Erro na requisição de sala:', error);
+                return null;
+            }
+        }
+
+        async sendMessage(content) {
+            if (!this.currentRoom || !content.trim()) {
+                console.warn('❌ Não é possível enviar mensagem');
+                return false;
+            }
+
+            // Solicitar nickname se necessário
+            if (!this.nickname) {
+                await this.requestNickname();
+            }
+
+            try {
+                const response = await fetch(`/chat/${this.currentRoom.room_code}/send`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                        'X-Anonymous-Session-ID': this.locationManager.anonymousSessionId
+                    },
+                    body: JSON.stringify({
+                        room_code: this.currentRoom.room_code,
+                        message: content.trim()
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('✅ Mensagem enviada:', data.message);
+                    // A mensagem aparecerá no próximo polling
+                    return true;
+                } else {
+                    console.error('❌ Erro ao enviar mensagem:', data.message);
+                    return false;
+                }
+            } catch (error) {
+                console.error('❌ Erro na requisição de envio:', error);
+                return false;
+            }
+        }
+
+        async loadMessages() {
+            if (!this.currentRoom) return;
+
+            try {
+                const response = await fetch(`/chat/${this.currentRoom.room_code}/messages?room_code=${this.currentRoom.room_code}`, {
+                    headers: {
+                        'X-Anonymous-Session-ID': this.locationManager.anonymousSessionId
+                    }
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const newMessages = data.messages || [];
+                    
+                    // Verificar se há mensagens novas
+                    if (newMessages.length !== this.messages.length) {
+                        this.messages = newMessages;
+                        this.renderMessages();
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro ao carregar mensagens:', error);
+            }
+        }
+
+        renderMessages() {
+            const container = document.getElementById('chat-messages');
+            if (!container) return;
+
+            const mySessionId = this.locationManager?.anonymousSessionId;
+            
+            container.innerHTML = this.messages.map(msg => {
+                const isOwn = msg.user_id === mySessionId;
+                const timeStr = this.formatTime(msg.created_at);
+                
+                return `
+                    <div class="flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2">
+                        <div class="${isOwn ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-800'} px-3 py-2 rounded-lg max-w-xs">
+                            ${!isOwn ? `<div class="text-xs font-bold mb-1 opacity-75">${this.escapeHtml(msg.user_name || 'Anônimo')}</div>` : ''}
+                            <div class="text-sm">${this.escapeHtml(msg.message)}</div>
+                            <div class="text-xs opacity-75 mt-1">${timeStr}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Scroll para baixo
+            container.scrollTop = container.scrollHeight;
+        }
+
+        formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        }
+
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async requestNickname() {
+            return new Promise((resolve) => {
+                const nickname = prompt('Digite seu apelido para o chat (máx. 20 caracteres):');
+                if (nickname && nickname.trim()) {
+                    this.nickname = nickname.trim().substring(0, 20);
+                } else {
+                    this.nickname = 'Anônimo';
+                }
+                resolve(this.nickname);
+            });
+        }
+
+        startPolling() {
+            if (this.messagesInterval) {
+                clearInterval(this.messagesInterval);
+            }
+
+            // Carregar mensagens imediatamente
+            this.loadMessages();
+            
+            // Polling de mensagens a cada 3 segundos
+            this.messagesInterval = setInterval(() => {
+                this.loadMessages();
+            }, 3000);
+        }
+
+        stopPolling() {
+            if (this.messagesInterval) {
+                clearInterval(this.messagesInterval);
+                this.messagesInterval = null;
+            }
+        }
+
+        destroy() {
+            this.stopPolling();
+            this.currentRoom = null;
+            this.messages = [];
+        }
+    }
+    
+    // Exportar para uso global
+    window.ChatManager = ChatManager;
+</script>
+<script>
 class LocationManager {
     constructor(isAuthenticated) {
         this.isAuthenticated = !!isAuthenticated;
         this.selectedAvatar = null;
+        this.selectedNickname = ''; // Campo para nickname personalizado
         this.userPosition = null; // Posição com privacidade aplicada (enviada ao servidor)
         this.realUserPosition = null; // Posição real do usuário (nunca enviada)
         this.privacyRadius = 50000; // 50 km
@@ -585,6 +916,14 @@ class LocationManager {
         // Avatar selection
         document.querySelectorAll('.avatar-btn').forEach(btn => {
             btn.addEventListener('click', () => this.selectAvatar(btn.dataset.avatar));
+        });
+        
+        // Nickname input
+        const nicknameInput = document.getElementById('nickname-input');
+        nicknameInput?.addEventListener('input', (e) => {
+            this.selectedNickname = e.target.value.trim();
+            this.updateNicknameStatus();
+            this.updateButtonState();
         });
         
         // Address input
@@ -887,6 +1226,19 @@ class LocationManager {
             }
         }
     }
+    
+    updateNicknameStatus() {
+        const status = document.getElementById('nickname-status');
+        if (status) {
+            // Sempre verde - nickname é opcional
+            status.classList.remove('bg-gray-300', 'bg-red-500');
+            status.classList.add('bg-green-500');
+        }
+    }
+    
+    updateButtonState() {
+        this.checkConfigComplete();
+    }
 
     async applyConfiguration() {
         if (!this.selectedAvatar || !this.userPosition) {
@@ -960,7 +1312,8 @@ class LocationManager {
                     longitude: this.userPosition.lng,
                     avatar_type: this.selectedAvatar,
                     privacy_radius: this.privacyRadius,
-                    session_id: sessionId
+                    session_id: sessionId,
+                    name: this.selectedNickname || null // Incluir nickname se fornecido
                 })
             });
             
@@ -1331,7 +1684,6 @@ class LocationManager {
             // Suportar múltiplos formatos de resposta
             let users = [];
             if (Array.isArray(data)) {
-
                 users = data;
             } else if (data.users && Array.isArray(data.users)) {
                 users = data.users;
@@ -1340,6 +1692,12 @@ class LocationManager {
             }
             
             console.log('👥 Usuários processados:', users.length, users);
+            console.log('🔍 LocationManager state:', {
+                isConfigured: this.isConfigured,
+                isAuthenticated: this.isAuthenticated,
+                anonymousSessionId: this.anonymousSessionId,
+                currentUserId: window.currentUserId
+            });
             
             this.onUsersUpdate(users);
             
@@ -1447,18 +1805,48 @@ class LocationManager {
 
 // Inicialização do mapa
 window.initMapChatHome = function() {
-    if (!window.google || !window.google.maps) return;
-    const map = new google.maps.Map(document.getElementById('map'), {
-        center: { lat: -14.2350, lng: -51.9253 },
-        zoom: 4,
-        streetViewControl: false,
-        mapTypeControl: false,
-        fullscreenControl: false,
-        zoomControl: true,
-        gestureHandling: 'greedy',
-        styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }]
-    });
-    window.map = map;
+    console.log('🗺️ Inicializando mapa...');
+    console.log('🗺️ Google Maps disponível:', !!window.google?.maps);
+    
+    if (!window.google || !window.google.maps) {
+        console.error('❌ Google Maps não carregou!');
+        return;
+    }
+    
+    const mapElement = document.getElementById('map');
+    console.log('🗺️ Elemento do mapa encontrado:', !!mapElement);
+    
+    if (!mapElement) {
+        console.error('❌ Elemento #map não encontrado!');
+        return;
+    }
+    
+    try {
+        const map = new google.maps.Map(mapElement, {
+            center: { lat: -14.2350, lng: -51.9253 },
+            zoom: 4,
+            streetViewControl: false,
+            mapTypeControl: false,
+            fullscreenControl: false,
+            zoomControl: true,
+            gestureHandling: 'greedy',
+            styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }]
+        });
+        
+        window.map = map;
+        console.log('✅ Mapa criado com sucesso!');
+        
+        // Verificar se o mapa foi realmente criado após um breve delay
+        setTimeout(() => {
+            console.log('🗺️ Status do mapa após criação:', {
+                hasMap: !!window.map,
+                mapCenter: window.map?.getCenter()?.toString()
+            });
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Erro ao criar mapa:', error);
+    }
 };
 
 // Variáveis globais do mapa
@@ -1510,18 +1898,35 @@ function updateMapMarkers(users) {
     }
     window.markers.forEach(m => m.setMap(null));
     window.markers = [];
-    if (!users || !users.length || !window.map) return;
+    if (!users || !users.length || !window.map) {
+        console.log('🚫 updateMapMarkers: Sem usuários ou mapa não carregado');
+        return;
+    }
     
-    // Filtrar o próprio usuário para evitar duplicação no mapa
-    const otherUsers = users.filter(user => {
-        // Se estiver autenticado, filtrar por user_id
-        if (window.locationManager.isAuthenticated && window.currentUserId) {
-            return user.id !== `user_${window.currentUserId}`;
-        }
-        // Se for anônimo, filtrar por session_id
-        const mySessionId = window.locationManager.generateSessionId();
-        return user.id !== `anon_${mySessionId}`;
+    console.log('👥 updateMapMarkers: Recebidos', users.length, 'usuários');
+    console.log('🔍 Dados dos usuários:', users);
+    console.log('🔍 LocationManager state:', {
+        isAuthenticated: window.locationManager?.isAuthenticated,
+        anonymousSessionId: window.locationManager?.anonymousSessionId,
+        currentUserId: window.currentUserId,
+        isConfigured: window.locationManager?.isConfigured
     });
+    
+    // Filtrar o próprio usuário de forma mais robusta
+    let otherUsers = users;
+    
+    if (window.locationManager?.isConfigured && window.locationManager?.anonymousSessionId) {
+        // Se usuário está configurado e tem session_id, filtrar apenas o próprio
+        const mySessionId = window.locationManager.anonymousSessionId;
+        otherUsers = users.filter(user => {
+            const isMe = user.id === mySessionId;
+            console.log(`👤 Verificando ${user.id} vs ${mySessionId}: é meu = ${isMe}`);
+            return !isMe;
+        });
+        console.log(`🎯 Filtrando meu próprio usuário: ${users.length} -> ${otherUsers.length}`);
+    } else {
+        console.log('🎯 Usuário não configurado ainda, mostrando todos os usuários');
+    }
     
     console.log(`🎯 Exibindo ${otherUsers.length} outros usuários (filtrado de ${users.length} total)`);
     
@@ -1578,6 +1983,43 @@ function updateMapMarkers(users) {
             console.log('🚫 Zoom automático desabilitado - usuário está explorando');
         }
     }
+
+    // Calcular e mostrar centro do chat (incluindo todos os usuários, não apenas "outros")
+    console.log('🔍 Chamando calculateChatCenter com:', users.length, 'usuários (TODOS)');
+    const chatCenter = calculateChatCenter(users); // Usar todos os usuários para o chat
+    console.log('💬 Resultado do calculateChatCenter:', chatCenter);
+    
+    // TESTE: Adicionar marcador fixo de chat para debug
+    if (users.length > 0 && window.map && !window.testChatMarker) {
+        console.log('🧪 Criando marcador de teste...');
+        window.testChatMarker = new google.maps.Marker({
+            position: { lat: -15.8, lng: -47.9 }, // Posição fixa para teste
+            map: window.map,
+            icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="100" height="40" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="5" y="5" width="90" height="25" rx="12" fill="#059669" stroke="#fff" stroke-width="2"/>
+                        <text x="50" y="20" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" font-weight="bold">
+                            💬 CHAT (${users.length})
+                        </text>
+                        <polygon points="50,30 45,35 55,35" fill="#059669"/>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(100, 40),
+                anchor: new google.maps.Point(50, 40)
+            },
+            title: `TESTE: Chat com ${users.length} usuários online`,
+            zIndex: 2000
+        });
+
+        window.testChatMarker.addListener('click', () => {
+            console.log('🧪 TESTE: Marcador clicado!');
+            alert(`Chat clicado! ${users.length} usuários online.`);
+            document.getElementById('chat-panel').classList.remove('hidden');
+        });
+        
+        console.log('🧪 Marcador de teste criado!');
+    }
 }
 
 function getTimeAgo(date) {
@@ -1589,10 +2031,311 @@ function getTimeAgo(date) {
     return Math.floor(diff / 86400) + ' d';
 }
 
+// Função para calcular centro geográfico dos usuários e mostrar ícone de chat
+function calculateChatCenter(users) {
+    console.log('💬 calculateChatCenter chamada com:', users?.length, 'usuários');
+    
+    if (!users || users.length < 1 || !window.map) { // Mudei de 2 para 1 para teste
+        console.log('💬 Removendo marcador de chat - poucos usuários ou mapa não carregado');
+        // Remover ícone de chat se houver
+        if (window.chatCenterMarker) {
+            window.chatCenterMarker.setMap(null);
+            window.chatCenterMarker = null;
+        }
+        return null;
+    }
+
+    // Filtrar usuários válidos com coordenadas
+    const validUsers = users.filter(user => 
+        user.latitude && user.longitude && 
+        !isNaN(parseFloat(user.latitude)) && !isNaN(parseFloat(user.longitude))
+    );
+
+    console.log('💬 Usuários válidos filtrados:', validUsers.length, 'de', users.length);
+
+    if (validUsers.length < 1) { // Mudei de 2 para 1 para teste
+        console.log('💬 Removendo marcador - menos de 1 usuário válido');
+        if (window.chatCenterMarker) {
+            window.chatCenterMarker.setMap(null);
+            window.chatCenterMarker = null;
+        }
+        return null;
+    }
+
+    // Calcular centro geográfico
+    let totalLat = 0;
+    let totalLng = 0;
+    
+    validUsers.forEach(user => {
+        totalLat += parseFloat(user.latitude);
+        totalLng += parseFloat(user.longitude);
+    });
+
+    const centerLat = totalLat / validUsers.length;
+    const centerLng = totalLng / validUsers.length;
+
+    // Calcular raio (distância do usuário mais distante)
+    let maxDistance = 0;
+    const centerPos = { lat: centerLat, lng: centerLng };
+    
+    validUsers.forEach(user => {
+        const userPos = { lat: parseFloat(user.latitude), lng: parseFloat(user.longitude) };
+        const distance = google.maps.geometry.spherical.computeDistanceBetween(
+            new google.maps.LatLng(centerPos.lat, centerPos.lng),
+            new google.maps.LatLng(userPos.lat, userPos.lng)
+        );
+        maxDistance = Math.max(maxDistance, distance);
+    });
+
+    const radiusKm = Math.round(maxDistance / 1000);
+
+    // Criar ou atualizar marker de chat
+    if (window.chatCenterMarker) {
+        window.chatCenterMarker.setPosition(centerPos);
+        // Atualizar tooltip
+        window.chatCenterMarker.setTitle(`Chat MapChat - ${validUsers.length} pessoa(s) em raio de ${radiusKm}km`);
+    } else {
+        window.chatCenterMarker = new google.maps.Marker({
+            position: centerPos,
+            map: window.map,
+            icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="80" height="40" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="5" y="5" width="70" height="25" rx="12" fill="#059669" stroke="#fff" stroke-width="2"/>
+                        <text x="40" y="20" font-family="Arial, sans-serif" font-size="12" fill="white" text-anchor="middle" font-weight="bold">
+                            👥 ${validUsers.length} online
+                        </text>
+                        <polygon points="40,30 35,35 45,35" fill="#059669"/>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(80, 40),
+                anchor: new google.maps.Point(40, 40)
+            },
+            title: `Clique para abrir chat com ${validUsers.length} pessoa(s) em raio de ${radiusKm}km`,
+            zIndex: 1000
+        });
+
+        // Adicionar click listener
+        window.chatCenterMarker.addListener('click', async () => {
+            console.log('🎯 Balão de chat clicado!');
+            
+            // Verificar se usuário está configurado
+            if (!window.locationManager?.isConfigured || !window.locationManager?.anonymousSessionId) {
+                console.log('❌ Usuário não configurado, abrindo painel de configuração');
+                // Se não configurado, abrir o painel de configuração
+                document.getElementById('chat-panel').classList.remove('hidden');
+                return;
+            }
+            
+            console.log('✅ Usuário configurado, buscando sala de chat...');
+            
+            // Usuário configurado - abrir diretamente a sala de chat
+            if (window.chatManager) {
+                // Abrir painel primeiro
+                document.getElementById('chat-panel').classList.remove('hidden');
+                
+                // Mostrar estado de conectando
+                showChatConnecting();
+                
+                // Encontrar ou criar sala
+                const room = await window.chatManager.findOrCreateRoom();
+                
+                if (room) {
+                    console.log('✅ Sala encontrada:', room);
+                    // Pular direto para o estado conectado
+                    showChatConnected(room);
+                } else {
+                    console.log('❌ Não foi possível criar sala');
+                    // Se não conseguiu criar sala, voltar ao estado inicial
+                    document.getElementById('chat-connecting-state').classList.add('hidden');
+                    document.getElementById('chat-initial-state').classList.remove('hidden');
+                }
+            } else {
+                console.log('❌ ChatManager não disponível');
+                // Fallback para configuração
+                document.getElementById('chat-panel').classList.remove('hidden');
+            }
+        });
+    }
+
+    console.log(`💬 Centro do chat: ${centerLat.toFixed(4)}, ${centerLng.toFixed(4)} | ${validUsers.length} usuários | Raio: ${radiusKm}km`);
+    
+    return {
+        center: centerPos,
+        radius: maxDistance,
+        userCount: validUsers.length
+    };
+}
+function initializeChatWidget() {
+    const toggleBtn = document.getElementById('chat-toggle');
+    const chatPanel = document.getElementById('chat-panel');
+    const closeBtn = document.getElementById('chat-close');
+    const statusIndicator = document.getElementById('chat-status-indicator');
+    const avatarIndicator = document.getElementById('avatar-indicator');
+    const locationIndicator = document.getElementById('location-indicator');
+
+    // Toggle do painel
+    toggleBtn.addEventListener('click', () => {
+        chatPanel.classList.toggle('hidden');
+    });
+
+    // Fechar painel
+    closeBtn.addEventListener('click', () => {
+        chatPanel.classList.add('hidden');
+    });
+
+    // Atualizar indicadores baseado no estado
+    function updateChatIndicators() {
+        const hasAvatar = window.locationManager?.avatarType;
+        const hasLocation = window.locationManager?.isConfigured;
+
+        // Avatar indicator
+        if (hasAvatar) {
+            avatarIndicator.className = 'w-2 h-2 bg-green-500 rounded-full';
+        } else {
+            avatarIndicator.className = 'w-2 h-2 bg-red-500 rounded-full';
+        }
+
+        // Location indicator
+        if (hasLocation) {
+            locationIndicator.className = 'w-2 h-2 bg-green-500 rounded-full';
+        } else {
+            locationIndicator.className = 'w-2 h-2 bg-red-500 rounded-full';
+        }
+
+        // Status indicator
+        if (hasAvatar && hasLocation) {
+            statusIndicator.className = 'absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white';
+            statusIndicator.title = 'Pronto para chat';
+            showChatConnecting();
+        } else if (hasAvatar || hasLocation) {
+            statusIndicator.className = 'absolute -bottom-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-white';
+            statusIndicator.title = 'Configuração incompleta';
+        } else {
+            statusIndicator.className = 'absolute -bottom-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white';
+            statusIndicator.title = 'Não configurado';
+        }
+    }
+
+    // Mostrar estado de conectando
+    function showChatConnecting() {
+        document.getElementById('chat-initial-state').classList.add('hidden');
+        document.getElementById('chat-connecting-state').classList.remove('hidden');
+        document.getElementById('chat-messages-container').classList.add('hidden');
+        document.getElementById('chat-input-section').classList.add('hidden');
+
+        // Simular busca por sala
+        setTimeout(() => {
+            if (window.chatManager && window.locationManager?.isConfigured) {
+                window.chatManager.findOrCreateRoom();
+            }
+        }, 2000);
+    }
+
+    // Mostrar estado conectado
+    function showChatConnected(roomData) {
+        document.getElementById('chat-initial-state').classList.add('hidden');
+        document.getElementById('chat-connecting-state').classList.add('hidden');
+        document.getElementById('chat-messages-container').classList.remove('hidden');
+        document.getElementById('chat-input-section').classList.remove('hidden');
+
+        // Atualizar título da sala
+        document.getElementById('chat-room-title').textContent = roomData.name || 'Chat MapChat';
+        document.getElementById('chat-room-subtitle').textContent = `${roomData.users_count || 0} pessoa(s) próximas`;
+    }
+
+    // Callbacks para o LocationManager
+    function setupLocationCallbacks() {
+        if (window.locationManager) {
+            const originalOnConfigApplied = window.locationManager.onConfigurationApplied;
+            window.locationManager.onConfigurationApplied = function() {
+                if (originalOnConfigApplied) originalOnConfigApplied.call(this);
+                updateChatIndicators();
+            };
+
+            const originalOnUsersUpdate = window.locationManager.onUsersUpdate;
+            window.locationManager.onUsersUpdate = function(users) {
+                if (originalOnUsersUpdate) originalOnUsersUpdate.call(this, users);
+                updateChatIndicators();
+            };
+        }
+    }
+
+    // Integração com ChatManager
+    if (window.chatManager) {
+        window.chatManager.onRoomJoined = showChatConnected;
+    }
+
+    // Configurar callbacks quando LocationManager estiver pronto
+    setTimeout(setupLocationCallbacks, 1000);
+
+    // Input de mensagem
+    const messageInput = document.getElementById('chat-message-input');
+    const sendBtn = document.getElementById('chat-send-btn');
+    const charCount = document.getElementById('char-count');
+
+    if (messageInput && sendBtn) {
+        // Contador de caracteres
+        messageInput.addEventListener('input', () => {
+            charCount.textContent = messageInput.value.length;
+        });
+
+        // Enviar com Enter
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Enviar com botão
+        sendBtn.addEventListener('click', sendMessage);
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message && window.chatManager) {
+                window.chatManager.sendMessage(message);
+                messageInput.value = '';
+                charCount.textContent = '0';
+            }
+        }
+    }
+
+    // Inicializar indicadores
+    updateChatIndicators();
+}
+
 // Inicialização principal
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 DOM Carregado - Inicializando aplicação');
+    
     const isAuthenticated = @json(auth()->check());
-    window.locationManager = new LocationManager(isAuthenticated);
+    
+    try {
+        window.locationManager = new LocationManager(isAuthenticated);
+        console.log('✅ LocationManager inicializado');
+    } catch (error) {
+        console.error('❌ Erro ao inicializar LocationManager:', error);
+        // Continuar mesmo com erro
+    }
+
+    try {
+        // Inicializar ChatManager
+        window.chatManager = new ChatManager(window.locationManager);
+        console.log('✅ ChatManager inicializado');
+    } catch (error) {
+        console.error('❌ Erro ao inicializar ChatManager:', error);
+        // Continuar mesmo com erro
+    }
+
+    try {
+        // Inicializar Widget de Chat
+        initializeChatWidget();
+        console.log('✅ ChatWidget inicializado');
+    } catch (error) {
+        console.error('❌ Erro ao inicializar ChatWidget:', error);
+        // Continuar mesmo com erro
+    }
 
     // Callbacks para integrar com o mapa e UI
     window.locationManager.onConfigurationApplied = function() {
@@ -1604,9 +2347,220 @@ document.addEventListener('DOMContentLoaded', () => {
     window.locationManager.onUsersUpdate = function(users) {
         updateUsersDisplay(users);
         updateMapMarkers(users);
+        
+        // NOVA LÓGICA: Criar/atualizar balão de chat inteligente
+        if (users && users.length >= 2 && window.map) {
+            // Calcular centro geográfico dos usuários
+            let totalLat = 0, totalLng = 0, validUsers = 0;
+            users.forEach(user => {
+                if (user.latitude && user.longitude && 
+                    !isNaN(parseFloat(user.latitude)) && !isNaN(parseFloat(user.longitude))) {
+                    totalLat += parseFloat(user.latitude);
+                    totalLng += parseFloat(user.longitude);
+                    validUsers++;
+                }
+            });
+            
+            if (validUsers >= 2) {
+                const centerLat = totalLat / validUsers;
+                const centerLng = totalLng / validUsers;
+                
+                if (window.simpleChatBalloon) {
+                    // Atualizar posição e texto do balão existente
+                    window.simpleChatBalloon.setPosition({ lat: centerLat, lng: centerLng });
+                    window.simpleChatBalloon.setTitle(`Chat com ${users.length} usuários online - Clique para conversar`);
+                    
+                    // Atualizar ícone com nova contagem
+                    window.simpleChatBalloon.setIcon({
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 12,
+                        fillColor: '#059669',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2
+                    });
+                } else {
+                    console.log(`💬 Criando balão de chat para ${users.length} usuários no centro geográfico...`);
+                    
+                    window.simpleChatBalloon = new google.maps.Marker({
+                        position: { lat: centerLat, lng: centerLng },
+                        map: window.map,
+                        icon: {
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 12,
+                            fillColor: '#059669',
+                            fillOpacity: 1,
+                            strokeColor: '#ffffff',
+                            strokeWeight: 2
+                        },
+                        title: `Chat com ${users.length} usuários online - Clique para conversar`,
+                        zIndex: 2000
+                    });
+                    
+                    // Adicionar evento de clique inteligente
+                    window.simpleChatBalloon.addListener('click', async () => {
+                        console.log('� Balão de chat clicado!');
+                        
+                        // Abrir painel de chat
+                        document.getElementById('chat-panel').classList.remove('hidden');
+                        
+                        // Se usuário não está configurado, mostrar tela de configuração
+                        if (!window.locationManager?.isConfigured) {
+                            console.log('⚠️ Usuário não configurado - mostrando tela inicial');
+                            return;
+                        }
+                        
+                        console.log('✅ Usuário configurado - conectando ao chat...');
+                        
+                        // Usuário configurado - tentar conectar ao chat
+                        if (window.chatManager) {
+                            showChatConnecting();
+                            
+                            try {
+                                const room = await window.chatManager.findOrCreateRoom();
+                                console.log('🏠 Resultado da sala:', room);
+                                
+                                if (room) {
+                                    showChatConnected(room);
+                                } else {
+                                    console.log('❌ Não foi possível criar sala - voltando ao estado inicial');
+                                    // Voltar ao estado inicial
+                                    document.getElementById('chat-connecting-state').classList.add('hidden');
+                                    document.getElementById('chat-initial-state').classList.remove('hidden');
+                                }
+                            } catch (error) {
+                                console.error('❌ Erro ao buscar sala:', error);
+                                // Voltar ao estado inicial
+                                document.getElementById('chat-connecting-state').classList.add('hidden');
+                                document.getElementById('chat-initial-state').classList.remove('hidden');
+                            }
+                        } else {
+                            console.log('❌ ChatManager não disponível');
+                        }
+                    });
+                    
+                    console.log('✅ Balão de chat criado no centro geográfico!');
+                }
+            }
+        } else if (window.simpleChatBalloon && (!users || users.length < 2)) {
+            // Remover balão se não há usuários suficientes
+            console.log('❌ Removendo balão - poucos usuários online');
+            window.simpleChatBalloon.setMap(null);
+            window.simpleChatBalloon = null;
+        }
+        
+        // Manter a lógica original do chat center (opcional)
+        // calculateChatCenter(users);
+    };
+    
+    // FALLBACK: Tentar inicializar o mapa se não foi inicializado após 3 segundos
+    setTimeout(() => {
+        console.log('🔄 Verificando se mapa foi inicializado...', { hasMap: !!window.map, hasGoogle: !!window.google });
+        if (!window.map) {
+            console.log('⚠️ Mapa não foi inicializado, tentando fallback...');
+            if (window.initMapChatHome) {
+                window.initMapChatHome();
+            }
+        }
+    }, 3000);
+    
+    // FALLBACK 2: Forçar inicialização após 6 segundos
+    setTimeout(() => {
+        if (!window.map && window.google?.maps) {
+            console.log('🔥 Forçando inicialização do mapa...');
+            try {
+                const mapElement = document.getElementById('map');
+                if (mapElement) {
+                    window.map = new google.maps.Map(mapElement, {
+                        center: { lat: -14.2350, lng: -51.9253 },
+                        zoom: 4,
+                        streetViewControl: false,
+                        mapTypeControl: false,
+                        fullscreenControl: false,
+                        zoomControl: true,
+                        gestureHandling: 'greedy'
+                    });
+                    console.log('✅ Mapa forçado criado com sucesso!');
+                    
+                    // Recarregar usuários se locationManager existe
+                    if (window.locationManager?.loadOnlineUsers) {
+                        window.locationManager.loadOnlineUsers();
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Erro ao forçar criação do mapa:', error);
+            }
+        }
+    }, 6000);
+    
+    // Função para ativar chat diretamente
+    window.ativarChat = async function() {
+        try {
+            // Obter nickname do campo se preenchido
+            const nicknameInput = document.getElementById('nickname-input');
+            const nickname = nicknameInput?.value?.trim() || '';
+            
+            // Configurar usuário se não estiver configurado
+            if (!window.locationManager?.isConfigured) {
+                if (window.locationManager) {
+                    // Usar sessionId existente se houver, senão criar novo
+                    if (!window.locationManager.anonymousSessionId) {
+                        window.locationManager.anonymousSessionId = 'anon_' + Date.now();
+                    }
+                    window.locationManager.selectedAvatar = 'default';
+                    window.locationManager.selectedNickname = nickname;
+                    window.locationManager.userPosition = window.locationManager.userPosition || { lat: -23.5505, lng: -46.6333 };
+                    
+                    // Enviar nickname para o servidor ANTES de conectar ao chat
+                    if (nickname) {
+                        await window.locationManager.sendLocationToServer();
+                    }
+                    
+                    window.locationManager.isConfigured = true;
+                }
+            } else if (nickname) {
+                // Se já configurado mas tem nickname novo, atualizar
+                window.locationManager.selectedNickname = nickname;
+                await window.locationManager.sendLocationToServer();
+            }
+            
+            // Abrir painel
+            document.getElementById('chat-panel').classList.remove('hidden');
+            
+            // Conectar ao chat
+            if (window.chatManager) {
+                await window.chatManager.findOrCreateRoom();
+            }
+            
+        } catch (error) {
+            console.error('Erro ao ativar chat:', error);
+        }
     };
 });
 </script>
+@endsection
+
+@section('styles')
+<style>
+/* Scrollbar personalizada para o chat */
+#chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-messages::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+#chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+</style>
 @endsection
 
 @section('scripts')

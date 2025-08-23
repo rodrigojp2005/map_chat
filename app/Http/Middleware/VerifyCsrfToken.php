@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        'chat/*', // Temporariamente desabilitar CSRF para rotas de chat
+        'location/anonymous', // Para testes de usuários anônimos
     ];
 }
