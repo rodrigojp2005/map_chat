@@ -187,7 +187,27 @@ class ChatController extends Controller
         
         // Usuário anônimo - tentar buscar nome personalizado
         $sessionId = str_replace('anon_', '', $userId);
+        
+        // Debug: Log para entender os IDs
+        \Log::info("Debug getSimpleUserInfo - userId: $userId, sessionId: $sessionId");
+        
         $anonymousUser = \App\Models\AnonymousUser::where('session_id', $sessionId)->first();
+        
+        if ($anonymousUser) {
+            \Log::info("Debug - Encontrou usuário: " . json_encode([
+                'session_id' => $anonymousUser->session_id,
+                'name' => $anonymousUser->name
+            ]));
+        } else {
+            \Log::info("Debug - Usuário não encontrado, tentando com prefixo anon_");
+            $anonymousUser = \App\Models\AnonymousUser::where('session_id', $userId)->first();
+            if ($anonymousUser) {
+                \Log::info("Debug - Encontrou com prefixo: " . json_encode([
+                    'session_id' => $anonymousUser->session_id,
+                    'name' => $anonymousUser->name
+                ]));
+            }
+        }
         
         if ($anonymousUser && $anonymousUser->name && $anonymousUser->name !== 'Usuário Anônimo') {
             return [

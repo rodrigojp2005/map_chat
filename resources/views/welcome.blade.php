@@ -2507,19 +2507,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (!window.locationManager.anonymousSessionId) {
                         window.locationManager.anonymousSessionId = 'anon_' + Date.now();
                     }
-                    window.locationManager.avatarType = 'default';
+                    window.locationManager.selectedAvatar = 'default';
                     window.locationManager.selectedNickname = nickname;
-                    window.locationManager.isConfigured = true;
+                    window.locationManager.userPosition = window.locationManager.userPosition || { lat: -23.5505, lng: -46.6333 };
                     
-                    // Aplicar configuração através do método oficial para evitar duplicação
-                    if (typeof window.locationManager.applyConfiguration === 'function') {
-                        window.locationManager.applyConfiguration({
-                            avatarType: 'default',
-                            position: window.locationManager.userPosition || { lat: -23.5505, lng: -46.6333 },
-                            nickname: nickname
-                        });
+                    // Enviar nickname para o servidor ANTES de conectar ao chat
+                    if (nickname) {
+                        await window.locationManager.sendLocationToServer();
                     }
+                    
+                    window.locationManager.isConfigured = true;
                 }
+            } else if (nickname) {
+                // Se já configurado mas tem nickname novo, atualizar
+                window.locationManager.selectedNickname = nickname;
+                await window.locationManager.sendLocationToServer();
             }
             
             // Abrir painel
