@@ -28,6 +28,16 @@ Route::post('/location/search-address', [LocationController::class, 'searchAddre
 // Endpoint público para localização de usuários anônimos
 Route::post('/location/anonymous', [LocationController::class, 'updateAnonymousLocation'])->name('location.anonymous');
 
+// Rotas públicas do Chat MapChat
+Route::post('/chat/find-room', [App\Http\Controllers\ChatController::class, 'findOrCreateRoom'])->name('chat.find-room');
+Route::get('/chat/{roomId}/messages', [App\Http\Controllers\ChatController::class, 'getMessages'])->name('chat.messages');
+Route::post('/chat/{roomId}/send', [App\Http\Controllers\ChatController::class, 'sendMessage'])->name('chat.send');
+Route::get('/chat/{roomId}/users', [App\Http\Controllers\ChatController::class, 'getRoomUsers'])->name('chat.users');
+Route::post('/chat/{roomId}/leave', [App\Http\Controllers\ChatController::class, 'leaveRoom'])->name('chat.leave');
+Route::get('/chat/{roomId}/info', [App\Http\Controllers\ChatController::class, 'getRoomInfo'])->name('chat.info');
+Route::post('/chat/{roomId}/heartbeat', [App\Http\Controllers\ChatController::class, 'heartbeat'])->name('chat.heartbeat');
+Route::post('/chat/set-nickname', [App\Http\Controllers\ChatController::class, 'setNickname'])->name('chat.set-nickname');
+
 // Rota pública para visualizar comentários (qualquer um pode ver)
 Route::get('/comentarios/{mapchat_id}', [ComentarioController::class, 'index'])->name('comentarios.index');
 

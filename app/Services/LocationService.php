@@ -115,8 +115,12 @@ class LocationService
             ->whereNotNull('longitude')
             ->get()
             ->map(function ($user) {
+                // Garantir que o ID não tenha prefixo duplo
+                $sessionId = $user->session_id;
+                $cleanId = str_starts_with($sessionId, 'anon_') ? substr($sessionId, 5) : $sessionId;
+                
                 return [
-                    'id' => 'anon_' . $user->session_id,
+                    'id' => 'anon_' . $cleanId,
                     'name' => $user->name,
                     'latitude' => (float) $user->latitude,
                     'longitude' => (float) $user->longitude,
@@ -203,7 +207,7 @@ class LocationService
     /**
      * Atualizar localização de usuário anônimo
      */
-    public function updateAnonymousUserLocation(string $sessionId, float $realLat, float $realLng, int $radiusKm = 5, string $avatarType = 'anonymous'): void
+    public function updateAnonymousUserLocation(string $sessionId, float $realLat, float $realLng, int $radiusKm = 5, string $avatarType = 'anonymous', ?string $name = null): void
     {
         $randomLocation = $this->generateRandomLocation($realLat, $realLng, $radiusKm);
         
@@ -211,13 +215,13 @@ class LocationService
         $anonymousUser = AnonymousUser::firstOrCreate(
             ['session_id' => $sessionId],
             [
-                'name' => 'Usuário Anônimo',
+                'name' => $name ?: 'Usuário Anônimo',
                 'avatar_type' => $avatarType
             ]
         );
 
-        // Atualizar localização e avatar
-        $anonymousUser->update([
+        // Atualizar localização, avatar e nome se fornecido
+        $updateData = [
             'real_latitude' => $realLat,
             'real_longitude' => $realLng,
             'latitude' => $randomLocation['latitude'],
@@ -225,7 +229,14 @@ class LocationService
             'privacy_radius' => $radiusKm * 1000, // salvar em metros
             'is_online' => true,
             'last_seen' => now(),
-            'avatar_type' => $avatarType // Atualizar avatar também
-        ]);
+            'avatar_type' => $avatarType
+        ];
+        
+        // Só atualizar nome se foi fornecido
+        if ($name) {
+            $updateData['name'] = $name;
+        }
+        
+        $anonymousUser->update($updateData);
     }
 }

@@ -17,6 +17,9 @@ class Kernel extends ConsoleKernel
         
         // Limpar usuários anônimos inativos a cada 30 minutos
         $schedule->command('cleanup:anonymous-users --force')->everyThirtyMinutes();
+        
+        // Limpar e reorganizar salas de chat a cada 15 minutos
+        $schedule->command('chat:cleanup')->everyFifteenMinutes();
     }
 
     /**
