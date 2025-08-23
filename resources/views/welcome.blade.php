@@ -986,6 +986,21 @@ class LocationManager {
     addUserMarkerToMap() {
         if (!window.map || !this.userPosition || !this.selectedAvatar) return;
         if (this.userMarker) this.userMarker.setMap(null);
+        
+        // Configurar detecção de interação do usuário (uma vez só)
+        if (!window.userInteractionListenersAdded) {
+            window.userHasInteracted = false;
+            window.map.addListener('drag', () => {
+                window.userHasInteracted = true;
+                console.log('👋 Usuário moveu o mapa - não interferir no zoom');
+            });
+            window.map.addListener('zoom_changed', () => {
+                window.userHasInteracted = true;
+                console.log('🔍 Usuário mudou zoom - não interferir no zoom');
+            });
+            window.userInteractionListenersAdded = true;
+        }
+        
         const avatarFile = this.getAvatarFilename(this.selectedAvatar);
         this.userMarker = new google.maps.Marker({
             position: this.userPosition,
@@ -1195,6 +1210,9 @@ class LocationManager {
             }
         }
         document.getElementById('config-section')?.classList.remove('hidden');
+        // Resetar flag de interação do usuário para permitir auto-zoom na próxima sessão
+        window.userHasInteracted = false;
+        console.log('🔄 Reset: Auto-zoom reabilitado para nova sessão');
         
         // Limpar seleções de avatar
         document.querySelectorAll('.avatar-btn').forEach(btn => {
@@ -1538,17 +1556,26 @@ function updateMapMarkers(users) {
         } catch (e) {
             window.markers.forEach(m => m.setMap(window.map));
         }
-        const bounds = new google.maps.LatLngBounds();
-        window.markers.forEach(m => bounds.extend(m.getPosition()));
-        if (window.markers.length === 1) {
-            window.map.setCenter(window.markers[0].getPosition());
-            window.map.setZoom(10);
-        } else {
-            window.map.fitBounds(bounds);
-            const listener = google.maps.event.addListener(window.map, 'idle', function() {
-                if (window.map.getZoom() > 15) window.map.setZoom(15);
-                google.maps.event.removeListener(listener);
-            });
+        
+        // Só ajustar zoom/centro se o usuário ainda não interagiu com o mapa
+        if (window.markers.length && !window.userHasInteracted) {
+            const bounds = new google.maps.LatLngBounds();
+            window.markers.forEach(m => bounds.extend(m.getPosition()));
+            
+            if (window.markers.length === 1) {
+                window.map.setCenter(window.markers[0].getPosition());
+                window.map.setZoom(10);
+                console.log('🎯 Auto-zoom: 1 usuário encontrado');
+            } else {
+                window.map.fitBounds(bounds);
+                const listener = google.maps.event.addListener(window.map, 'idle', function() {
+                    if (window.map.getZoom() > 15) window.map.setZoom(15);
+                    google.maps.event.removeListener(listener);
+                });
+                console.log(`🎯 Auto-zoom: ${window.markers.length} usuários encontrados`);
+            }
+        } else if (window.userHasInteracted) {
+            console.log('🚫 Zoom automático desabilitado - usuário está explorando');
         }
     }
 }
