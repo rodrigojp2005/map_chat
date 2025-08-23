@@ -115,44 +115,6 @@
             </div>
         </div>
 
-        <!-- Status Section (after apply) -->
-        <div id="status-section" class="hidden">
-            <div class="p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <h4 class="text-sm font-semibold text-gray-700">Status:</h4>
-                    <div class="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true"></div>
-                </div>
-                <div id="location-status" class="text-sm text-gray-600">
-                    <div class="flex items-center mb-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                        <span>Você está no mapa!</span>
-                    </div>
-                    <div class="text-xs text-gray-500" id="current-location">
-                        Localização: Calculando...
-                    </div>
-                </div>
-                
-                <!-- Quick Actions -->
-                <div class="mt-3 flex space-x-2">
-                    <button id="change-avatar" class="flex-1 bg-blue-500 text-white py-1.5 px-3 rounded text-xs hover:bg-blue-600 transition-colors">
-                        Trocar Avatar
-                    </button>
-                    <button id="change-location" class="flex-1 bg-orange-500 text-white py-1.5 px-3 rounded text-xs hover:bg-orange-600 transition-colors">
-                        Mudar Local
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Debug info (development only) -->
-        <div class="p-4 border-t">
-            <button id="toggle-debug" class="text-xs text-gray-500 hover:text-gray-700">Debug Info</button>
-            <div id="debug-info" class="mt-2 text-xs text-gray-500 p-2 bg-gray-50 rounded hidden">
-                <div id="debug-location">Localização: Aguardando...</div>
-                <div id="debug-users">Usuários: Carregando...</div>
-                <div id="debug-auth">Auth: {{ auth()->check() ? 'Logado' : 'Visitante' }}</div>
-            </div>
-        </div>
     </div>
     
     <!-- Painel de usuários online (direita) -->
@@ -272,8 +234,8 @@
         display: block !important;
         position: fixed !important;
         top: 140px !important;
-        left: 8px !important;
         right: 8px !important;
+        left: auto !important;
         bottom: 20px !important;
         max-width: calc(100vw - 16px) !important;
         max-height: calc(100vh - 160px) !important;
@@ -675,30 +637,6 @@ class LocationManager {
         const applyBtn = document.getElementById('apply-config');
         applyBtn?.addEventListener('click', () => this.applyConfiguration());
         
-        // Quick action buttons (new)
-        const changeAvatarBtn = document.getElementById('change-avatar');
-        const changeLocationBtn = document.getElementById('change-location');
-        
-        changeAvatarBtn?.addEventListener('click', () => {
-            document.getElementById('status-section')?.classList.add('hidden');
-            document.getElementById('config-section')?.classList.remove('hidden');
-            // Focus no primeiro avatar para melhor UX
-            document.querySelector('.avatar-btn')?.focus();
-        });
-        
-        changeLocationBtn?.addEventListener('click', () => {
-            this.userPosition = null;
-            this.updateLocationStatus(false);
-            document.getElementById('status-section')?.classList.add('hidden');
-            document.getElementById('config-section')?.classList.remove('hidden');
-            // Reinicializar detecção de plataforma
-            this.initializeUIByPlatform();
-            // Focus no input de endereço se desktop
-            if (!this.isMobile) {
-                document.getElementById('address-input')?.focus();
-            }
-        });
-        
         // Mobile toggle panels (separados)
         const toggleConfigBtn = document.getElementById('toggle-config');
         const toggleOnlineBtn = document.getElementById('toggle-online');
@@ -710,11 +648,15 @@ class LocationManager {
             paineis: document.querySelectorAll('.sidebar-panel').length
         });
         
-        toggleConfigBtn?.addEventListener('click', () => this.toggleConfigPanel());
+        toggleConfigBtn?.addEventListener('click', () => {
+            // Se já está configurado, mostrar mensagem de bloqueio
+            if (this.isConfigured) {
+                this.showSessionActiveMessage();
+                return;
+            }
+            this.toggleConfigPanel();
+        });
         toggleOnlineBtn?.addEventListener('click', () => this.toggleOnlinePanel());
-        
-        // Debug
-        document.getElementById('toggle-debug')?.addEventListener('click', () => this.toggleDebug());
         
         // Cleanup
         window.addEventListener('beforeunload', () => {
@@ -967,9 +909,19 @@ class LocationManager {
                 await this.updatePrivacyRadius(this.privacyRadius);
             }
             
-            // UI
-            document.getElementById('config-section')?.classList.add('hidden');
-            document.getElementById('status-section')?.classList.remove('hidden');
+            // UI - Esconder painel completo de configuração (desktop e mobile)
+            const configPanel = document.getElementById('config-panel');
+            if (configPanel) {
+                configPanel.classList.add('hidden'); // Desktop
+                configPanel.classList.remove('mobile-config-visible'); // Mobile
+            }
+            
+            // Remover overlay mobile se existir
+            const overlay = document.querySelector('.mobile-panels-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+            
             this.addUserMarkerToMap();
             
             // Carregar usuários e iniciar atualização periódica
@@ -1066,19 +1018,6 @@ class LocationManager {
         if (currentLoc) currentLoc.textContent = `${this.userPosition.lat.toFixed(4)}, ${this.userPosition.lng.toFixed(4)}`;
         const debugLocation = document.getElementById('debug-location');
         if (debugLocation) debugLocation.textContent = `Localização: ${this.userPosition.lat.toFixed(4)}, ${this.userPosition.lng.toFixed(4)} (${this.isMobile ? 'GPS' : 'Endereço'})`;
-    }
-
-    toggleDebug() {
-        const debugInfo = document.getElementById('debug-info');
-        const debugBtn = document.getElementById('toggle-debug');
-        if (!debugInfo || !debugBtn) return;
-        if (debugInfo.classList.contains('hidden')) {
-            debugInfo.classList.remove('hidden');
-            debugBtn.textContent = 'Ocultar Debug';
-        } else {
-            debugInfo.classList.add('hidden');
-            debugBtn.textContent = 'Debug Info';
-        }
     }
 
     toggleConfigPanel() {
@@ -1197,6 +1136,42 @@ class LocationManager {
         }
     }
 
+    showSessionActiveMessage() {
+        const modal = `
+            <div class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 modal-overlay" id="session-active-modal" onclick="if(event.target === this) this.remove()">
+                <div class="bg-white rounded-xl p-8 max-w-md mx-4 text-center shadow-2xl relative" onclick="event.stopPropagation()">
+                    <button onclick="document.getElementById('session-active-modal').remove()" class="absolute top-3 right-3 w-8 h-8 bg-gray-200 hover:bg-gray-300 rounded-full flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors" title="Fechar">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                    <div class="text-6xl mb-4">🔒</div>
+                    <h3 class="text-2xl font-bold text-blue-600 mb-4">Sessão Ativa</h3>
+                    <p class="text-gray-700 mb-4">Você só poderá modificar sua localização e avatar quando o cronômetro global zerar.</p>
+                    <p class="text-sm text-gray-600 mb-6">Isso garante que todos tenham uma experiência justa no mapa.</p>
+                    <div class="text-xs text-gray-500 mb-4">
+                        💡 <strong>Dica:</strong> Você pode atualizar a página para reconfigurar, mas perderá sua posição atual.
+                    </div>
+                    <button onclick="document.getElementById('session-active-modal').remove()" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors font-semibold">
+                        Entendi
+                    </button>
+                </div>
+            </div>`;
+        document.body.insertAdjacentHTML('beforeend', modal);
+        
+        // Adicionar suporte para fechar com ESC
+        const handleEscape = (event) => {
+            if (event.key === 'Escape') {
+                const modal = document.getElementById('session-active-modal');
+                if (modal) {
+                    modal.remove();
+                    document.removeEventListener('keydown', handleEscape);
+                }
+            }
+        };
+        document.addEventListener('keydown', handleEscape);
+    }
+
     resetConfiguration() {
         // Limpar dados do usuário
         this.userPosition = null;
@@ -1210,9 +1185,16 @@ class LocationManager {
             this.userMarker = null;
         }
         
-        // Resetar UI para estado inicial
+        // Resetar UI para estado inicial (desktop e mobile)
+        const configPanel = document.getElementById('config-panel');
+        if (configPanel) {
+            configPanel.classList.remove('hidden'); // Desktop
+            // No mobile, mostrar o painel quando resetar
+            if (this.isMobile) {
+                configPanel.classList.add('mobile-config-visible');
+            }
+        }
         document.getElementById('config-section')?.classList.remove('hidden');
-        document.getElementById('status-section')?.classList.add('hidden');
         
         // Limpar seleções de avatar
         document.querySelectorAll('.avatar-btn').forEach(btn => {
