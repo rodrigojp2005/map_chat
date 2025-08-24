@@ -1,4 +1,6 @@
 <?php
+use Illuminate\Support\Facades\DB;
+use App\Models\AnonymousUser;
 // Script de debug completo para servidor
 echo "=== DEBUG COMPLETO DO SERVIDOR ===\n";
 echo "Data/Hora: " . date('Y-m-d H:i:s') . "\n\n";
@@ -69,8 +71,7 @@ try {
     $app = require_once 'bootstrap/app.php';
     $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
     
-    use Illuminate\Support\Facades\DB;
-    use App\Models\AnonymousUser;
+
     
     // Testar conexão
     $pdo = DB::connection()->getPdo();
