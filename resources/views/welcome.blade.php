@@ -45,30 +45,10 @@
                 </div>
             </div>
 
-            <!-- Nickname Section -->
-            <div class="p-4 border-b">
-                <div class="flex items-center justify-between mb-3">
-                    <h4 class="text-sm font-semibold text-gray-700">2. Seu apelido (opcional):</h4>
-                    <div id="nickname-status" class="w-2 h-2 bg-gray-300 rounded-full"></div>
-                </div>
-                <div class="space-y-2">
-                    <input 
-                        type="text" 
-                        id="nickname-input" 
-                        placeholder="Digite seu apelido... (máx. 20 chars)"
-                        maxlength="20"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-green-500 focus:border-green-500"
-                    >
-                    <p class="text-xs text-gray-500">
-                        💡 Se deixar vazio, aparecerá como "Anônimo [código]"
-                    </p>
-                </div>
-            </div>
-
             <!-- Location Input (Desktop) / Auto-detection (Mobile) -->
             <div class="p-4 border-b" id="location-section">
                 <div class="flex items-center justify-between mb-3">
-                    <h4 class="text-sm font-semibold text-gray-700">3. Sua localização:</h4>
+                    <h4 class="text-sm font-semibold text-gray-700">2. Sua localização:</h4>
                     <div id="location-status-dot" class="w-2 h-2 bg-gray-300 rounded-full"></div>
                 </div>
                 
@@ -102,7 +82,7 @@
 
             <!-- Privacy Radius -->
             <div class="p-4 border-b">
-                <h4 class="text-sm font-semibold text-gray-700 mb-3">4. Raio de Privacidade: <span id="radius-value">50 km</span></h4>
+                <h4 class="text-sm font-semibold text-gray-700 mb-3">3. Raio de Privacidade: <span id="radius-value">50 km</span></h4>
                 <input type="range" id="privacy-radius" min="500" max="500000" step="500" value="50000" 
                        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider">
                 <div class="flex justify-between text-xs text-gray-500 mt-1">
@@ -210,9 +190,9 @@
                         <h4 class="font-bold text-gray-800 mb-2">Chat por Proximidade</h4>
                         <p class="text-sm text-gray-600 mb-4">Configure seu avatar e localização para conversar com pessoas próximas!</p>
                         
-                        <!-- Botão para ativar chat -->
-                        <button onclick="ativarChat()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded mb-3 text-sm transition-colors">
-                            💬 Entrar no Chat
+                        <!-- Botão de teste para ativar chat -->
+                        <button onclick="testarChatDiretamente()" class="bg-green-500 text-white px-4 py-2 rounded mb-3 text-sm">
+                            🧪 TESTAR CHAT AGORA
                         </button>
                         
                         <div class="text-xs text-gray-500">
@@ -238,8 +218,8 @@
                 </div>
 
                 <!-- Estado conectado - lista de mensagens -->
-                <div id="chat-messages-container" class="flex-1 overflow-y-auto p-3 hidden" style="max-height: 300px;">
-                    <div id="chat-messages" class="space-y-2 overflow-y-auto" style="max-height: 280px; padding-right: 8px;">
+                <div id="chat-messages-container" class="flex-1 overflow-y-auto p-3 hidden">
+                    <div id="chat-messages" class="space-y-2">
                         <!-- Mensagens aparecerão aqui -->
                     </div>
                 </div>
@@ -627,7 +607,6 @@ class LocationManager {
     constructor(isAuthenticated) {
         this.isAuthenticated = !!isAuthenticated;
         this.selectedAvatar = null;
-        this.selectedNickname = ''; // Campo para nickname personalizado
         this.userPosition = null; // Posição com privacidade aplicada (enviada ao servidor)
         this.realUserPosition = null; // Posição real do usuário (nunca enviada)
         this.privacyRadius = 50000; // 50 km
@@ -916,14 +895,6 @@ class LocationManager {
         // Avatar selection
         document.querySelectorAll('.avatar-btn').forEach(btn => {
             btn.addEventListener('click', () => this.selectAvatar(btn.dataset.avatar));
-        });
-        
-        // Nickname input
-        const nicknameInput = document.getElementById('nickname-input');
-        nicknameInput?.addEventListener('input', (e) => {
-            this.selectedNickname = e.target.value.trim();
-            this.updateNicknameStatus();
-            this.updateButtonState();
         });
         
         // Address input
@@ -1226,19 +1197,6 @@ class LocationManager {
             }
         }
     }
-    
-    updateNicknameStatus() {
-        const status = document.getElementById('nickname-status');
-        if (status) {
-            // Sempre verde - nickname é opcional
-            status.classList.remove('bg-gray-300', 'bg-red-500');
-            status.classList.add('bg-green-500');
-        }
-    }
-    
-    updateButtonState() {
-        this.checkConfigComplete();
-    }
 
     async applyConfiguration() {
         if (!this.selectedAvatar || !this.userPosition) {
@@ -1312,8 +1270,7 @@ class LocationManager {
                     longitude: this.userPosition.lng,
                     avatar_type: this.selectedAvatar,
                     privacy_radius: this.privacyRadius,
-                    session_id: sessionId,
-                    name: this.selectedNickname || null // Incluir nickname se fornecido
+                    session_id: sessionId
                 })
             });
             
@@ -2399,18 +2356,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     // Adicionar evento de clique inteligente
                     window.simpleChatBalloon.addListener('click', async () => {
-                        console.log('� Balão de chat clicado!');
+                        console.log('🟢 BALÃO VERDE CLICADO! DEBUG ATIVO');
+                        alert('Balão clicado! Verificando configuração...');
                         
-                        // Abrir painel de chat
+                        console.log('🔍 Estado do LocationManager:', {
+                            exists: !!window.locationManager,
+                            isConfigured: window.locationManager?.isConfigured,
+                            hasSessionId: !!window.locationManager?.anonymousSessionId,
+                            sessionId: window.locationManager?.anonymousSessionId
+                        });
+                        
+                        // Abrir painel de chat SEMPRE
                         document.getElementById('chat-panel').classList.remove('hidden');
                         
                         // Se usuário não está configurado, mostrar tela de configuração
                         if (!window.locationManager?.isConfigured) {
                             console.log('⚠️ Usuário não configurado - mostrando tela inicial');
+                            alert('Usuário não configurado - configure primeiro!');
                             return;
                         }
                         
                         console.log('✅ Usuário configurado - conectando ao chat...');
+                        alert('Usuário configurado! Conectando...');
                         
                         // Usuário configurado - tentar conectar ao chat
                         if (window.chatManager) {
@@ -2493,74 +2460,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }, 6000);
     
-    // Função para ativar chat diretamente
-    window.ativarChat = async function() {
+    // Função de teste para ativar chat diretamente
+    window.testarChatDiretamente = async function() {
+        console.log('🧪 TESTE DIRETO DO CHAT INICIADO');
+        alert('Iniciando teste do chat...');
+        
         try {
-            // Obter nickname do campo se preenchido
-            const nicknameInput = document.getElementById('nickname-input');
-            const nickname = nicknameInput?.value?.trim() || '';
-            
-            // Configurar usuário se não estiver configurado
+            // Configurar usuário fake se não estiver configurado
             if (!window.locationManager?.isConfigured) {
+                console.log('📍 Configurando usuário fake para teste...');
+                
+                // Simular configuração
                 if (window.locationManager) {
-                    // Usar sessionId existente se houver, senão criar novo
-                    if (!window.locationManager.anonymousSessionId) {
-                        window.locationManager.anonymousSessionId = 'anon_' + Date.now();
-                    }
-                    window.locationManager.selectedAvatar = 'default';
-                    window.locationManager.selectedNickname = nickname;
-                    window.locationManager.userPosition = window.locationManager.userPosition || { lat: -23.5505, lng: -46.6333 };
-                    
-                    // Enviar nickname para o servidor ANTES de conectar ao chat
-                    if (nickname) {
-                        await window.locationManager.sendLocationToServer();
-                    }
-                    
+                    window.locationManager.anonymousSessionId = 'anon_teste_' + Date.now();
+                    window.locationManager.avatarType = 'default';
                     window.locationManager.isConfigured = true;
+                    
+                    console.log('✅ Usuário fake configurado:', {
+                        sessionId: window.locationManager.anonymousSessionId,
+                        configured: window.locationManager.isConfigured
+                    });
                 }
-            } else if (nickname) {
-                // Se já configurado mas tem nickname novo, atualizar
-                window.locationManager.selectedNickname = nickname;
-                await window.locationManager.sendLocationToServer();
             }
             
             // Abrir painel
             document.getElementById('chat-panel').classList.remove('hidden');
             
-            // Conectar ao chat
+            // Testar conexão com chat
             if (window.chatManager) {
-                await window.chatManager.findOrCreateRoom();
+                console.log('🚀 Testando conexão do ChatManager...');
+                const room = await window.chatManager.findOrCreateRoom();
+                
+                if (room) {
+                    alert('✅ Chat conectado com sucesso! Sala: ' + room.name);
+                    console.log('✅ Sala conectada:', room);
+                } else {
+                    alert('❌ Erro ao conectar na sala de chat');
+                }
+            } else {
+                alert('❌ ChatManager não disponível');
+                console.error('❌ window.chatManager não existe');
             }
             
         } catch (error) {
-            console.error('Erro ao ativar chat:', error);
+            console.error('❌ Erro no teste:', error);
+            alert('❌ Erro: ' + error.message);
         }
     };
 });
 </script>
-@endsection
-
-@section('styles')
-<style>
-/* Scrollbar personalizada para o chat */
-#chat-messages::-webkit-scrollbar {
-    width: 6px;
-}
-
-#chat-messages::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-}
-
-#chat-messages::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 3px;
-}
-
-#chat-messages::-webkit-scrollbar-thumb:hover {
-    background: #a8a8a8;
-}
-</style>
 @endsection
 
 @section('scripts')
