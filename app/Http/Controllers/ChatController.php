@@ -110,6 +110,8 @@ class ChatController extends Controller
                 'user_id' => $userId,
                 'user_type' => $userType,
                 'user_name' => $userName,
+                'latitude' => 0.0,
+                'longitude' => 0.0,
                 'joined_at' => now(),
                 'is_active' => true
             ]);
