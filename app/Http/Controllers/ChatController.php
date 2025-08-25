@@ -367,9 +367,16 @@ class ChatController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            \Log::error('Erro ao enviar mensagem no ChatController', [
+                'exception' => $e,
+                'request' => $request->all(),
+                'user_id' => $userId ?? null,
+                'roomCode' => $roomCode
+            ]);
             return response()->json([
                 'success' => false,
-                'message' => 'Erro ao enviar mensagem'
+                'message' => 'Erro ao enviar mensagem',
+                'debug' => $e->getMessage()
             ], 500);
         }
     }
