@@ -1,19 +1,19 @@
 <?php
 /**
- * Script de teste direto das rotas do chat
+ * Script de teste direto das rotas do chat no servidor online
  */
 
-echo "=== Teste das Rotas de Chat ===\n\n";
+echo "=== Teste das Rotas de Chat (Servidor Online) ===\n\n";
 
-$base_url = 'http://localhost:8000';
+$base_url = 'https://mapchat.com.br'; // Servidor online
 $session_id = 'test_' . time();
 
 // Headers comuns
 $headers = [
     'Content-Type: application/json',
     'Accept: application/json',
-    'X-CSRF-TOKEN: test', // Será ignorado por ser teste
-    'User-Agent: ChatTestScript/1.0'
+    'User-Agent: ChatTestScript/1.0',
+    'Referer: https://mapchat.com.br/'
 ];
 
 function makeRequest($url, $method = 'GET', $data = null, $headers = []) {
@@ -26,6 +26,8 @@ function makeRequest($url, $method = 'GET', $data = null, $headers = []) {
         CURLOPT_SSL_VERIFYPEER => false,
         CURLOPT_TIMEOUT => 30,
         CURLOPT_HTTPHEADER => $headers,
+        CURLOPT_COOKIEJAR => '/tmp/chat_cookies.txt',
+        CURLOPT_COOKIEFILE => '/tmp/chat_cookies.txt'
     ]);
     
     if ($method === 'POST') {
@@ -46,10 +48,39 @@ function makeRequest($url, $method = 'GET', $data = null, $headers = []) {
     }
     
     echo "HTTP $httpCode\n";
-    echo "Response: $response\n\n";
     
-    return json_decode($response, true);
+    // Verificar se é JSON válido
+    $decoded = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo "Response (não-JSON): " . substr($response, 0, 500) . "...\n\n";
+        return null;
+    }
+    
+    echo "Response: " . json_encode($decoded, JSON_PRETTY_PRINT) . "\n\n";
+    return $decoded;
 }
+
+// Primeiro, obter a página principal para pegar o CSRF token
+echo "0. Obtendo CSRF token...\n";
+$ch = curl_init();
+curl_setopt_array($ch, [
+    CURLOPT_URL => $base_url,
+    CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_FOLLOWLOCATION => true,
+    CURLOPT_SSL_VERIFYPEER => false,
+    CURLOPT_COOKIEJAR => '/tmp/chat_cookies.txt',
+    CURLOPT_COOKIEFILE => '/tmp/chat_cookies.txt'
+]);
+$homepage = curl_exec($ch);
+curl_close($ch);
+
+// Extrair CSRF token
+preg_match('/<meta name="csrf-token" content="([^"]+)"/', $homepage, $matches);
+$csrfToken = $matches[1] ?? 'not-found';
+echo "CSRF Token: $csrfToken\n\n";
+
+// Adicionar CSRF token aos headers
+$headers[] = "X-CSRF-TOKEN: $csrfToken";
 
 // Teste 1: Definir nickname
 echo "1. Testando set-nickname...\n";
@@ -60,8 +91,11 @@ $result = makeRequest(
     $headers
 );
 
-if (!$result || !$result['success']) {
+if (!$result || !isset($result['success']) || !$result['success']) {
     echo "❌ Falha ao definir nickname\n\n";
+    if ($result && isset($result['message'])) {
+        echo "Erro: " . $result['message'] . "\n\n";
+    }
 } else {
     echo "✅ Nickname definido com sucesso\n\n";
 }
@@ -75,12 +109,20 @@ $roomResult = makeRequest(
     $headers
 );
 
-if (!$roomResult || !$roomResult['success']) {
+if (!$roomResult || !isset($roomResult['success']) || !$roomResult['success']) {
     echo "❌ Falha ao encontrar/criar sala\n\n";
+    if ($roomResult && isset($roomResult['message'])) {
+        echo "Erro: " . $roomResult['message'] . "\n\n";
+    }
     exit(1);
 }
 
-$roomId = $roomResult['room']['room_code'];
+$roomId = $roomResult['room']['room_id'] ?? $roomResult['room']['room_code'] ?? null;
+if (!$roomId) {
+    echo "❌ Room ID não encontrado na resposta\n\n";
+    exit(1);
+}
+
 echo "✅ Sala encontrada: $roomId\n\n";
 
 // Teste 3: Enviar mensagem
@@ -88,12 +130,15 @@ echo "3. Testando envio de mensagem...\n";
 $messageResult = makeRequest(
     "$base_url/chat/$roomId/send",
     'POST',
-    ['content' => 'Mensagem de teste', 'session_id' => $session_id],
+    ['content' => 'Mensagem de teste from script', 'session_id' => $session_id, 'message_type' => 'text'],
     $headers
 );
 
-if (!$messageResult || !$messageResult['success']) {
+if (!$messageResult || !isset($messageResult['success']) || !$messageResult['success']) {
     echo "❌ Falha ao enviar mensagem\n\n";
+    if ($messageResult && isset($messageResult['message'])) {
+        echo "Erro: " . $messageResult['message'] . "\n\n";
+    }
 } else {
     echo "✅ Mensagem enviada com sucesso\n\n";
 }
@@ -107,14 +152,19 @@ $messagesResult = makeRequest(
     $headers
 );
 
-if (!$messagesResult || !$messagesResult['success']) {
+if (!$messagesResult || !isset($messagesResult['success']) || !$messagesResult['success']) {
     echo "❌ Falha ao obter mensagens\n\n";
+    if ($messagesResult && isset($messagesResult['message'])) {
+        echo "Erro: " . $messagesResult['message'] . "\n\n";
+    }
 } else {
-    $messageCount = count($messagesResult['messages']);
+    $messageCount = count($messagesResult['messages'] ?? []);
     echo "✅ $messageCount mensagens obtidas\n";
     
     if ($messageCount > 0) {
-        echo "Última mensagem: " . $messagesResult['messages'][0]['content'] . "\n";
+        $lastMessage = end($messagesResult['messages']);
+        echo "Última mensagem: " . ($lastMessage['message'] ?? $lastMessage['content'] ?? 'N/A') . "\n";
+        echo "Por: " . ($lastMessage['user_name'] ?? 'N/A') . "\n";
     }
     echo "\n";
 }
@@ -128,10 +178,13 @@ $usersResult = makeRequest(
     $headers
 );
 
-if (!$usersResult || !$usersResult['success']) {
+if (!$usersResult || !isset($usersResult['success']) || !$usersResult['success']) {
     echo "❌ Falha ao obter usuários\n\n";
+    if ($usersResult && isset($usersResult['message'])) {
+        echo "Erro: " . $usersResult['message'] . "\n\n";
+    }
 } else {
-    $userCount = count($usersResult['users']);
+    $userCount = count($usersResult['users'] ?? []);
     echo "✅ $userCount usuários na sala\n\n";
 }
 
