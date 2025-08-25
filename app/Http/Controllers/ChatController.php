@@ -215,8 +215,8 @@ class ChatController extends Controller
         }
         
         // Usuário anônimo - tentar buscar nome personalizado
-        $sessionId = str_replace('anon_', '', $userId);
-        $anonymousUser = \App\Models\AnonymousUser::where('session_id', $sessionId)->first();
+        // O userId já é o session_id completo (ex: anon_debug_1756124939817_yaea9hunc)
+        $anonymousUser = \App\Models\AnonymousUser::where('session_id', $userId)->first();
         
         if ($anonymousUser && $anonymousUser->name && $anonymousUser->name !== 'Usuário Anônimo') {
             return [
