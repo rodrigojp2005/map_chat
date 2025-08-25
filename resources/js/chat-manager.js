@@ -29,6 +29,11 @@ class ChatManager {
 
         this.initializeUI();
         this.setupEventListeners();
+        
+        // Inicializar chat automaticamente após um pequeno delay
+        setTimeout(() => {
+            this.initializeChat();
+        }, 1000);
     }
 
     /**
@@ -216,6 +221,25 @@ class ChatManager {
     }
 
     /**
+     * Inicializar sistema de chat
+     */
+    initializeChat() {
+        console.log('🚀 Inicializando ChatManager...');
+        
+        // Mostrar o container do chat
+        this.chatContainer.classList.remove('hidden');
+        
+        // Gerar session ID único
+        this.sessionId = this.generateSessionId();
+        this.currentUserId = this.sessionId;
+        
+        console.log('📱 Chat SessionID gerado:', this.sessionId);
+        
+        // Solicitar nickname para usuário anônimo
+        this.showNicknamePrompt();
+    }
+
+    /**
      * Configurar listeners do modal de nickname
      */
     setupNicknameModalListeners() {
@@ -278,20 +302,20 @@ class ChatManager {
         // Mostrar o container do chat
         this.chatContainer.classList.remove('hidden');
         
-        // Usar o mesmo session ID do LocationManager
-        if (this.locationManager.anonymousSessionId) {
+        // Usar o mesmo session ID do LocationManager ou gerar um novo
+        if (this.locationManager && this.locationManager.anonymousSessionId) {
             this.sessionId = this.locationManager.anonymousSessionId;
             this.currentUserId = this.sessionId; // Usar o formato completo
         } else {
             // Gerar session ID se não existe
-            this.sessionId = this.locationManager.generateSessionId();
+            this.sessionId = this.generateSessionId();
             this.currentUserId = this.sessionId;
         }
 
         console.log('📱 Chat SessionID:', this.sessionId);
 
         // Verificar se já tem nickname definido
-        if (!this.nickname && this.locationManager.isAuthenticated) {
+        if (!this.nickname && this.locationManager && this.locationManager.isAuthenticated) {
             // Usuário logado - usar nome do usuário
             this.nickname = 'Usuário'; // Seria obtido do backend
             this.userType = 'registered';
@@ -300,6 +324,13 @@ class ChatManager {
             // Usuário anônimo - solicitar nickname
             this.showNicknamePrompt();
         }
+    }
+
+    /**
+     * Gerar session ID único
+     */
+    generateSessionId() {
+        return 'anon_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     }
 
     /**
@@ -585,7 +616,7 @@ class ChatManager {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
                 },
                 body: JSON.stringify({
-                    message: originalMessage,
+                    content: originalMessage,  // Alterado de 'message' para 'content'
                     session_id: this.sessionId.replace('anon_', ''),
                     message_type: 'text'
                 })

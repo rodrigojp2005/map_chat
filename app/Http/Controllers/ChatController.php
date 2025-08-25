@@ -82,6 +82,7 @@ class ChatController extends Controller
 
         return [
             'room_code' => $roomId,
+            'room_id' => $roomId, // Adicionar para compatibilidade com frontend
             'name' => 'Chat Global',
             'id' => $room->id,
             'users_count' => $this->getActiveUsersCount($roomId)
@@ -183,7 +184,11 @@ class ChatController extends Controller
             return Auth::id();
         }
 
-        $sessionId = $request->get('anonymous_session_id') ?? $request->header('X-Anonymous-Session-ID');
+        // Tentar diferentes formas de obter o session_id
+        $sessionId = $request->get('session_id') 
+                  ?? $request->get('anonymous_session_id') 
+                  ?? $request->header('X-Anonymous-Session-ID')
+                  ?? $request->input('session_id');
         
         if ($sessionId) {
             $cleanSessionId = str_starts_with($sessionId, 'anon_') ? substr($sessionId, 5) : $sessionId;
@@ -281,12 +286,16 @@ class ChatController extends Controller
                     $userInfo = $this->getSimpleUserInfo($message->user_id, $message->user_type);
                     return [
                         'id' => $message->id,
-                        'content' => $message->content,
+                        'message' => $message->content, // Mapeado para 'message' que o JS espera
+                        'content' => $message->content, // Manter ambos por compatibilidade
                         'user_id' => $message->user_id,
                         'user_name' => $userInfo['user_name'],
                         'user_type' => $message->user_type,
                         'created_at' => $message->created_at,
-                        'avatar_type' => $userInfo['avatar_type']
+                        'sent_at' => $message->created_at->toISOString(),
+                        'sent_at_human' => $message->created_at->diffForHumans(),
+                        'avatar_type' => $userInfo['avatar_type'],
+                        'avatar_url' => asset('images/' . $this->getAvatarFilename($userInfo['avatar_type']))
                     ];
                 });
 
@@ -344,12 +353,16 @@ class ChatController extends Controller
                 'success' => true,
                 'message' => [
                     'id' => $message->id,
-                    'content' => $message->content,
+                    'message' => $message->content, // Mapeado para 'message' que o JS espera
+                    'content' => $message->content, // Manter ambos por compatibilidade
                     'user_id' => $userId,
                     'user_name' => $userInfo['user_name'],
                     'user_type' => $this->getUserType(),
                     'created_at' => $message->created_at,
-                    'avatar_type' => $userInfo['avatar_type']
+                    'sent_at' => $message->created_at->toISOString(),
+                    'sent_at_human' => $message->created_at->diffForHumans(),
+                    'avatar_type' => $userInfo['avatar_type'],
+                    'avatar_url' => asset('images/' . $this->getAvatarFilename($userInfo['avatar_type']))
                 ]
             ]);
 
@@ -393,5 +406,156 @@ class ChatController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false], 500);
         }
+    }
+
+    /**
+     * Definir nickname para usuário anônimo
+     */
+    public function setNickname(Request $request)
+    {
+        try {
+            $request->validate([
+                'nickname' => 'required|string|min:2|max:20',
+                'session_id' => 'required|string'
+            ]);
+
+            $sessionId = $request->session_id;
+            $nickname = trim($request->nickname);
+
+            // Verificar se nickname é válido (apenas letras, números e _)
+            if (!preg_match('/^[a-zA-Z0-9_\s]+$/', $nickname)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nickname deve conter apenas letras, números e _'
+                ], 400);
+            }
+
+            // Criar ou atualizar usuário anônimo
+            $anonymousUser = \App\Models\AnonymousUser::updateOrCreate([
+                'session_id' => 'anon_' . $sessionId
+            ], [
+                'name' => $nickname,
+                'avatar_type' => 'default',
+                'updated_at' => now()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'nickname' => $nickname,
+                'user_id' => 'anon_' . $sessionId
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao definir nickname: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Sair de uma sala de chat
+     */
+    public function leaveRoom(Request $request, $roomCode)
+    {
+        try {
+            $userId = $this->getCurrentUserId($request);
+            
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuário não identificado'
+                ], 400);
+            }
+
+            $room = ChatRoom::where('room_id', $roomCode)->first();
+            if (!$room) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sala não encontrada'
+                ], 404);
+            }
+
+            // Marcar usuário como inativo
+            ChatRoomUser::where('chat_room_id', $room->id)
+                ->where('user_id', $userId)
+                ->update([
+                    'is_active' => false
+                ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Você saiu da sala'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao sair da sala'
+            ], 500);
+        }
+    }
+
+    /**
+     * Obter informações de uma sala
+     */
+    public function getRoomInfo(Request $request, $roomCode)
+    {
+        try {
+            $userId = $this->getCurrentUserId($request);
+            
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Usuário não identificado'
+                ], 400);
+            }
+
+            $room = ChatRoom::where('room_id', $roomCode)->first();
+            if (!$room) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sala não encontrada'
+                ], 404);
+            }
+
+            $usersCount = $this->getActiveUsersCount($roomCode);
+
+            return response()->json([
+                'success' => true,
+                'room' => [
+                    'id' => $room->id,
+                    'room_id' => $room->room_id,
+                    'name' => $room->name,
+                    'users_count' => $usersCount,
+                    'is_active' => $room->is_active,
+                    'created_at' => $room->created_at
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erro ao obter informações da sala'
+            ], 500);
+        }
+    }
+
+    /**
+     * Obter filename do avatar baseado no tipo
+     */
+    private function getAvatarFilename($avatarType)
+    {
+        $avatarMap = [
+            'default' => 'default.gif',
+            'man' => 'mario.gif',
+            'woman' => 'girl.gif',
+            'pet' => 'pets.gif',
+            'geek' => 'geek.gif',
+            'sport' => 'sport.gif',
+            'user' => 'default.gif'
+        ];
+
+        return $avatarMap[$avatarType] ?? 'default.gif';
     }
 }
