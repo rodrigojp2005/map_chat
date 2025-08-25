@@ -48,9 +48,15 @@ class ChatController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            // Debug: capturar erro específico
             return response()->json([
                 'success' => false,
-                'message' => 'Erro interno do servidor'
+                'message' => 'Erro interno do servidor',
+                'debug' => [
+                    'error' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine()
+                ]
             ], 500);
         }
     }
