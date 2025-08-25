@@ -22,6 +22,11 @@ Route::get('/teste-debug', function () {
     return view('teste-debug');
 });
 
+// Rota de debug completo do chat
+Route::get('/debug-chat', function () {
+    return view('debug-chat');
+});
+
 // Endpoint público para listar chats ativos em JSON (usado pelo mapa lateral)
 Route::get('/mapchat-ativos.json', [MapchatController::class, 'ativosJson'])->name('mapchat.ativos.json');
 
