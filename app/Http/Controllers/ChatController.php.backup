@@ -8,6 +8,7 @@ use App\Models\ChatRoom;
 use App\Models\ChatMessage;
 use App\Models\ChatRoomUser;
 use Illuminate\Support\Facades\Auth;
+// REMOVIDO: use Illuminate\Support\Facades\Log; - Para evitar erro do Monolog
 
 class ChatController extends Controller
 {
@@ -48,6 +49,7 @@ class ChatController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            // Log::error('Erro ao encontrar/criar sala de chat: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erro interno do servidor'
@@ -60,102 +62,91 @@ class ChatController extends Controller
      */
     private function createOrGetGlobalRoom()
     {
-        $roomId = 'global_chat';
+        $roomId = 'global_room';
         
-        $room = ChatRoom::firstOrCreate([
-            'room_id' => $roomId
-        ], [
-            'name' => 'Chat Global',
-            'is_active' => true,
-            'max_users' => 1000,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
+        $room = ChatRoom::where('room_id', $roomId)->first();
+        
+        if (!$room) {
+            $room = ChatRoom::create([
+                'room_id' => $roomId,
+                'name' => 'Chat Global',
+                'center_latitude' => 0.0,
+                'center_longitude' => 0.0,
+                'radius_km' => 0,
+                'max_users' => 1000,
+                'current_users' => 0,
+                'is_active' => true,
+                'last_activity' => now()
+            ]);
+            
+            ]);
+
+        // Log::info("Sala global criada: {$roomId}");
 
         return [
-            'room_code' => $roomId,
-            'name' => 'Chat Global',
-            'id' => $room->id,
-            'users_count' => $this->getActiveUsersCount($roomId)
+        }
+        
+        return [
+            'room_code' => $room->room_id, // Manter compatibilidade com frontend
+            'name' => $room->name,
+            'location' => 'Global',
+            'active_users_count' => $this->getActiveUsersCount($room->room_id)
         ];
     }
 
     /**
-     * Adicionar usuário à sala global
+     * Juntar usuário à sala global
      */
     private function joinGlobalRoom($roomCode, $userId, $userType)
     {
+        // Buscar o ID da sala pelo room_id
         $room = ChatRoom::where('room_id', $roomCode)->first();
-        if (!$room) return;
+        if (!$room) {
+            throw new \Exception("Sala não encontrada: {$roomCode}");
+        }
+
+        // Primeiro, limpar possíveis duplicatas do mesmo usuário
+        ChatRoomUser::where('chat_room_id', $room->id)
+            ->where('user_id', $userId)
+            ->where('user_type', $userType)
+            ->where('created_at', '<', now()->subMinutes(1)) // Manter apenas registros recentes
+            ->delete();
 
         $existingUser = ChatRoomUser::where('chat_room_id', $room->id)
             ->where('user_id', $userId)
+            ->where('user_type', $userType)
             ->first();
 
         if (!$existingUser) {
+            // Criar nome de usuário baseado no tipo
+            $userName = $userType === 'anonymous' ? 
+                'Anônimo ' . substr($userId, -8) : 
+                'Usuário';
+
             ChatRoomUser::create([
                 'chat_room_id' => $room->id,
                 'user_id' => $userId,
+                'user_name' => $userName,
                 'user_type' => $userType,
+                'avatar_type' => 'default',
+                'latitude' => 0.0,
+                'longitude' => 0.0,
                 'joined_at' => now(),
+                'last_seen' => now(),
                 'is_active' => true
             ]);
+            
+            ]);
+            
+            // Log::info("Usuário {$userType}:{$userId} juntou-se à sala global");
         } else {
+            // Usuário já existe, apenas reativar
             $existingUser->update([
                 'is_active' => true,
                 'joined_at' => now()
             ]);
-        }
-    }
-
-    /**
-     * Obter usuários de uma sala
-     */
-    public function getRoomUsers(Request $request, $roomCode)
-    {
-        try {
-            $userId = $this->getCurrentUserId($request);
             
-            if (!$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuário não identificado'
-                ], 400);
-            }
-
-            $room = ChatRoom::where('room_id', $roomCode)->first();
-            if (!$room) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Sala não encontrada'
-                ], 404);
-            }
-
-            $users = ChatRoomUser::where('chat_room_id', $room->id)
-                ->where('is_active', true)
-                ->where('joined_at', '>=', now()->subHours(24))
-                ->get()
-                ->map(function($user) {
-                    $userInfo = $this->getSimpleUserInfo($user->user_id, $user->user_type);
-                    return [
-                        'user_id' => $user->user_id,
-                        'user_name' => $userInfo['user_name'],
-                        'user_type' => $user->user_type,
-                        'joined_at' => $user->joined_at,
-                        'avatar_type' => $userInfo['avatar_type']
-                    ];
-                });
-
-            return response()->json([
-                'success' => true,
-                'users' => $users->toArray()
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erro interno'
-            ], 500);
+            // Log::info("Usuário {$userType}:{$userId} reativado na sala global");
         }
     }
 
@@ -171,6 +162,7 @@ class ChatController extends Controller
         $sessionId = $request->get('anonymous_session_id') ?? $request->header('X-Anonymous-Session-ID');
         
         if ($sessionId) {
+            // Remover qualquer prefixo 'anon_' existente antes de adicionar um novo
             $cleanSessionId = str_starts_with($sessionId, 'anon_') ? substr($sessionId, 5) : $sessionId;
             return 'anon_' . $cleanSessionId;
         }
@@ -201,7 +193,27 @@ class ChatController extends Controller
         
         // Usuário anônimo - tentar buscar nome personalizado
         $sessionId = str_replace('anon_', '', $userId);
+        
+        // Debug: Log para entender os IDs
+        \Log::info("Debug getSimpleUserInfo - userId: $userId, sessionId: $sessionId");
+        
         $anonymousUser = \App\Models\AnonymousUser::where('session_id', $sessionId)->first();
+        
+        if ($anonymousUser) {
+            \Log::info("Debug - Encontrou usuário: " . json_encode([
+                'session_id' => $anonymousUser->session_id,
+                'name' => $anonymousUser->name
+            ]));
+        } else {
+            \Log::info("Debug - Usuário não encontrado, tentando com prefixo anon_");
+            $anonymousUser = \App\Models\AnonymousUser::where('session_id', $userId)->first();
+            if ($anonymousUser) {
+                \Log::info("Debug - Encontrou com prefixo: " . json_encode([
+                    'session_id' => $anonymousUser->session_id,
+                    'name' => $anonymousUser->name
+                ]));
+            }
+        }
         
         if ($anonymousUser && $anonymousUser->name && $anonymousUser->name !== 'Usuário Anônimo') {
             return [
@@ -209,7 +221,7 @@ class ChatController extends Controller
                 'avatar_type' => $anonymousUser->avatar_type ?? 'default'
             ];
         }
-
+        
         // Nome padrão se não encontrou nome personalizado
         return [
             'user_name' => 'Anônimo ' . substr($userId, -8),
@@ -222,6 +234,7 @@ class ChatController extends Controller
      */
     private function getActiveUsersCount($roomCode)
     {
+        // Buscar o ID da sala pelo room_id
         $room = ChatRoom::where('room_id', $roomCode)->first();
         if (!$room) {
             return 0;
@@ -236,18 +249,13 @@ class ChatController extends Controller
     /**
      * Obter mensagens de uma sala
      */
-    public function getMessages(Request $request, $roomCode)
+    public function getMessages(Request $request)
     {
         try {
-            $userId = $this->getCurrentUserId($request);
-            
-            if (!$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuário não identificado'
-                ], 400);
-            }
+            $roomCode = $request->get('room_code', 'global_room');
+            $limit = $request->get('limit', 50);
 
+            // Buscar o ID da sala pelo room_id
             $room = ChatRoom::where('room_id', $roomCode)->first();
             if (!$room) {
                 return response()->json([
@@ -257,30 +265,30 @@ class ChatController extends Controller
             }
 
             $messages = ChatMessage::where('chat_room_id', $room->id)
+                ->where('is_visible', true)
                 ->orderBy('created_at', 'desc')
-                ->limit(50)
+                ->limit($limit)
                 ->get()
                 ->reverse()
                 ->values()
                 ->map(function($message) {
-                    $userInfo = $this->getSimpleUserInfo($message->user_id, $message->user_type);
                     return [
                         'id' => $message->id,
-                        'content' => $message->content,
                         'user_id' => $message->user_id,
-                        'user_name' => $userInfo['user_name'],
+                        'user_name' => $message->user_name,
                         'user_type' => $message->user_type,
-                        'created_at' => $message->created_at,
-                        'avatar_type' => $userInfo['avatar_type']
+                        'message' => $message->message,
+                        'created_at' => $message->created_at
                     ];
                 });
 
             return response()->json([
                 'success' => true,
-                'messages' => $messages->toArray()
+                'messages' => $messages
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Erro ao obter mensagens: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao carregar mensagens'
@@ -291,11 +299,18 @@ class ChatController extends Controller
     /**
      * Enviar mensagem
      */
-    public function sendMessage(Request $request, $roomCode)
+    public function sendMessage(Request $request)
     {
+        $request->validate([
+            'room_code' => 'required|string',
+            'message' => 'required|string|max:1000'
+        ]);
+
         try {
             $userId = $this->getCurrentUserId($request);
-            
+            $userType = $this->getUserType();
+            $roomCode = $request->get('room_code', 'global_room');
+
             if (!$userId) {
                 return response()->json([
                     'success' => false,
@@ -303,10 +318,7 @@ class ChatController extends Controller
                 ], 400);
             }
 
-            $request->validate([
-                'content' => 'required|string|max:500'
-            ]);
-
+            // Buscar o ID da sala pelo room_id
             $room = ChatRoom::where('room_id', $roomCode)->first();
             if (!$room) {
                 return response()->json([
@@ -315,68 +327,43 @@ class ChatController extends Controller
                 ], 404);
             }
 
+            // Auto-juntar à sala global se não estiver
+            $this->joinGlobalRoom($roomCode, $userId, $userType);
+
+            // Obter informações do usuário para criar a mensagem
+            $userInfo = $this->getSimpleUserInfo($userId, $userType);
+
+            // Criar mensagem
             $message = ChatMessage::create([
                 'chat_room_id' => $room->id,
                 'user_id' => $userId,
-                'user_type' => $this->getUserType(),
-                'content' => $request->content,
-                'created_at' => now()
+                'user_name' => $userInfo['user_name'],
+                'user_type' => $userType,
+                'avatar_type' => $userInfo['avatar_type'],
+                'message' => $request->message,
+                'message_type' => 'text',
+                'sent_at' => now(),
+                'is_visible' => true
             ]);
-
-            $userInfo = $this->getSimpleUserInfo($userId, $this->getUserType());
 
             return response()->json([
                 'success' => true,
                 'message' => [
                     'id' => $message->id,
-                    'content' => $message->content,
-                    'user_id' => $userId,
-                    'user_name' => $userInfo['user_name'],
-                    'user_type' => $this->getUserType(),
-                    'created_at' => $message->created_at,
-                    'avatar_type' => $userInfo['avatar_type']
+                    'user_id' => $message->user_id,
+                    'user_name' => $message->user_name,
+                    'user_type' => $message->user_type,
+                    'message' => $message->message,
+                    'created_at' => $message->created_at
                 ]
             ]);
 
         } catch (\Exception $e) {
+            Log::error('Erro ao enviar mensagem: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Erro ao enviar mensagem'
             ], 500);
         }
     }
-
-    /**
-     * Heartbeat para manter usuário ativo
-     */
-    public function heartbeat(Request $request, $roomCode)
-    {
-        try {
-            $userId = $this->getCurrentUserId($request);
-            
-            if (!$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Usuário não identificado'
-                ], 400);
-            }
-
-            $room = ChatRoom::where('room_id', $roomCode)->first();
-            if (!$room) {
-                return response()->json(['success' => false], 404);
-            }
-
-            ChatRoomUser::where('chat_room_id', $room->id)
-                ->where('user_id', $userId)
-                ->update([
-                    'joined_at' => now(),
-                    'is_active' => true
-                ]);
-
-            return response()->json(['success' => true]);
-
-        } catch (\Exception $e) {
-            return response()->json(['success' => false], 500);
-        }
-    }
-}
+} 
