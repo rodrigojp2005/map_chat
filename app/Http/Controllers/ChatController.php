@@ -101,10 +101,15 @@ class ChatController extends Controller
             ->first();
 
         if (!$existingUser) {
+            // Obter nome do usuário
+            $userInfo = $this->getSimpleUserInfo($userId, $userType);
+            $userName = $userInfo['user_name'] ?? 'Usuário Anônimo';
+            
             ChatRoomUser::create([
                 'chat_room_id' => $room->id,
                 'user_id' => $userId,
                 'user_type' => $userType,
+                'user_name' => $userName,
                 'joined_at' => now(),
                 'is_active' => true
             ]);
