@@ -74,6 +74,8 @@ class ChatController extends Controller
             'name' => 'Chat Global',
             'is_active' => true,
             'max_users' => 1000,
+            'center_latitude' => 0.0,
+            'center_longitude' => 0.0,
             'created_at' => now(),
             'updated_at' => now()
         ]);
