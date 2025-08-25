@@ -415,8 +415,14 @@
         async findOrCreateRoom() {
             if (!this.locationManager?.isConfigured || !this.locationManager?.anonymousSessionId) {
                 console.warn('❌ LocationManager não configurado para chat');
+                console.log('Debug LocationManager:', {
+                    isConfigured: this.locationManager?.isConfigured,
+                    anonymousSessionId: this.locationManager?.anonymousSessionId
+                });
                 return null;
             }
+
+            console.log('🚀 Iniciando findOrCreateRoom com sessionId:', this.locationManager.anonymousSessionId);
 
             try {
                 const response = await fetch('/chat/find-room', {
@@ -426,10 +432,14 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
                         'X-Anonymous-Session-ID': this.locationManager.anonymousSessionId
                     },
-                    body: JSON.stringify({})
+                    body: JSON.stringify({
+                        anonymous_session_id: this.locationManager.anonymousSessionId
+                    })
                 });
 
+                console.log('📡 Resposta do servidor:', response.status, response.statusText);
                 const data = await response.json();
+                console.log('📦 Dados recebidos:', data);
                 
                 if (data.success && data.room) {
                     this.currentRoom = data.room;
@@ -2472,8 +2482,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Simular configuração
                 if (window.locationManager) {
-                    window.locationManager.anonymousSessionId = 'anon_teste_' + Date.now();
-                    window.locationManager.avatarType = 'default';
+                    window.locationManager.anonymousSessionId = 'anon_teste_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    window.locationManager.selectedAvatar = 'default';
+                    window.locationManager.userPosition = { lat: -23.5505, lng: -46.6333 };
                     window.locationManager.isConfigured = true;
                     
                     console.log('✅ Usuário fake configurado:', {
